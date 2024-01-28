@@ -38,3 +38,7 @@ out/
 
 ### Test ###
 test/
+
+### localSet ###
+src/main/resources/application-local.yml
+src/main/resources/logback-spring-local.xml
