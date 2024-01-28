@@ -17,7 +17,6 @@ on:
 # 환경변수 설정
 env:
   ZIP_FILE_NAME: superTime
-  AWS_DEFAULT_REGION: ap-northeast-2c
 
 # 작업 정의
 jobs:
@@ -55,21 +54,26 @@ jobs:
 
       # 디렉토리 생성
       - name: Make Directory
+        if: github.event_name == 'push'
         run: mkdir -p deploy
 
       # Jar 파일 복사
       - name: Copy Jar
+        if: github.event_name == 'push'
         run: cp ./build/libs/*.jar ./deploy
 
       # appspec.yml 파일 복사
       - name: Copy appspec.yml
+        if: github.event_name == 'push'
         run: cp appspec.yml ./deploy
 
       # script files 복사
       - name: Copy script
+        if: github.event_name == 'push'
         run: cp ./scripts/*.sh ./deploy
 
       - name: Make zip file
+        if: github.event_name == 'push'
         run: zip -r ./$ZIP_FILE_NAME.zip ./deploy
         shell: bash
 
@@ -77,6 +81,7 @@ jobs:
     needs: build
 
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     steps:
       - uses: actions/checkout@v3
@@ -86,21 +91,19 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2c
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Upload to S3
-        if: github.event_name == 'push'
-        run: aws s3 cp --region $AWS_DEFAULT_REGION ./$ZIP_FILE_NAME.zip s3://${{ secrets.AWS_S3_CODE_BUCKET_NAME }}
+        run: aws s3 cp --region ${{ secrets.AWS_DEFAULT_REGION }} ./$ZIP_FILE_NAME.zip s3://${{ secrets.AWS_S3_CODE_BUCKET_NAME }}
 
       - name: Deploy
-        if: github.event_name == 'push'
         shell: /usr/bin/bash -e {0}
         env:
           S3_BUCKET_NAME: ${{ secrets.AWS_S3_CODE_BUCKET_NAME }}
           JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.9-9/x64
           JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.9-9/x64
-          AWS_DEFAULT_REGION: ap-northeast-2c
-          AWS_REGION: ap-northeast-2c
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
@@ -109,4 +112,4 @@ jobs:
           --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
           --file-exists-behavior OVERWRITE \
           --s3-location bucket=${{ secrets.AWS_S3_CODE_BUCKET_NAME }},bundleType=zip,key=$ZIP_FILE_NAME.zip \
-          --region $AWS_REGION
+          --region ${{ secrets.AWS_DEFAULT_REGION }}
