@@ -42,7 +42,15 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
-      - name: Build with Gradle
+
+      # pull_request event triger
+      - name: Build for Pull Request
+        if: github.event_name == 'pull_request'
+        run: ./gradlew clean build
+
+      # push event triger
+      - name: Build for Push
+        if: github.event_name == 'push'
         run: ./gradlew clean build
 
       # 디렉토리 생성
@@ -65,6 +73,14 @@ jobs:
         run: zip -r ./$ZIP_FILE_NAME.zip ./deploy
         shell: bash
 
+  deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -73,10 +89,11 @@ jobs:
           aws-region: $AWS_DEFAULT_REGION
 
       - name: Upload to S3
+        if: github.event_name == 'push'
         run: aws s3 cp --region $AWS_DEFAULT_REGION ./$ZIP_FILE_NAME.zip s3://${{ secrets.AWS_S3_CODE_BUCKET_NAME }}
 
-        # Deploy
       - name: Deploy
+        if: github.event_name == 'push'
         shell: /usr/bin/bash -e {0}
         env:
           S3_BUCKET_NAME: ${{ secrets.AWS_S3_CODE_BUCKET_NAME }}
@@ -92,4 +109,4 @@ jobs:
           --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
           --file-exists-behavior OVERWRITE \
           --s3-location bucket=${{ secrets.AWS_S3_CODE_BUCKET_NAME }},bundleType=zip,key=$ZIP_FILE_NAME.zip \
-           --region $AWS_DEFAULT_REGION
+          --region $AWS_REGION
