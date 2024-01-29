@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.supercoding.supertime.service.AuthService;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
+import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 @RestController
@@ -28,5 +29,14 @@ public class AuthController {
         CommonResponseDto loginResult = authService.login(loginInfo);
         log.info("[AUTH] 로그인 결과 = " + loginResult);
         return ResponseEntity.ok().body(loginResult);
+    }
+
+    @Operation(summary = "회원가입", description = "회원가입을 다루는 api입니다.")
+    @PostMapping("/signup")
+    public ResponseEntity<CommonResponseDto> signup(@RequestBody SignupRequestDto signupInfo){
+        log.info("[AUTH] 회원가입 요청이 들어왔습니다.");
+        CommonResponseDto signupResult = authService.signup(signupInfo);
+        log.info("[AUTH] 회원가입 결과 = " + signupResult);
+        return ResponseEntity.ok().body(signupResult);
     }
 }

@@ -26,7 +26,6 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "기수", example = "1")
     private Long semester;
 
-    @NotNull
     @Column(name = "user_profile_cid")
     @Schema(description = "유저 프로필 사진", example = "1")
     private Long userProfileCid;
@@ -60,8 +59,7 @@ public class UserEntity extends TimeEntity {
     private Roles roles;
 
     @Schema(description = "아이디 삭제 여부", example = "0 or 1으로 삭제여부 판단")
-    @Column(name = "is_deleted", length = 10)
-    private String isDeleted;
-
+    @Column(name = "is_deleted")
+    private int isDeleted;
 
 }
