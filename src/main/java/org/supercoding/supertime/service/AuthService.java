@@ -60,6 +60,7 @@ public class AuthService {
                 .semester(signupInfo.getSemesterCid())
                 .roles(Roles.ROLE_USER)
                 .isDeleted(0)
+                .varified(0)
                 .build();
 
         userRepository.save(signupUser);
