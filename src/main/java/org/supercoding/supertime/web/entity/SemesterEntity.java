@@ -15,7 +15,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "Semester")
+@Table(name = "semester_table")
 public class SemesterEntity {
 
     @Id
@@ -32,15 +32,12 @@ public class SemesterEntity {
     @NotNull
     @Column(name = "semester_detail_name")
     @Schema(description = "기수", example = "2311")
-    private Integer semesterDetailName;
+    private String semesterDetailName;
 
     @NotNull
     @Column(name = "start_date")
     @Schema(description = "과정 시작일", example = "2023-11-11")
     private Date startDate;
-
-    @Enumerated(EnumType.STRING)
-    private Roles roles;
 
     @Enumerated(EnumType.STRING)
     private Part part;

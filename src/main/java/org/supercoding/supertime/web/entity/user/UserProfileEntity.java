@@ -12,7 +12,7 @@ import org.supercoding.supertime.web.entity.TimeEntity;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "UserProfileEntity")
+@Table(name = "user_profile_table")
 public class UserProfileEntity extends TimeEntity {
     @Id
     @Column(name = "user_profile_cid")
