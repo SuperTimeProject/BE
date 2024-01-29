@@ -13,7 +13,7 @@ import org.supercoding.supertime.web.entity.enums.Roles;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "User")
+@Table(name = "user_table")
 public class UserEntity extends TimeEntity {
     @Id
     @Column(name = "user_cid")
@@ -26,7 +26,6 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "기수", example = "1")
     private Long semester;
 
-    @NotNull
     @Column(name = "user_profile_cid")
     @Schema(description = "유저 프로필 사진", example = "1")
     private Long userProfileCid;
@@ -48,11 +47,20 @@ public class UserEntity extends TimeEntity {
 
     @NotNull
     @Column(name = "user_name")
-    @Schema(description = "유저 이름", example = "피카츄")
+    @Schema(description = "유저 이름", example = "홍길동")
     private String userName;
+
+    @NotNull
+    @Column(name = "user_nickname")
+    @Schema(description = "유저 닉네임", example = "피카츄")
+    private String userNickname;
 
     @Enumerated(EnumType.STRING)
     private Roles roles;
 
+    @NotNull
+    @Schema(description = "아이디 삭제 여부", example = "0 or 1으로 삭제여부 판단")
+    @Column(name = "is_deleted")
+    private int isDeleted;
 
 }
