@@ -30,6 +30,11 @@ public class SemesterEntity {
     private Integer semesterName;
 
     @NotNull
+    @Column(name = "semester_detail_name")
+    @Schema(description = "기수", example = "2311")
+    private Integer semesterDetailName;
+
+    @NotNull
     @Column(name = "start_date")
     @Schema(description = "과정 시작일", example = "2023-11-11")
     private Date startDate;

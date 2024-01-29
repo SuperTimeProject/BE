@@ -48,11 +48,20 @@ public class UserEntity extends TimeEntity {
 
     @NotNull
     @Column(name = "user_name")
-    @Schema(description = "유저 이름", example = "피카츄")
+    @Schema(description = "유저 이름", example = "홍길동")
     private String userName;
+
+    @NotNull
+    @Column(name = "user_nickname")
+    @Schema(description = "유저 닉네임", example = "피카츄")
+    private String userNickname;
 
     @Enumerated(EnumType.STRING)
     private Roles roles;
+
+    @Schema(description = "아이디 삭제 여부", example = "0 or 1으로 삭제여부 판단")
+    @Column(name = "is_deleted", length = 10)
+    private String isDeleted;
 
 
 }
