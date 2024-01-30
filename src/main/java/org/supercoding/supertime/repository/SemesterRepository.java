@@ -6,4 +6,5 @@ import org.supercoding.supertime.web.entity.SemesterEntity;
 
 @Repository
 public interface SemesterRepository extends JpaRepository<SemesterEntity, Long> {
+    Boolean existsBySemesterName(int createSemesterName);
 }

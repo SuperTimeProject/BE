@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
+import java.util.NoSuchElementException;
+
 @RestControllerAdvice
 @Slf4j
 public class ExceptionControllerAdvice {
@@ -19,7 +21,7 @@ public class ExceptionControllerAdvice {
         log.error("[NOTFOUND] DB 검색 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
         return ResponseEntity.ok().body(
                 CommonResponseDto.builder()
-                        .code(404)
+                        .code(HttpStatus.CONFLICT.value())
                         .message(e.getMessage())
                         .success(false)
                         .build()
@@ -32,10 +34,23 @@ public class ExceptionControllerAdvice {
         log.error("[CONFLICT] 데이터 무결성 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
         return ResponseEntity.ok().body(
                 CommonResponseDto.builder()
-                        .code(409)
-                        .message("데이터 중복 또는 무결성 제약 오류입니다.")
+                        .code(HttpStatus.CONFLICT.value())
+                        .message(e.getMessage())
                         .success(false)
                         .build()
         );
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<CommonResponseDto> handleNoSuchElementException(NoSuchElementException e) {
+        log.error("[CONFLICT] 데이터 무결성 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
+        CommonResponseDto responseDto = CommonResponseDto.builder()
+                .code(HttpStatus.CONFLICT.value())
+                .message(e.getMessage())
+                .success(false)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(responseDto);
     }
 }
