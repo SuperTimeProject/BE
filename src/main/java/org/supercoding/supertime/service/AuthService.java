@@ -71,4 +71,30 @@ public class AuthService {
                 .message("회원가입에 성공했습니다.")
                 .build();
     }
+
+    public CommonResponseDto emailDuplicateTest(String userEmail) {
+        Boolean duplicateResult = userRepository.existsByUserId(userEmail);
+        if (duplicateResult){
+            throw new DataIntegrityViolationException("이미 사용중인 이메일입니다.");
+        }
+
+        return CommonResponseDto.builder()
+                .success(true)
+                .code(200)
+                .message("사용 가능한 email입니다.")
+                .build();
+    }
+
+    public CommonResponseDto nicknameDuplicateTest(String nickname) {
+        Boolean duplicateResult = userRepository.existsByUserNickname(nickname);
+        if (duplicateResult){
+            throw new DataIntegrityViolationException("이미 사용중인 닉네임입니다.");
+        }
+
+        return CommonResponseDto.builder()
+                .success(true)
+                .code(200)
+                .message("사용 가능한 닉네임입니다.")
+                .build();
+    }
 }
