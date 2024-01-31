@@ -32,7 +32,7 @@ public class PostEntity extends TimeEntity {
     @Schema(description = "사용자 식별번호")
     private UserEntity userEntity;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<PostImageEntity> postImages;
 
     @Column(name = "post_title", columnDefinition = "TEXT")

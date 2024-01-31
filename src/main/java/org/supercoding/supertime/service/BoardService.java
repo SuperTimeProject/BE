@@ -95,7 +95,6 @@ public class BoardService {
         if (!postImages.isEmpty()) {
             for (PostImageEntity imageEntity : postImages) {
                 imageUploadService.deleteImage(imageEntity.getPostImageFilePath());
-                postImageRepository.delete(imageEntity);
                 log.info("[DELETE] " + imageEntity.getPostImageFileName() + " 이미지가 삭제되었습니다");
             }
         }
