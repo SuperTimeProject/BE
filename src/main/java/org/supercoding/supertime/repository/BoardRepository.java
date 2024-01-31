@@ -6,4 +6,5 @@ import org.supercoding.supertime.web.entity.board.BoardEntity;
 
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
+    boolean existsByBoardName(String boardName);
 }
