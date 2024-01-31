@@ -1,15 +1,21 @@
 package org.supercoding.supertime.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.BoardService;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -19,11 +25,15 @@ import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 public class BoardController {
     private final BoardService boardService;
 
-    @Operation(summary = "게시물 생성", description = "게시물을 생성하는 api입니다.")
-    @PostMapping("/create/{boardCid}")
-    public ResponseEntity<CommonResponseDto> createPost(@PathVariable Long boardCid, @RequestBody CreatePostRequestDto createPostInfo){
+    @Operation(summary = "게시물 생성", description = "스웨거에서 테스트를 진행할 떄에는 productInfo도 json파일로 생성해서 테스트 진행해 주셔야합니다.")
+    @PostMapping(value = "/create/{boardCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> createPost(
+            @PathVariable Long boardCid,
+            @RequestPart(name = "postInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) CreatePostRequestDto createPostInfo,
+            @RequestPart(name = "postImage", required = false) List<MultipartFile> postImages
+    ){
         log.info("[BOARD] 게시물 생성 요청이 들어왔습니다.");
-        CommonResponseDto createPostResult = boardService.createPost(boardCid, createPostInfo);
+        CommonResponseDto createPostResult = boardService.createPost(boardCid, createPostInfo, postImages);
         log.info("[BOARD] 게시물 생성 결과 = " + createPostResult);
 
         return ResponseEntity.ok(createPostResult);

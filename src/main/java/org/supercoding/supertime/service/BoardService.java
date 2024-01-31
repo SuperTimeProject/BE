@@ -5,7 +5,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.BoardRepository;
+import org.supercoding.supertime.repository.PostImageRepository;
 import org.supercoding.supertime.repository.PostRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
@@ -13,7 +15,10 @@ import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
+import org.supercoding.supertime.web.entity.board.PostImageEntity;
 import org.supercoding.supertime.web.entity.user.UserEntity;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +27,11 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ImageUploadService imageUploadService;
+    private final PostImageRepository postImageRepository;
 
     @Transactional
-    public CommonResponseDto createPost(Long boardCid, CreatePostRequestDto createPostInfo) {
+    public CommonResponseDto createPost(Long boardCid, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
         // TODO
         // - 게시판 유무 확인
         // - 게시판 작성 권한 확인
@@ -40,6 +47,12 @@ public class BoardService {
                 .postTitle(createPostInfo.getPostTitle())
                 .postContent(createPostInfo.getPostContent())
                 .build();
+
+        if(images != null){
+            List<PostImageEntity> uploadImages = imageUploadService.uploadImages(images, "post");
+            newPost.setPostImages(uploadImages);
+            log.info("[CREATE_POST] 상품에 이미지가 추가되었습니다.");
+        }
 
         postRepository.save(newPost);
 
@@ -72,11 +85,22 @@ public class BoardService {
                 .build();
     }
 
+    @Transactional
     public CommonResponseDto deletePost(Long postCid) {
-        if(!postRepository.existsById(postCid)){
-            throw new NotFoundException("삭제하려는 게시물이 존재하지 않습니다.");
+        PostEntity targetPost = postRepository.findById(postCid)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
+
+        List<PostImageEntity> postImages = targetPost.getPostImages();
+
+        if (!postImages.isEmpty()) {
+            for (PostImageEntity imageEntity : postImages) {
+                imageUploadService.deleteImage(imageEntity.getPostImageFilePath());
+                postImageRepository.delete(imageEntity);
+                log.info("[DELETE] " + imageEntity.getPostImageFileName() + " 이미지가 삭제되었습니다");
+            }
         }
-        postRepository.deleteById(postCid);
+
+        postRepository.delete(targetPost);
 
         return CommonResponseDto.builder()
                 .code(200)
