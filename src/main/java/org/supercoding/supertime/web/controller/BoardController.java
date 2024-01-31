@@ -38,4 +38,14 @@ public class BoardController {
 
         return ResponseEntity.ok(editPostResult);
     }
+
+    @Operation(summary = "게시물 삭제", description = "게시물을 삭제하는 api입니다.")
+    @DeleteMapping("/delete/{postCid}")
+    public ResponseEntity<CommonResponseDto> deletePost(@PathVariable Long postCid){
+        log.info("[BOARD] 게시물 삭제 요청이 들어왔습니다.");
+        CommonResponseDto deletePostResult = boardService.deletePost(postCid);
+        log.info("[BOARD] 게시물 삭제 결과 = " + deletePostResult);
+
+        return ResponseEntity.ok(deletePostResult);
+    }
 }

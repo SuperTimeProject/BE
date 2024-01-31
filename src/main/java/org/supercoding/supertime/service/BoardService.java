@@ -71,4 +71,17 @@ public class BoardService {
                 .message("게시물 수정이 성공적으로 이루어졌습니다.")
                 .build();
     }
+
+    public CommonResponseDto deletePost(Long postCid) {
+        if(!postRepository.existsById(postCid)){
+            throw new NotFoundException("삭제하려는 게시물이 존재하지 않습니다.");
+        }
+        postRepository.deleteById(postCid);
+
+        return CommonResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message("게시물을 성공적으로 삭제하였습니다.")
+                .build();
+    }
 }
