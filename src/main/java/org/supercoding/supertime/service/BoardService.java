@@ -1,6 +1,7 @@
 package org.supercoding.supertime.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.PostRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
+import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
@@ -21,6 +23,7 @@ public class BoardService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public CommonResponseDto createPost(Long boardCid, CreatePostRequestDto createPostInfo) {
         // TODO
         // - 게시판 유무 확인
@@ -44,6 +47,28 @@ public class BoardService {
                 .code(200)
                 .success(true)
                 .message("게시물 작성이 성공적으로 이루어졌습니다.")
+                .build();
+    }
+
+    @Transactional
+    public CommonResponseDto editPost(Long postCid, EditPostRequestDto editPostInfo) {
+        PostEntity targetPost = postRepository.findById(postCid).orElseThrow(()->new NotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+        // TODO - 게시물 작성자와 수정하려는 사람의 정보가 일치하는지 토큰을 이용해 확인하는 로직 추가
+
+        if(editPostInfo.getPostTitle() != null){
+            targetPost.setPostTitle(editPostInfo.getPostTitle());
+        }
+
+        if(editPostInfo.getPostContent() != null){
+            targetPost.setPostContent(editPostInfo.getPostContent());
+        }
+
+        postRepository.save(targetPost);
+
+        return CommonResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message("게시물 수정이 성공적으로 이루어졌습니다.")
                 .build();
     }
 }

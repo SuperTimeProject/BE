@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.BoardService;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
+import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 @RestController
@@ -26,5 +27,15 @@ public class BoardController {
         log.info("[BOARD] 게시물 생성 결과 = " + createPostResult);
 
         return ResponseEntity.ok(createPostResult);
+    }
+
+    @Operation(summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
+    @PutMapping("/edit/{postCid}")
+    public ResponseEntity<CommonResponseDto> editPost(@PathVariable Long postCid, @RequestBody EditPostRequestDto editPostInfo){
+        log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
+        CommonResponseDto editPostResult = boardService.editPost(postCid, editPostInfo);
+        log.info("[BOARD] 게시물 수정 결과 = " + editPostResult);
+
+        return ResponseEntity.ok(editPostResult);
     }
 }

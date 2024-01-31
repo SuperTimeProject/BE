@@ -1,5 +1,6 @@
 package org.supercoding.supertime.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +28,7 @@ public class SemesterService {
     private final SemesterRepository semesterRepository;
     private final BoardRepository boardRepository;
 
+    @Transactional
     public CommonResponseDto createSemester(CreateSemesterRequestDto createSemesterInfo) {
         // 중복된 기수가 있는지 확인
         Boolean isExist = semesterRepository.existsBySemesterName(createSemesterInfo.getSemesterName());
