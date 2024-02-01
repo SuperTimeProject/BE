@@ -1,15 +1,18 @@
 package org.supercoding.supertime.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.semester.CreateSemesterRequestDto;
 import org.supercoding.supertime.web.dto.semester.GetAllSemesterResponseDto;
 import org.supercoding.supertime.web.dto.semester.GetSemesterDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
+import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.IsFull;
 import org.supercoding.supertime.web.entity.enums.Roles;
 
@@ -23,13 +26,20 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class SemesterService {
     private final SemesterRepository semesterRepository;
+    private final BoardRepository boardRepository;
 
+    @Transactional
     public CommonResponseDto createSemester(CreateSemesterRequestDto createSemesterInfo) {
         // 중복된 기수가 있는지 확인
         Boolean isExist = semesterRepository.existsBySemesterName(createSemesterInfo.getSemesterName());
         if(isExist){
             throw new DataIntegrityViolationException("이미 중복된 기수가 존재합니다.");
         }
+        BoardEntity newSemesterBoard = BoardEntity.builder()
+                .boardName("기수 게시판 ("+createSemesterInfo.getSemesterName()+")")
+                .build();
+        boardRepository.save(newSemesterBoard);
+
         // 기수에 대해 FULL, HALF에 두개 생성
         List<String> partList = Arrays.asList("FULL", "HALF");
 
@@ -44,6 +54,12 @@ public class SemesterService {
                     .build();
 
             semesterRepository.save(newSemester);
+
+            // 파트별 스터디 게시판 생성
+            BoardEntity newSemesterPartBoard = BoardEntity.builder()
+                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+part+")")
+                    .build();
+            boardRepository.save(newSemesterPartBoard);
         }
         // 결과 전달
 

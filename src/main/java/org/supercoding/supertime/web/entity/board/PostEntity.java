@@ -6,6 +6,8 @@ import lombok.*;
 import org.supercoding.supertime.web.entity.TimeEntity;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -30,10 +32,8 @@ public class PostEntity extends TimeEntity {
     @Schema(description = "사용자 식별번호")
     private UserEntity userEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "post_image_cid", referencedColumnName = "post_image_cid", nullable = false)
-    @Schema(description = "게시물 이미지 식별번호")
-    private PostImageEntity postImageEntity;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<PostImageEntity> postImages;
 
     @Column(name = "post_title", columnDefinition = "TEXT")
     @Schema(description = "게시물 제목", example = "게시물 1")
