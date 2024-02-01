@@ -19,7 +19,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<CommonResponseDto> handleNotFoundException(NotFoundException e){
         log.error("[NOTFOUND] DB 검색 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 CommonResponseDto.builder()
                         .code(HttpStatus.CONFLICT.value())
                         .message(e.getMessage())
@@ -32,7 +32,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<CommonResponseDto> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         log.error("[CONFLICT] 데이터 무결성 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 CommonResponseDto.builder()
                         .code(HttpStatus.CONFLICT.value())
                         .message(e.getMessage())
