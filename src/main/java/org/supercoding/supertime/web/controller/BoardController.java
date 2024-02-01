@@ -44,10 +44,14 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
-    @PutMapping("/edit/{postCid}")
-    public ResponseEntity<CommonResponseDto> editPost(@PathVariable Long postCid, @RequestBody EditPostRequestDto editPostInfo){
+    @PutMapping(value = "/edit/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> editPost(
+            @PathVariable Long postCid,
+            @RequestPart(name = "editPostInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) EditPostRequestDto editPostInfo,
+            @RequestPart(name = "postImage",required = false) List<MultipartFile> postImages
+                                                      ){
         log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
-        CommonResponseDto editPostResult = boardService.editPost(postCid, editPostInfo);
+        CommonResponseDto editPostResult = boardService.editPost(postCid, editPostInfo, postImages);
         log.info("[BOARD] 게시물 수정 결과 = " + editPostResult);
 
         return ResponseEntity.ok(editPostResult);

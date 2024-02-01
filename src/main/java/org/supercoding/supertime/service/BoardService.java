@@ -78,8 +78,9 @@ public class BoardService {
     }
 
     @Transactional
-    public CommonResponseDto editPost(Long postCid, EditPostRequestDto editPostInfo) {
+    public CommonResponseDto editPost(Long postCid, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
         PostEntity targetPost = postRepository.findById(postCid).orElseThrow(()->new NotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+        List<PostImageEntity> imageList = targetPost.getPostImages();
         // TODO - 게시물 작성자와 수정하려는 사람의 정보가 일치하는지 토큰을 이용해 확인하는 로직 추가
 
         if(editPostInfo.getPostTitle() != null){
@@ -88,6 +89,26 @@ public class BoardService {
 
         if(editPostInfo.getPostContent() != null){
             targetPost.setPostContent(editPostInfo.getPostContent());
+        }
+
+        List<PostImageEntity> deletedImages = new ArrayList<>();
+
+        if(!imageList.isEmpty()){
+            for(PostImageEntity image: imageList){
+                if(editPostInfo.getDeleteImageList().contains(image.getPostImageCid())){
+                    deletedImages.add(image);
+                    imageUploadService.deleteImage(image.getPostImageFilePath());
+                    postImageRepository.deleteById(image.getPostImageCid());
+                }
+            }
+
+            imageList.removeAll(deletedImages);
+        }
+
+        if(images != null){
+            List<PostImageEntity> uploadImages = imageUploadService.uploadImages(images, "post");
+            imageList.addAll(uploadImages);
+            targetPost.setPostImages(imageList);
         }
 
         postRepository.save(targetPost);
