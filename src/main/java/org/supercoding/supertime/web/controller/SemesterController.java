@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.SemesterService;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.semester.CreateSemesterRequestDto;
@@ -33,7 +30,7 @@ public class SemesterController {
     }
 
     @Operation(summary = "전체 기수 불러오기", description = "생성되어있는 기수를 불러오는 api입니다.")
-    @PostMapping("/getAllSemester")
+    @GetMapping("/getAllSemester")
     public ResponseEntity<GetAllSemesterResponseDto> getAllSemester(){
         log.info("[SEMESTER] 기수 리스트 불러오기 요청이 들어왔습니다.");
         GetAllSemesterResponseDto getAllSemesterResult = semesterService.getAllSemester();
