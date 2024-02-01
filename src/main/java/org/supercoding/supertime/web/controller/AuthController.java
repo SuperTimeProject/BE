@@ -15,6 +15,7 @@ import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 @Slf4j
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "회원관련 API")
 public class AuthController {
     private final AuthService authService;
