@@ -15,7 +15,7 @@ import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 @Slf4j
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "회원관련 API", description = "유저 접속 관련")
+@Tag(name = "회원관련 API")
 public class AuthController {
     private final AuthService authService;
 

@@ -18,7 +18,7 @@ import org.supercoding.supertime.web.dto.semester.GetAllSemesterResponseDto;
 @Slf4j
 @RequestMapping("/semester")
 @RequiredArgsConstructor
-@Tag(name = "기수 관리 API", description = "기수에대한 api입니다.")
+@Tag(name = "기수 관리 API")
 public class SemesterController {
     private final SemesterService semesterService;
 

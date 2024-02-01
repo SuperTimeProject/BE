@@ -130,6 +130,7 @@ public class BoardService {
         for(PostEntity post: postList){
             GetBoardPostDetailDto postDetail = GetBoardPostDetailDto.builder()
                     .author(post.getUserEntity().getUserNickname())
+                    .postCid(post.getPostCid())
                     .postTitle(post.getPostTitle())
                     .createdAt(toSimpleDate(post.getCreatedAt()))
                     .build();

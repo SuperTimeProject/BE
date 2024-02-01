@@ -12,6 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @Slf4j
 public class GetBoardPostDetailDto {
+
+    @Schema(description = "포스트 cid")
+    private Long postCid;
+
     @Schema(description = "작성자")
     private String author;
 
