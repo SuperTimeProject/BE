@@ -12,6 +12,8 @@ import org.supercoding.supertime.repository.PostRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
+import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostDetailDto;
+import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailImageDto;
@@ -27,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -113,6 +116,32 @@ public class BoardService {
                 .code(200)
                 .success(true)
                 .message("게시물을 성공적으로 삭제하였습니다.")
+                .build();
+    }
+
+    public GetBoardPostResponseDto getBoardPost(Long boardCid) {
+        List<PostEntity> postList = postRepository.findAllByBoardEntity_BoardCid(boardCid);
+        List<GetBoardPostDetailDto> postListDto = new ArrayList<>();
+
+        if(postList.isEmpty()){
+            throw new NoSuchElementException("게시판에 게시글이 없습니다.");
+        }
+
+        for(PostEntity post: postList){
+            GetBoardPostDetailDto postDetail = GetBoardPostDetailDto.builder()
+                    .author(post.getUserEntity().getUserNickname())
+                    .postTitle(post.getPostTitle())
+                    .createdAt(toSimpleDate(post.getCreatedAt()))
+                    .build();
+
+            postListDto.add(postDetail);
+        }
+
+        return GetBoardPostResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message("게시판에 포함된 게시물을 불러왔습니다.")
+                .postList(postListDto)
                 .build();
     }
 
