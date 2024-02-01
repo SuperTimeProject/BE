@@ -38,7 +38,7 @@ public class AuthController {
     }
 
     @Operation(summary = "이메일 중복확인", description = "이메일 중복을 확인하는 api입니다.")
-    @PostMapping("/duplicateTest/email")
+    @GetMapping("/duplicateTest/email")
     public ResponseEntity<CommonResponseDto> emailDuplicateTest(@RequestParam String userEmail){
         log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
         CommonResponseDto duplicateTestResult = authService.emailDuplicateTest(userEmail);
@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @Operation(summary = "닉네임 중복확인", description = "닉네임 중복을 확인하는 api입니다.")
-    @PostMapping("/duplicateTest/nickname")
+    @GetMapping("/duplicateTest/nickname")
     public ResponseEntity<CommonResponseDto> nicknameDuplicateTest(@RequestParam String nickname){
         log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
         CommonResponseDto duplicateTestResult = authService.nicknameDuplicateTest(nickname);
