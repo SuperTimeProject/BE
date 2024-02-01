@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.BoardService;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
+import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 import java.util.List;
@@ -57,5 +58,25 @@ public class BoardController {
         log.info("[BOARD] 게시물 삭제 결과 = " + deletePostResult);
 
         return ResponseEntity.ok(deletePostResult);
+    }
+
+//    @Operation(summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
+//    @GetMapping("/getBoard/{boardCid}")
+//    public ResponseEntity<CommonResponseDto> getBoardPosts(@PathVariable Long boardCid){
+//        log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
+//        CommonResponseDto getBoardPostsResult = boardService.getBoardPost(boardCid);
+//        log.info("[BOARD] 게시판 조회 요청 결과 = "+ getBoardPostsResult);
+//
+//        return ResponseEntity.ok(getBoardPostsResult);
+//    }
+
+    @Operation(summary = "게시물 조회", description = "게시물의 세부 내용을 불러오는 api입니다.")
+    @GetMapping("/getPost/{postCid}")
+    public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid){
+        log.info("[POST] 게시물 조회 요청이 들어왔습니다.");
+        GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid);
+        log.info("[POST] 게시물 조회 요청 결과 = "+ getPostDetailResult);
+
+        return ResponseEntity.ok(getPostDetailResult);
     }
 }

@@ -12,12 +12,20 @@ import org.supercoding.supertime.repository.PostRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
+import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
+import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailDto;
+import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailImageDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -106,5 +114,46 @@ public class BoardService {
                 .success(true)
                 .message("게시물을 성공적으로 삭제하였습니다.")
                 .build();
+    }
+
+    public GetPostDetailResponseDto getPostDetail(Long postCid) {
+        PostEntity targetPost = postRepository.findById(postCid)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
+
+        List<PostDetailImageDto> imageList = new ArrayList<>();
+
+        if(!targetPost.getPostImages().isEmpty()){
+            for(PostImageEntity image: targetPost.getPostImages()){
+                PostDetailImageDto postImage = PostDetailImageDto.builder()
+                        .postImageCid(image.getPostImageCid())
+                        .postImageFileName(image.getPostImageFileName())
+                        .postImageFilePath(image.getPostImageFilePath())
+                        .build();
+
+                imageList.add(postImage);
+            }
+        }
+
+        PostDetailDto postDetailDto = PostDetailDto.builder()
+                .postCid(targetPost.getPostCid())
+                .author(targetPost.getUserEntity().getUserNickname()) // 게시판에서는 닉네임을 사용
+                .postTitle(targetPost.getPostTitle())
+                .postContent(targetPost.getPostContent())
+                .imageList(imageList)
+                .createdAt(toSimpleDate(targetPost.getCreatedAt()))
+                .build();
+
+        return GetPostDetailResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message("게시물을 성공적으로 불러왔습니다.")
+                .postInfo(postDetailDto)
+                .build();
+
+    }
+
+    public String toSimpleDate(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return date.format(formatter);
     }
 }
