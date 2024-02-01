@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -73,9 +75,9 @@ public class BoardController {
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시물 조회", description = "게시물의 세부 내용을 불러오는 api입니다.")
     @GetMapping("/getPost/{postCid}")
-    public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid){
+    public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid, HttpServletRequest req, HttpServletResponse res){
         log.info("[POST] 게시물 조회 요청이 들어왔습니다.");
-        GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid);
+        GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid, req, res);
         log.info("[POST] 게시물 조회 요청 결과 = "+ getPostDetailResult);
 
         return ResponseEntity.ok(getPostDetailResult);

@@ -32,4 +32,7 @@ public class PostDetailDto {
 
     @Schema(description = "작성일", example = "23-11-10")
     private String createdAt;
+
+    @Schema(description = "게시물 조회수", example = "39")
+    private int postView;
 }

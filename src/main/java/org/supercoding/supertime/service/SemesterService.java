@@ -41,7 +41,6 @@ public class SemesterService {
                 .build();
         boardRepository.save(newSemesterBoard);
 
-        // 기수에 대해 FULL, HALF에 두개 생성
         List<String> partList = Arrays.asList("FE", "BE", "FULL");
 
         for(String part:partList){
