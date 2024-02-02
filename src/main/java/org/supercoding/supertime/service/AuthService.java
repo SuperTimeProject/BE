@@ -5,20 +5,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
+import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.user.UserEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
+    private final BoardRepository boardRepository;
+    private final SemesterRepository semesterRepository;
     public CommonResponseDto login(LoginRequestDto loginInfo) {
         UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
         int isDeleted = user.getIsDeleted();
@@ -53,11 +60,23 @@ public class AuthService {
             throw new DataIntegrityViolationException("중복된 닉네임이 존재합니다.");
         }
 
+        List<BoardEntity> userBoard = new ArrayList<>();
+//        List<String> boardList = Arrays.asList("전체 게시판", "커뮤니티 게시판");
+        SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+        String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
+        log.info("보드리스트" + boardList);
+
+        for(String boardName : boardList){
+            BoardEntity board = boardRepository.findByBoardName(boardName);
+            userBoard.add(board);
+        }
+
         UserEntity signupUser = UserEntity.builder()
                 .userId(signupInfo.getUserId())
                 .userNickname(signupInfo.getUserNickname())
                 .userPassword(signupInfo.getUserPassword())
                 .semester(signupInfo.getSemesterCid())
+                .boardList(userBoard)
                 .roles(Roles.ROLE_USER)
                 .isDeleted(0)
                 .varified(0)
