@@ -38,7 +38,7 @@ public class AuthService {
         return CommonResponseDto.builder()
                 .code(200)
                 .success(true)
-                .message("로그인에 성고하였습니다.")
+                .message("로그인에 성공하였습니다.")
                 .build();
     }
 
