@@ -7,12 +7,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.supercoding.supertime.web.entity.enums.Roles;
+import org.supercoding.supertime.config.security.filter.JwtAuthorizationFilter;
 
 import java.util.List;
 
@@ -21,6 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
+    /*
+     * 시큐리티 설정 파일
+     */
+    private final TokenProvider tokenProvider;
 
     // 모든 유저가 접근 가능(인증X)
     private final String[] PERMIT_URL = {
@@ -34,11 +40,11 @@ public class SecurityConfig {
 
     // 관리자만 접근 가능
     private final String[] ADMIN_URL = {
-            "api/admin/**"
+            "/api/admin/**"
     };
 
     private final String[] AUTHENTICATION_URL = {
-            "api/**"
+            "/api/**"
     };
 
     @Bean
@@ -74,24 +80,36 @@ public class SecurityConfig {
                                 .anyRequest().hasRole("ADMIN")
                 );
 
+
+
         // 세션 설정
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        //TODO
-        // 1. JWT 필터 생성/설정
-        // 2. AuthenticationEntryPoint / CustomAccessDeniedHandler 공부
-        // 3. 로그인 로직
+        http
+                .exceptionHandling((exception) -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint(tokenProvider)));
 
+        http
+                .exceptionHandling((exception) -> exception
+                        .accessDeniedHandler(new CustomAccessDeniedHandler()));
+
+
+        // jwt filter
+        http
+                .addFilterBefore(new JwtAuthorizationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+
+    @Bean
     //모든 CORS Block 방지 커스텀
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
+        //추가
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -101,6 +119,11 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
