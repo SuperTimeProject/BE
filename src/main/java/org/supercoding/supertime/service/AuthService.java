@@ -7,14 +7,20 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
+import org.supercoding.supertime.repository.UserProfileRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
+import org.supercoding.supertime.web.dto.auth.getUser.GetUserInfoDetailDto;
+import org.supercoding.supertime.web.dto.auth.getUser.GetUserInfoResponseDto;
+import org.supercoding.supertime.web.dto.auth.getUser.UserProfileDto;
+import org.supercoding.supertime.web.dto.auth.getUser.UserSemesterDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.user.UserEntity;
+import org.supercoding.supertime.web.entity.user.UserProfileEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +32,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final SemesterRepository semesterRepository;
+    private final UserProfileRepository userProfileRepository;
     public CommonResponseDto login(LoginRequestDto loginInfo) {
         UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
         int isDeleted = user.getIsDeleted();
@@ -114,6 +121,54 @@ public class AuthService {
                 .success(true)
                 .code(200)
                 .message("사용 가능한 닉네임입니다.")
+                .build();
+    }
+
+    public GetUserInfoResponseDto getUserInfo(Long userCid) {
+        UserEntity loggedInUser = userRepository.findById(userCid)
+                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
+
+        List<Long> boardList = new ArrayList<>();
+        for(BoardEntity board:loggedInUser.getBoardList()){
+            boardList.add(board.getBoardCid());
+        }
+
+        SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
+                .orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+        UserSemesterDto semester = UserSemesterDto.builder()
+                .semesterCid(semesterEntity.getSemesterCid())
+                .semesterDetailName(semesterEntity.getSemesterDetailName())
+                .isFull(semesterEntity.getIsFull())
+                .build();
+
+        UserProfileDto userProfile = null;
+        if(loggedInUser.getUserProfileCid() != null){
+        UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
+                .orElseThrow(()->new NotFoundException("찾는 프로필이 존재하지 않습니다."));
+        userProfile = UserProfileDto.builder()
+                .userProfileCid(userProfileEntity.getUserProfileCid())
+                .userProfileFileName(userProfileEntity.getUserProfileFileName())
+                .userProfileFilePath(userProfileEntity.getUserProfileFilePath())
+                .build();
+        }
+
+        GetUserInfoDetailDto getUserInfoDetailDto = GetUserInfoDetailDto.builder()
+                .userCid(loggedInUser.getUserCid())
+                .userId(loggedInUser.getUserId())
+                .userName(loggedInUser.getUserName())
+                .userNickname(loggedInUser.getUserNickname())
+                .part(loggedInUser.getPart())
+                .role(loggedInUser.getRoles())
+                .boardList(boardList)
+                .semester(semester)
+                .userProfile(userProfile)
+                .build();
+
+        return GetUserInfoResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message("유저 정보 불러오기 성공했습니다.")
+                .getUserInfo(getUserInfoDetailDto)
                 .build();
     }
 }

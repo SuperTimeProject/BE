@@ -59,7 +59,7 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @Column(name = "board_cid_list")
     @Schema(name = "게시판 리스트")
     private List<BoardEntity> boardList;
