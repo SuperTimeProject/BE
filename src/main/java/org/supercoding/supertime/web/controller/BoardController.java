@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -42,10 +44,14 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
-    @PutMapping("/edit/{postCid}")
-    public ResponseEntity<CommonResponseDto> editPost(@PathVariable Long postCid, @RequestBody EditPostRequestDto editPostInfo){
+    @PutMapping(value = "/edit/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> editPost(
+            @PathVariable Long postCid,
+            @RequestPart(name = "editPostInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) EditPostRequestDto editPostInfo,
+            @RequestPart(name = "postImage",required = false) List<MultipartFile> postImages
+                                                      ){
         log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
-        CommonResponseDto editPostResult = boardService.editPost(postCid, editPostInfo);
+        CommonResponseDto editPostResult = boardService.editPost(postCid, editPostInfo, postImages);
         log.info("[BOARD] 게시물 수정 결과 = " + editPostResult);
 
         return ResponseEntity.ok(editPostResult);
@@ -73,9 +79,9 @@ public class BoardController {
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시물 조회", description = "게시물의 세부 내용을 불러오는 api입니다.")
     @GetMapping("/getPost/{postCid}")
-    public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid){
+    public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid, HttpServletRequest req, HttpServletResponse res){
         log.info("[POST] 게시물 조회 요청이 들어왔습니다.");
-        GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid);
+        GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid, req, res);
         log.info("[POST] 게시물 조회 요청 결과 = "+ getPostDetailResult);
 
         return ResponseEntity.ok(getPostDetailResult);

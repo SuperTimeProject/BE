@@ -42,4 +42,12 @@ public class PostEntity extends TimeEntity {
     @Column(name = "post_content")
     @Schema(description = "게시물 내용", example = "1번 게시물 내용 예시")
     private String postContent;
+
+    @Column(name = "post_view")
+    @Schema(description = "게시물 조회수", example = "39")
+    private int postView;
+
+    public void updatePostView(){
+        this.postView++;
+    }
 }

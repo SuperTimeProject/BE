@@ -1,6 +1,9 @@
 package org.supercoding.supertime.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,8 +78,9 @@ public class BoardService {
     }
 
     @Transactional
-    public CommonResponseDto editPost(Long postCid, EditPostRequestDto editPostInfo) {
+    public CommonResponseDto editPost(Long postCid, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
         PostEntity targetPost = postRepository.findById(postCid).orElseThrow(()->new NotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+        List<PostImageEntity> imageList = targetPost.getPostImages();
         // TODO - 게시물 작성자와 수정하려는 사람의 정보가 일치하는지 토큰을 이용해 확인하는 로직 추가
 
         if(editPostInfo.getPostTitle() != null){
@@ -85,6 +89,26 @@ public class BoardService {
 
         if(editPostInfo.getPostContent() != null){
             targetPost.setPostContent(editPostInfo.getPostContent());
+        }
+
+        List<PostImageEntity> deletedImages = new ArrayList<>();
+
+        if(!imageList.isEmpty()){
+            for(PostImageEntity image: imageList){
+                if(editPostInfo.getDeleteImageList().contains(image.getPostImageCid())){
+                    deletedImages.add(image);
+                    imageUploadService.deleteImage(image.getPostImageFilePath());
+                    postImageRepository.deleteById(image.getPostImageCid());
+                }
+            }
+
+            imageList.removeAll(deletedImages);
+        }
+
+        if(images != null){
+            List<PostImageEntity> uploadImages = imageUploadService.uploadImages(images, "post");
+            imageList.addAll(uploadImages);
+            targetPost.setPostImages(imageList);
         }
 
         postRepository.save(targetPost);
@@ -132,6 +156,7 @@ public class BoardService {
                     .author(post.getUserEntity().getUserNickname())
                     .postCid(post.getPostCid())
                     .postTitle(post.getPostTitle())
+                    .postView(post.getPostView())
                     .createdAt(toSimpleDate(post.getCreatedAt()))
                     .build();
 
@@ -146,9 +171,36 @@ public class BoardService {
                 .build();
     }
 
-    public GetPostDetailResponseDto getPostDetail(Long postCid) {
+    @Transactional
+    public GetPostDetailResponseDto getPostDetail(Long postCid, HttpServletRequest req, HttpServletResponse res) {
         PostEntity targetPost = postRepository.findById(postCid)
-                .orElseThrow(() -> new NotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("조회하려는 게시물이 존재하지 않습니다."));
+        // 조회수 추가 로직
+        Cookie oldCookie = null;
+        Cookie[] cookies = req.getCookies();
+        if(cookies != null){
+            for(Cookie cookie:cookies){
+                if(cookie.getName().equals("postView")){
+                    oldCookie = cookie;
+                }
+            }
+        }
+        if(oldCookie != null){
+            if(!oldCookie.getValue().contains("["+ postCid +"]")){
+            targetPost.updatePostView();
+            oldCookie.setValue(oldCookie.getValue() + "_[" + postCid + "]");
+            oldCookie.setPath("/");
+            oldCookie.setMaxAge(60*60*24);
+            res.addCookie(oldCookie);
+            }
+        } else {
+            targetPost.updatePostView();
+            Cookie newCookie = new Cookie("postView", "[" + postCid + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24); 								// 쿠키 시간
+            res.addCookie(newCookie);
+        }
+        postRepository.save(targetPost);
 
         List<PostDetailImageDto> imageList = new ArrayList<>();
 
@@ -170,6 +222,7 @@ public class BoardService {
                 .postTitle(targetPost.getPostTitle())
                 .postContent(targetPost.getPostContent())
                 .imageList(imageList)
+                .postView(targetPost.getPostView())
                 .createdAt(toSimpleDate(targetPost.getCreatedAt()))
                 .build();
 

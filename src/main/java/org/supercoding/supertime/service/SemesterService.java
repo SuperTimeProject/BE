@@ -14,6 +14,7 @@ import org.supercoding.supertime.web.dto.semester.GetSemesterDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.IsFull;
+import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
 
 import java.util.ArrayList;
@@ -40,8 +41,7 @@ public class SemesterService {
                 .build();
         boardRepository.save(newSemesterBoard);
 
-        // 기수에 대해 FULL, HALF에 두개 생성
-        List<String> partList = Arrays.asList("FULL", "HALF");
+        List<String> partList = Arrays.asList("FE", "BE", "FULL");
 
         for(String part:partList){
             String detailName = createSemesterInfo.getSemesterName() + part;
@@ -50,7 +50,7 @@ public class SemesterService {
                     .semesterName(createSemesterInfo.getSemesterName())
                     .semesterDetailName(detailName)
                     .startDate(createSemesterInfo.getStartDate())
-                    .isFull("FULL".equals(part) ? IsFull.FULL : IsFull.HALF)
+                    .part(getPartEnum(part))
                     .build();
 
             semesterRepository.save(newSemester);
@@ -68,6 +68,20 @@ public class SemesterService {
                 .success(true)
                 .message("기수 생성이 완료되었습니다.")
                 .build();
+    }
+
+    private static Part getPartEnum(String inputString) {
+        switch (inputString) {
+            case "FE":
+                return Part.PART_FE;
+            case "BE":
+                return Part.PART_BE;
+            case "FULL":
+                return Part.PART_FULL;
+            default:
+                // 부적절한 문자열인 경우에는 null을 반환하거나 예외처리를 수행할 수 있음
+                return null;
+        }
     }
 
     public GetAllSemesterResponseDto getAllSemester() {
