@@ -17,6 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.supercoding.supertime.config.security.filter.JwtAuthorizationFilter;
 
 import java.util.List;
+import java.util.Locale;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +32,7 @@ public class SecurityConfig {
     // 모든 유저가 접근 가능(인증X)
     private final String[] PERMIT_URL = {
             "/",
+            "/**",
             "/auth/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
@@ -44,7 +46,9 @@ public class SecurityConfig {
     };
 
     private final String[] AUTHENTICATION_URL = {
-            "/api/**"
+            "/api/**",
+            "/Board/**",
+            "/Semester/**"
     };
 
     @Bean
@@ -112,7 +116,7 @@ public class SecurityConfig {
         //추가
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("*"));
 
