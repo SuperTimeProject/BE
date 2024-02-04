@@ -41,23 +41,23 @@ public class SemesterService {
                 .build();
         boardRepository.save(newSemesterBoard);
 
-        List<String> partList = Arrays.asList("FE", "BE", "FULL");
+        List<String> enumList = Arrays.asList("FULL", "HALF");
 
-        for(String part:partList){
-            String detailName = createSemesterInfo.getSemesterName() + part;
+        for(String isFull:enumList){
+            String detailName = createSemesterInfo.getSemesterName() + isFull;
 
             SemesterEntity newSemester = SemesterEntity.builder()
                     .semesterName(createSemesterInfo.getSemesterName())
                     .semesterDetailName(detailName)
                     .startDate(createSemesterInfo.getStartDate())
-                    .part(getPartEnum(part))
+                    .isFull(getIsFullEnum(isFull))
                     .build();
 
             semesterRepository.save(newSemester);
 
             // 파트별 스터디 게시판 생성
             BoardEntity newSemesterPartBoard = BoardEntity.builder()
-                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+part+")")
+                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+isFull+")")
                     .build();
             boardRepository.save(newSemesterPartBoard);
         }
@@ -70,14 +70,12 @@ public class SemesterService {
                 .build();
     }
 
-    private static Part getPartEnum(String inputString) {
+    private static IsFull getIsFullEnum(String inputString) {
         switch (inputString) {
-            case "FE":
-                return Part.PART_FE;
-            case "BE":
-                return Part.PART_BE;
             case "FULL":
-                return Part.PART_FULL;
+                return IsFull.FULL;
+            case "HALF":
+                return IsFull.HALF;
             default:
                 // 부적절한 문자열인 경우에는 null을 반환하거나 예외처리를 수행할 수 있음
                 return null;
