@@ -2,6 +2,7 @@ package org.supercoding.supertime.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,9 @@ public class AuthController {
 
     @Operation(summary = "로그인", description = "로그인을 다루는 api입니다.")
     @PostMapping("/login")
-    public ResponseEntity<CommonResponseDto> login(@RequestBody LoginRequestDto loginInfo){
+    public ResponseEntity<CommonResponseDto> login(@RequestBody LoginRequestDto loginInfo, HttpServletResponse httpServletResponse){
         log.info("[AUTH] 로그인 요청이 들어왔습니다.");
-        CommonResponseDto loginResult = authService.login(loginInfo);
+        CommonResponseDto loginResult = authService.login(loginInfo,httpServletResponse);
         log.info("[AUTH] 로그인 결과 = " + loginResult);
         return ResponseEntity.ok().body(loginResult);
     }

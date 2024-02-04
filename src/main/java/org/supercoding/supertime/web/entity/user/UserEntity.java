@@ -63,4 +63,8 @@ public class UserEntity extends TimeEntity {
     @Column(name = "is_deleted")
     private int isDeleted;
 
+    public UserEntity update(String name){
+        this.userName = name;
+        return this;
+    }
 }

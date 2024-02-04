@@ -5,15 +5,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.SemesterService;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.semester.CreateSemesterRequestDto;
 import org.supercoding.supertime.web.dto.semester.GetAllSemesterResponseDto;
+import org.supercoding.supertime.web.dto.user.CustomUserDetailDto;
+import org.supercoding.supertime.web.entity.user.UserEntity;
 
 @RestController
 @Slf4j
-@RequestMapping("/semester")
+@RequestMapping("/Semester")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "기수 관리 API")
@@ -38,5 +43,13 @@ public class SemesterController {
         log.info("[SEMESTER] 기수 리스트 불러오기 결과 = " + getAllSemesterResult);
 
         return ResponseEntity.ok().body(getAllSemesterResult);
+    }
+
+
+    //유저 정보 쓰고싶을때!
+    @GetMapping("/test2")
+    public String test2(Authentication authentication) {
+        String id = authentication.getName();
+        return id;
     }
 }

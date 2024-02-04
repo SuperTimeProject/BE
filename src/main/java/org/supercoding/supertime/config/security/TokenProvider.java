@@ -17,6 +17,7 @@ import org.supercoding.supertime.web.dto.auth.TokenDto;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Key;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -29,8 +30,8 @@ public class TokenProvider {
     * 유저정보로 JWT토큰 생성 & 생성된 토큰을 바탕으로 유저 정보를 가져옴
     * 암호화 / 복호화 / 검증 다 여기서
     * */
-    private static final String AUTHORITIES_KEY = "auth";
-    private static final String BEARER_TYPE = "Bearer";
+    private static final String AUTHORITIES_KEY = "Authorization";
+    private static final String BEARER_TYPE = "Bearer ";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;            // 30분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7일
 
@@ -76,6 +77,7 @@ public class TokenProvider {
                 .tokenType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .duration(REFRESH_TOKEN_EXPIRE_TIME)
                 .build();
     }
 
