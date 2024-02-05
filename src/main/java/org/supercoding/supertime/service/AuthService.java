@@ -1,89 +1,112 @@
 package org.supercoding.supertime.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.supercoding.supertime.repository.BoardRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.supercoding.supertime.config.security.TokenProvider;
+import org.supercoding.supertime.repository.RefreshTokenRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
-import org.supercoding.supertime.repository.UserProfileRepository;
 import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
-import org.supercoding.supertime.web.dto.auth.getUser.GetUserInfoDetailDto;
-import org.supercoding.supertime.web.dto.auth.getUser.GetUserInfoResponseDto;
-import org.supercoding.supertime.web.dto.auth.getUser.UserProfileDto;
-import org.supercoding.supertime.web.dto.auth.getUser.UserSemesterDto;
+import org.supercoding.supertime.web.dto.auth.TokenDto;
+import org.supercoding.supertime.web.dto.auth.TokenRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
-import org.supercoding.supertime.web.entity.board.BoardEntity;
+import org.supercoding.supertime.web.entity.auth.RefreshToken;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.user.UserEntity;
-import org.supercoding.supertime.web.entity.user.UserProfileEntity;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
-    private final BoardRepository boardRepository;
-    private final SemesterRepository semesterRepository;
-    private final UserProfileRepository userProfileRepository;
-    public CommonResponseDto login(LoginRequestDto loginInfo) {
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenProvider tokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    public CommonResponseDto login(LoginRequestDto loginInfo, HttpServletResponse httpServletResponse) {
         UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
         int isDeleted = user.getIsDeleted();
 
         if(isDeleted == 1) {
             throw new NotFoundException("탈퇴 처리된 유저입니다.");
         };
-        // TODO - security 구현 후 'passwordEncoder.matches'를 사용한 비밀번호 확인 절차로 수정
-        if(!user.getUserPassword().equals(loginInfo.getUserPassword())){
-            // TODO - security에서 제공하는 예외처리로 수정
-            throw new NotFoundException("비밀번호가 일치하지 않습니다.");
-            // throw new BadCredentialException("비밀번호가 일치하지 않습니다.");
-        }
+
+        if(!passwordEncoder.matches(loginInfo.getUserPassword(), user.getUserPassword()))
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
 
         // TODO - 토큰 발급 과정 추가
+        UsernamePasswordAuthenticationToken authenticationToken = loginInfo.toAuthentication();
+
+        // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
+        //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+        // 3. 인증 정보를 기반으로 JWT 토큰 생성
+        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+
+        // 4. RefreshToken 저장
+        RefreshToken refreshToken = RefreshToken.builder()
+                .key(authentication.getName())
+                .value(tokenDto.getRefreshToken())
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+        log.info("[login] user role: " + user.getRoles());
+        // 5. 토큰 발급
+        //return tokenDto;
+
+//      1. accesstoken 2. refreshtoken
+//        ResponseCookie responseCookie = ResponseCookie
+//                .httpOnly(true)
+//                .secure(true)
+//                .sameSite("None")
+//                .maxAge()
+//                .path("/")
+//                .build();
+
+        httpServletResponse.setHeader("Access-Token", tokenDto.getAccessToken());
 
         return CommonResponseDto.builder()
                 .code(200)
                 .success(true)
-                .message("로그인에 성고하였습니다.")
+                .message("로그인에 성공하였습니다.")
                 .build();
     }
 
     public CommonResponseDto signup(SignupRequestDto signupInfo) {
+
         Boolean existUserId = userRepository.existsByUserId(signupInfo.getUserName());
         if(existUserId){
             throw new DataIntegrityViolationException("중복된 아이디가 존재합니다.");
         }
 
         Boolean existUserNickname = userRepository.existsByUserNickname(signupInfo.getUserNickname());
-        if(existUserId){
+        if(existUserNickname){
             throw new DataIntegrityViolationException("중복된 닉네임이 존재합니다.");
         }
 
-        List<BoardEntity> userBoard = new ArrayList<>();
-//        List<String> boardList = Arrays.asList("전체 게시판", "커뮤니티 게시판");
-        SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
-        String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
-        log.info("보드리스트" + boardList);
-
-        for(String boardName : boardList){
-            BoardEntity board = boardRepository.findByBoardName(boardName);
-            userBoard.add(board);
-        }
+        // 패스워드 인코딩
+        String password = passwordEncoder.encode(signupInfo.getUserPassword());
 
         UserEntity signupUser = UserEntity.builder()
                 .userId(signupInfo.getUserId())
                 .userNickname(signupInfo.getUserNickname())
-                .userPassword(signupInfo.getUserPassword())
+                .userPassword(password)
                 .semester(signupInfo.getSemesterCid())
-                .boardList(userBoard)
                 .roles(Roles.ROLE_USER)
                 .isDeleted(0)
                 .varified(0)
@@ -97,6 +120,44 @@ public class AuthService {
                 .message("회원가입에 성공했습니다.")
                 .build();
     }
+
+
+    @Transactional
+    public CommonResponseDto reissue(TokenRequestDto tokenRequestDto) {
+        // 1. Refresh Token 검증
+        if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
+            throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
+        }
+
+        // 2. Access Token 에서 Member ID 가져오기
+        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+
+        // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
+        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
+
+        // 4. Refresh Token 일치하는지 검사
+        if (!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())) {
+            throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
+        }
+
+        // 5. 새로운 토큰 생성
+        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+
+        // 6. 저장소 정보 업데이트
+        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
+        refreshTokenRepository.save(newRefreshToken);
+
+        // 토큰 발급
+        //return tokenDto;
+
+        return CommonResponseDto.builder()
+                .success(true)
+                .code(200)
+                .message("토큰 갱신에 성공했습니다.")
+                .build();
+    }
+
 
     public CommonResponseDto emailDuplicateTest(String userEmail) {
         Boolean duplicateResult = userRepository.existsByUserId(userEmail);
@@ -124,51 +185,5 @@ public class AuthService {
                 .build();
     }
 
-    public GetUserInfoResponseDto getUserInfo(Long userCid) {
-        UserEntity loggedInUser = userRepository.findById(userCid)
-                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
 
-        List<Long> boardList = new ArrayList<>();
-        for(BoardEntity board:loggedInUser.getBoardList()){
-            boardList.add(board.getBoardCid());
-        }
-
-        SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
-                .orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
-        UserSemesterDto semester = UserSemesterDto.builder()
-                .semesterCid(semesterEntity.getSemesterCid())
-                .semesterDetailName(semesterEntity.getSemesterDetailName())
-                .isFull(semesterEntity.getIsFull())
-                .build();
-
-        UserProfileDto userProfile = null;
-        if(loggedInUser.getUserProfileCid() != null){
-        UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
-                .orElseThrow(()->new NotFoundException("찾는 프로필이 존재하지 않습니다."));
-        userProfile = UserProfileDto.builder()
-                .userProfileCid(userProfileEntity.getUserProfileCid())
-                .userProfileFileName(userProfileEntity.getUserProfileFileName())
-                .userProfileFilePath(userProfileEntity.getUserProfileFilePath())
-                .build();
-        }
-
-        GetUserInfoDetailDto getUserInfoDetailDto = GetUserInfoDetailDto.builder()
-                .userCid(loggedInUser.getUserCid())
-                .userId(loggedInUser.getUserId())
-                .userName(loggedInUser.getUserName())
-                .userNickname(loggedInUser.getUserNickname())
-                .part(loggedInUser.getPart())
-                .role(loggedInUser.getRoles())
-                .boardList(boardList)
-                .semester(semester)
-                .userProfile(userProfile)
-                .build();
-
-        return GetUserInfoResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("유저 정보 불러오기 성공했습니다.")
-                .getUserInfo(getUserInfoDetailDto)
-                .build();
-    }
 }

@@ -5,11 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.supercoding.supertime.web.entity.TimeEntity;
-import org.supercoding.supertime.web.entity.board.BoardEntity;
-import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -59,14 +55,6 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @Column(name = "board_cid_list")
-    @Schema(name = "게시판 리스트")
-    private List<BoardEntity> boardList;
-
-    @Enumerated(EnumType.STRING)
-    private Part part;
-
     @Enumerated(EnumType.STRING)
     private Roles roles;
 
@@ -75,4 +63,8 @@ public class UserEntity extends TimeEntity {
     @Column(name = "is_deleted")
     private int isDeleted;
 
+    public UserEntity update(String name){
+        this.userName = name;
+        return this;
+    }
 }
