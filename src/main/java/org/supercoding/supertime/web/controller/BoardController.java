@@ -8,8 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.BoardService;
@@ -23,7 +25,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@RequestMapping("/Board")
+@RequestMapping("/board")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class BoardController {
@@ -33,11 +35,12 @@ public class BoardController {
     @PostMapping(value = "/create/{boardCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> createPost(
             @PathVariable Long boardCid,
+            @AuthenticationPrincipal User user,
             @RequestPart(name = "postInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) CreatePostRequestDto createPostInfo,
             @RequestPart(name = "postImage", required = false) List<MultipartFile> postImages
     ){
         log.info("[BOARD] 게시물 생성 요청이 들어왔습니다.");
-        CommonResponseDto createPostResult = boardService.createPost(boardCid, createPostInfo, postImages);
+        CommonResponseDto createPostResult = boardService.createPost(boardCid,user, createPostInfo, postImages);
         log.info("[BOARD] 게시물 생성 결과 = " + createPostResult);
 
         return ResponseEntity.ok(createPostResult);
@@ -47,11 +50,12 @@ public class BoardController {
     @PutMapping(value = "/edit/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editPost(
             @PathVariable Long postCid,
+            @AuthenticationPrincipal User user,
             @RequestPart(name = "editPostInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) EditPostRequestDto editPostInfo,
             @RequestPart(name = "postImage",required = false) List<MultipartFile> postImages
                                                       ){
         log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
-        CommonResponseDto editPostResult = boardService.editPost(postCid, editPostInfo, postImages);
+        CommonResponseDto editPostResult = boardService.editPost(postCid, user, editPostInfo, postImages);
         log.info("[BOARD] 게시물 수정 결과 = " + editPostResult);
 
         return ResponseEntity.ok(editPostResult);
@@ -59,9 +63,12 @@ public class BoardController {
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 삭제", description = "게시물을 삭제하는 api입니다.")
     @DeleteMapping("/delete/{postCid}")
-    public ResponseEntity<CommonResponseDto> deletePost(@PathVariable Long postCid){
+    public ResponseEntity<CommonResponseDto> deletePost(
+            @PathVariable Long postCid,
+            @AuthenticationPrincipal User user
+    ){
         log.info("[BOARD] 게시물 삭제 요청이 들어왔습니다.");
-        CommonResponseDto deletePostResult = boardService.deletePost(postCid);
+        CommonResponseDto deletePostResult = boardService.deletePost(postCid, user);
         log.info("[BOARD] 게시물 삭제 결과 = " + deletePostResult);
 
         return ResponseEntity.ok(deletePostResult);

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
+import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
@@ -45,6 +46,19 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<CommonResponseDto> handleNoSuchElementException(NoSuchElementException e) {
         log.error("[CONFLICT] 데이터 무결성 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
+        CommonResponseDto responseDto = CommonResponseDto.builder()
+                .code(HttpStatus.CONFLICT.value())
+                .message(e.getMessage())
+                .success(false)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(responseDto);
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<CommonResponseDto> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("[CONFLICT] 인증 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
         CommonResponseDto responseDto = CommonResponseDto.builder()
                 .code(HttpStatus.CONFLICT.value())
                 .message(e.getMessage())

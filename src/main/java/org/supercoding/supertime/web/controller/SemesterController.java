@@ -18,7 +18,7 @@ import org.supercoding.supertime.web.entity.user.UserEntity;
 
 @RestController
 @Slf4j
-@RequestMapping("/Semester")
+@RequestMapping("/semester")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "기수 관리 API")
@@ -43,13 +43,5 @@ public class SemesterController {
         log.info("[SEMESTER] 기수 리스트 불러오기 결과 = " + getAllSemesterResult);
 
         return ResponseEntity.ok().body(getAllSemesterResult);
-    }
-
-
-    //유저 정보 쓰고싶을때!
-    @GetMapping("/test2")
-    public String test2(Authentication authentication) {
-        String id = authentication.getName();
-        return id;
     }
 }
