@@ -8,6 +8,7 @@ import org.supercoding.supertime.web.entity.TimeEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
+import org.supercoding.supertime.web.entity.enums.Valified;
 
 import java.util.List;
 
@@ -35,11 +36,6 @@ public class UserEntity extends TimeEntity {
     private Long userProfileCid;
 
     @NotNull
-    @Column(name = "varified")
-    @Schema(description = "사용자 인증 여부(0:비인증, 1:인증)", example = "1")
-    private Integer varified;
-
-    @NotNull
     @Column(name = "user_id")
     @Schema(description = "유저 아이디", example = "id123")
     private String userId;
@@ -63,6 +59,9 @@ public class UserEntity extends TimeEntity {
     @Column(name = "board_cid_list")
     @Schema(name = "게시판 리스트")
     private List<BoardEntity> boardList;
+
+    @Enumerated(EnumType.STRING)
+    private Valified valified;
 
     @Enumerated(EnumType.STRING)
     private Part part;

@@ -28,6 +28,7 @@ import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.auth.RefreshToken;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.Roles;
+import org.supercoding.supertime.web.entity.enums.Valified;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 import org.supercoding.supertime.web.entity.user.UserProfileEntity;
 
@@ -129,7 +130,7 @@ public class AuthService {
                 .boardList(userBoard)
                 .roles(Roles.ROLE_USER)
                 .isDeleted(0)
-                .varified(0)
+                .valified(Valified.COMPLETED) // 인증에 관한 api 구현 전까지 인증 완료상태 반환
                 .build();
 
         userRepository.save(signupUser);
