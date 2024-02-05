@@ -6,10 +6,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AuthService;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
+import org.supercoding.supertime.web.dto.user.CustomUserDetailDto;
+import org.supercoding.supertime.web.dto.user.getUserDto.GetUserInfoResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 @RestController
@@ -55,5 +61,15 @@ public class AuthController {
         CommonResponseDto duplicateTestResult = authService.nicknameDuplicateTest(nickname);
         log.info("[DUPLICATE] 이메일 중복확인 요청 결과 = " + duplicateTestResult);
         return ResponseEntity.ok().body(duplicateTestResult);
+    }
+
+    @Operation(summary = "로그인 유저 불러오기", description = "로그인한 유저의 정보를 불러오는 api입니다.")
+    @GetMapping("/getUserInfo")
+    public ResponseEntity<GetUserInfoResponseDto> getUserInfo(@AuthenticationPrincipal User user){
+        log.info("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
+        GetUserInfoResponseDto getUserInfoResult = authService.getUserInfo(user);
+        log.info("[GET_USER] 유저 정보 결과 = " + getUserInfoResult);
+
+        return ResponseEntity.ok(getUserInfoResult);
     }
 }

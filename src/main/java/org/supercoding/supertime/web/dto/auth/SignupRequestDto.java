@@ -21,7 +21,7 @@ public class SignupRequestDto {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @Schema(description = "소속 기수", example = "2311Full")
+    @Schema(description = "소속 기수", example = "1")
     private Long semesterCid;
 
     @Schema(description = "비밀번호", example = "qwerasdf1234")

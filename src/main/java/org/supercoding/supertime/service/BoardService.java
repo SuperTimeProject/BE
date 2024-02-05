@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.BoardRepository;
@@ -45,14 +47,14 @@ public class BoardService {
     private final PostImageRepository postImageRepository;
 
     @Transactional
-    public CommonResponseDto createPost(Long boardCid, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
+    public CommonResponseDto createPost(Long boardCid, User user, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
         // TODO
         // - 게시판 유무 확인
         // - 게시판 작성 권한 확인
         // - 게시물 생성
         BoardEntity targetBoard = boardRepository.findById(boardCid).orElseThrow(()-> new NotFoundException("게시판이 존재하지 않습니다."));
         // 시큐리티 적용시 토큰기반으로 검색하는 로직으로 수정
-        UserEntity author = userRepository.findById(createPostInfo.getUserCid()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
+        UserEntity author = userRepository.findByUserId(user.getUsername()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
         // TODO (희망사항) 권한 정보에 대한 칼럼을 추가하여 유저가 포함되어있는지 확인하는 구문 구현
 
         PostEntity newPost = PostEntity.builder()
@@ -78,10 +80,13 @@ public class BoardService {
     }
 
     @Transactional
-    public CommonResponseDto editPost(Long postCid, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
+    public CommonResponseDto editPost(Long postCid, User user, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
         PostEntity targetPost = postRepository.findById(postCid).orElseThrow(()->new NotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+
+        if(targetPost.getUserEntity().getUserId() != user.getUsername()){
+            throw new AccessDeniedException("수정 권한이 없습니다.");
+        }
         List<PostImageEntity> imageList = targetPost.getPostImages();
-        // TODO - 게시물 작성자와 수정하려는 사람의 정보가 일치하는지 토큰을 이용해 확인하는 로직 추가
 
         if(editPostInfo.getPostTitle() != null){
             targetPost.setPostTitle(editPostInfo.getPostTitle());
@@ -121,9 +126,13 @@ public class BoardService {
     }
 
     @Transactional
-    public CommonResponseDto deletePost(Long postCid) {
+    public CommonResponseDto deletePost(Long postCid, User user) {
         PostEntity targetPost = postRepository.findById(postCid)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
+
+        if(targetPost.getUserEntity().getUserId() != user.getUsername()){
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
 
         List<PostImageEntity> postImages = targetPost.getPostImages();
 

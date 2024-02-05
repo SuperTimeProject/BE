@@ -17,9 +17,6 @@ import java.util.List;
 @ToString
 @Slf4j
 public class CreatePostRequestDto {
-    // TODO - 시큐리티 구현시 user정보는 토큰기반으로 가져옴
-    @Schema(description = "사용자 식별번호")
-    private Long userCid;
 
     @Schema(description = "게시물 제목", example = "게시물 1")
     private String postTitle;

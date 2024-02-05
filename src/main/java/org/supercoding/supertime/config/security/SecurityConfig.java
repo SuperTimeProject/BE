@@ -42,7 +42,8 @@ public class SecurityConfig {
             "/api-docs/**",
             "/v3/**",
             "/login/**",
-            "/oauth2/**"
+            "/oauth2/**",
+            "/semester/**"
     };
 
     // 관리자만 접근 가능
@@ -52,8 +53,8 @@ public class SecurityConfig {
 
     private final String[] AUTHENTICATION_URL = {
             "/api/**",
-            "/Board/**",
-            "/Semester/**"
+            "/board/**",
+            "/semester/**"
     };
 
     @Bean
