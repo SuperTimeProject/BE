@@ -89,7 +89,7 @@ public class AuthService {
 //                .path("/")
 //                .build();
 
-        httpServletResponse.setHeader("Access-Token", tokenDto.getAccessToken());
+        httpServletResponse.setHeader("Authorization", tokenDto.getAccessToken());
 
         return CommonResponseDto.builder()
                 .code(200)
