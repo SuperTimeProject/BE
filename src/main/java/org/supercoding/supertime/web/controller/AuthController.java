@@ -7,14 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AuthService;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
-import org.supercoding.supertime.web.dto.user.CustomUserDetailDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.GetUserInfoResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
