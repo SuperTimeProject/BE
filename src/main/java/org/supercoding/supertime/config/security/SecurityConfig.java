@@ -43,7 +43,8 @@ public class SecurityConfig {
             "/v3/**",
             "/login/**",
             "/oauth2/**",
-            "/semester/**"
+            "/semester/**",
+            "/ws/**"
     };
 
     // 관리자만 접근 가능
