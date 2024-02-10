@@ -7,14 +7,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.PostImageRepository;
 import org.supercoding.supertime.repository.PostRepository;
 import org.supercoding.supertime.repository.UserRepository;
+import org.supercoding.supertime.web.advice.CustomAccessDeniedException;
+import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
+import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
 import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostDetailDto;
@@ -22,17 +25,17 @@ import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostResponse
 import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailImageDto;
+import org.supercoding.supertime.web.dto.board.getUserPost.GetUserPostDto;
+import org.supercoding.supertime.web.dto.board.getUserPost.GetUserPostResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -52,9 +55,11 @@ public class BoardService {
         // - 게시판 유무 확인
         // - 게시판 작성 권한 확인
         // - 게시물 생성
-        BoardEntity targetBoard = boardRepository.findById(boardCid).orElseThrow(()-> new NotFoundException("게시판이 존재하지 않습니다."));
+        BoardEntity targetBoard = boardRepository.findById(boardCid)
+                .orElseThrow(()-> new CustomNotFoundException("게시판이 존재하지 않습니다."));
         // 시큐리티 적용시 토큰기반으로 검색하는 로직으로 수정
-        UserEntity author = userRepository.findByUserId(user.getUsername()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
+        UserEntity author = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
         // TODO (희망사항) 권한 정보에 대한 칼럼을 추가하여 유저가 포함되어있는지 확인하는 구문 구현
 
         PostEntity newPost = PostEntity.builder()
@@ -81,9 +86,10 @@ public class BoardService {
 
     @Transactional
     public CommonResponseDto editPost(Long postCid, User user, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
-        PostEntity targetPost = postRepository.findById(postCid).orElseThrow(()->new NotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+        PostEntity targetPost = postRepository.findById(postCid)
+                .orElseThrow(()->new CustomNotFoundException("수정하려는 게시물이 존재하지 않습니다."));
 
-        if(targetPost.getUserEntity().getUserId() != user.getUsername()){
+        if(!targetPost.getUserEntity().getUserId().equals(user.getUsername())){
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
         List<PostImageEntity> imageList = targetPost.getPostImages();
@@ -130,7 +136,7 @@ public class BoardService {
         PostEntity targetPost = postRepository.findById(postCid)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
 
-        if(targetPost.getUserEntity().getUserId() != user.getUsername()){
+        if(!targetPost.getUserEntity().getUserId().equals(user.getUsername())){
             throw new AccessDeniedException("삭제 권한이 없습니다.");
         }
 
@@ -183,7 +189,7 @@ public class BoardService {
     @Transactional
     public GetPostDetailResponseDto getPostDetail(Long postCid, HttpServletRequest req, HttpServletResponse res) {
         PostEntity targetPost = postRepository.findById(postCid)
-                .orElseThrow(() -> new NotFoundException("조회하려는 게시물이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomNotFoundException("조회하려는 게시물이 존재하지 않습니다."));
         // 조회수 추가 로직
         Cookie oldCookie = null;
         Cookie[] cookies = req.getCookies();
@@ -244,8 +250,47 @@ public class BoardService {
 
     }
 
+    public GetUserPostResponseDto getUserPost(User user, Long boardCid) {
+        // TODO
+        // 유저가 해당 게시판에 포함되어있는지 확인
+        // 해당 보드에 유저가 작성한 글 불러오기
+
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(() -> new CustomNotFoundException("유저 정보가 없습니다."));
+
+        BoardEntity boardEntity = boardRepository.findById(boardCid)
+                .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
+
+        if(userEntity.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
+                .noneMatch(cid -> cid.equals(boardEntity.getBoardCid()))
+        ) {
+            throw new CustomAccessDeniedException("게시물 조회 권한이 없습니다.");
+        }
+
+        List<PostEntity> userPostList = postRepository.findAllByBoardEntity_BoardCidAndUserEntity_UserCid(userEntity.getUserCid(), boardCid);
+
+        if(userPostList.isEmpty()) {
+            throw new CustomNoSuchElementException("리스트가 비어있습니다.");
+        }
+
+        List<GetUserPostDto> userPostDtoList = new ArrayList<>();
+        for(PostEntity post : userPostList){
+            GetUserPostDto userPost = GetUserPostDto.builder()
+                    .postCid(post.getPostCid())
+                    .postTitle(post.getPostTitle())
+                    .createdAt(toSimpleDate(post.getCreatedAt()))
+                    .build();
+            userPostDtoList.add(userPost);
+        }
+
+        return GetUserPostResponseDto.success("성공적으로 유저 게시물을 불러왔습니다.", userPostDtoList);
+    }
+
+
     public String toSimpleDate(LocalDateTime date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return date.format(formatter);
     }
+
 }

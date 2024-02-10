@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
     List<PostEntity> findAllByBoardEntity_BoardCid(Long boardCid);
+
+    List<PostEntity> findAllByBoardEntity_BoardCidAndUserEntity_UserCid(Long userCid, Long boardCid);
 }
