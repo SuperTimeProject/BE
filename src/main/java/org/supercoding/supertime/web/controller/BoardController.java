@@ -75,9 +75,11 @@ public class BoardController {
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
     @GetMapping("/getBoard/{boardCid}")
-    public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(@PathVariable Long boardCid){
+    public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long boardCid){
         log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
-        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(boardCid);
+        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid);
         log.info("[BOARD] 게시판 조회 요청 결과 = "+ getBoardPostsResult);
 
         return ResponseEntity.ok(getBoardPostsResult);

@@ -57,9 +57,16 @@ public class BoardService {
         // - 게시물 생성
         BoardEntity targetBoard = boardRepository.findById(boardCid)
                 .orElseThrow(()-> new CustomNotFoundException("게시판이 존재하지 않습니다."));
-        // 시큐리티 적용시 토큰기반으로 검색하는 로직으로 수정
+
         UserEntity author = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        if(author.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
+                .noneMatch(cid -> cid.equals(targetBoard.getBoardCid()))
+        ) {
+            throw new CustomAccessDeniedException("게시판 작성 권한이 없습니다.");
+        }
         // TODO (희망사항) 권한 정보에 대한 칼럼을 추가하여 유저가 포함되어있는지 확인하는 구문 구현
 
         PostEntity newPost = PostEntity.builder()
@@ -158,7 +165,16 @@ public class BoardService {
                 .build();
     }
 
-    public GetBoardPostResponseDto getBoardPost(Long boardCid) {
+    public GetBoardPostResponseDto getBoardPost(User user, Long boardCid) {
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(() -> new CustomNotFoundException("유저가 존재하지 않습니다."));
+
+        if(userEntity.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
+                .noneMatch(cid -> cid.equals(boardCid))
+        ) {
+            throw new CustomAccessDeniedException("게시판 조회 권한이 없습니다.");
+        }
         List<PostEntity> postList = postRepository.findAllByBoardEntity_BoardCid(boardCid);
         List<GetBoardPostDetailDto> postListDto = new ArrayList<>();
 
