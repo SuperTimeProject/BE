@@ -84,11 +84,7 @@ public class BoardService {
 
         postRepository.save(newPost);
 
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("게시물 작성이 성공적으로 이루어졌습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("게시물 작성이 성공적으로 이루어졌습니다.");
     }
 
     @Transactional
@@ -131,11 +127,7 @@ public class BoardService {
 
         postRepository.save(targetPost);
 
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("게시물 수정이 성공적으로 이루어졌습니다.")
-                .build();
+        return CommonResponseDto.successResponse("게시물 수정이 성공적으로 이루어졌습니다.");
     }
 
     @Transactional
@@ -158,11 +150,7 @@ public class BoardService {
 
         postRepository.delete(targetPost);
 
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("게시물을 성공적으로 삭제하였습니다.")
-                .build();
+        return CommonResponseDto.successResponse("게시물을 성공적으로 삭제하였습니다.");
     }
 
     public GetBoardPostResponseDto getBoardPost(User user, Long boardCid) {
@@ -194,12 +182,7 @@ public class BoardService {
             postListDto.add(postDetail);
         }
 
-        return GetBoardPostResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("게시판에 포함된 게시물을 불러왔습니다.")
-                .postList(postListDto)
-                .build();
+        return GetBoardPostResponseDto.successResponse("게시판에 포함된 게시물을 불러왔습니다.", postListDto);
     }
 
     @Transactional
@@ -257,12 +240,8 @@ public class BoardService {
                 .createdAt(toSimpleDate(targetPost.getCreatedAt()))
                 .build();
 
-        return GetPostDetailResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("게시물을 성공적으로 불러왔습니다.")
-                .postInfo(postDetailDto)
-                .build();
+
+        return GetPostDetailResponseDto.successResponse("게시물을 성공적으로 불러왔습니다.", postDetailDto);
 
     }
 
