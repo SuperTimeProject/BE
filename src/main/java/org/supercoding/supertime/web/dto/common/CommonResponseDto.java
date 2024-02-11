@@ -3,6 +3,7 @@ package org.supercoding.supertime.web.dto.common;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
@@ -20,4 +21,20 @@ public class CommonResponseDto {
 
     @Schema(description = "요청 코드의 에러 메시지", example = "잘못되었습니다")
     private String message;
+
+    public static CommonResponseDto successResponse(final String message){
+        return CommonResponseDto.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message(message)
+                .build();
+    }
+
+    public static CommonResponseDto createSuccessResponse(final String message){
+        return CommonResponseDto.builder()
+                .code(HttpStatus.CREATED.value())
+                .success(true)
+                .message(message)
+                .build();
+    }
 }

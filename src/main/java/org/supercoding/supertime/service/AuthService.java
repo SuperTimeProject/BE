@@ -92,11 +92,7 @@ public class AuthService {
 
         httpServletResponse.setHeader("Authorization", tokenDto.getAccessToken());
 
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("로그인에 성공하였습니다.")
-                .build();
+        return CommonResponseDto.successResponse("로그인에 성공했습니다.");
     }
 
     public CommonResponseDto signup(SignupRequestDto signupInfo) {
@@ -138,11 +134,7 @@ public class AuthService {
 
         userRepository.save(signupUser);
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("회원가입에 성공했습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("회원가입에 성공했습니다.");
     }
 
 
@@ -175,11 +167,7 @@ public class AuthService {
         // 토큰 발급
         //return tokenDto;
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("토큰 갱신에 성공했습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("토큰 갱신에 성공했습니다.");
     }
 
 
@@ -189,11 +177,7 @@ public class AuthService {
             throw new DataIntegrityViolationException("이미 사용중인 이메일입니다.");
         }
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("사용 가능한 email입니다.")
-                .build();
+        return CommonResponseDto.successResponse("사용 가능한 email 입니다.");
     }
 
     public CommonResponseDto nicknameDuplicateTest(String nickname) {
@@ -202,11 +186,7 @@ public class AuthService {
             throw new DataIntegrityViolationException("이미 사용중인 닉네임입니다.");
         }
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("사용 가능한 닉네임입니다.")
-                .build();
+        return CommonResponseDto.successResponse("사용 가능한 닉네임 입니다.");
     }
 
 
@@ -250,11 +230,6 @@ public class AuthService {
                 .userProfile(userProfile)
                 .build();
 
-        return GetUserInfoResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("유저 정보 불러오기 성공했습니다.")
-                .getUserInfo(getUserInfoDetailDto)
-                .build();
+        return GetUserInfoResponseDto.successResponse("유저 정보를 성공적으로 불러왔습니다.", getUserInfoDetailDto);
     }
 }

@@ -3,6 +3,7 @@ package org.supercoding.supertime.web.dto.user.getUserDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
@@ -23,4 +24,13 @@ public class GetUserInfoResponseDto {
 
     @Schema(description = "유저 정보")
     private GetUserInfoDetailDto getUserInfo;
+
+    public static GetUserInfoResponseDto successResponse(final String message, final GetUserInfoDetailDto userInfo) {
+        return GetUserInfoResponseDto.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message(message)
+                .getUserInfo(userInfo)
+                .build();
+    }
 }

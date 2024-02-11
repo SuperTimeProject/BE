@@ -3,6 +3,8 @@ package org.supercoding.supertime.web.dto.board.getBoardPost;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailDto;
 
 import java.util.List;
@@ -26,4 +28,13 @@ public class GetBoardPostResponseDto {
 
     @Schema(description = "게시물 리스트")
     private List<GetBoardPostDetailDto> postList;
+
+    public static GetBoardPostResponseDto successResponse(final String message, final List<GetBoardPostDetailDto> postList) {
+        return GetBoardPostResponseDto.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message(message)
+                .postList(postList)
+                .build();
+    }
 }
