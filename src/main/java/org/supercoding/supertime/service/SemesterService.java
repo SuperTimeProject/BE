@@ -63,12 +63,7 @@ public class SemesterService {
         }
         // 결과 전달
 
-
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("기수 생성이 완료되었습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("기수 생성이 완료되었습니다.");
     }
 
     private static IsFull getIsFullEnum(String inputString) {
@@ -99,11 +94,6 @@ public class SemesterService {
             resultList.add(newSemesterDto);
         }
 
-        return GetAllSemesterResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("기수를 성공적으로 불러왔습니다.")
-                .semesterList(resultList)
-                .build();
+        return GetAllSemesterResponseDto.successResponse("기수를 성공적으로 불러왔습니다.", resultList);
     }
 }

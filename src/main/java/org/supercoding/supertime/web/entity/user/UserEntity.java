@@ -55,7 +55,12 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_board", // 중간 테이블 이름
+            joinColumns = @JoinColumn(name = "user_cid"), // UserEntity를 참조하는 외래 키
+            inverseJoinColumns = @JoinColumn(name = "board_cid") // BoardEntity를 참조하는 외래 키
+    )
     @Column(name = "board_cid_list")
     @Schema(name = "게시판 리스트")
     private List<BoardEntity> boardList;

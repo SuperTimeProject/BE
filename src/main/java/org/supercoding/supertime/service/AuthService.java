@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
+import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
 import org.supercoding.supertime.web.dto.auth.TokenDto;
@@ -27,6 +28,7 @@ import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.auth.RefreshToken;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
+import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.enums.Valified;
 import org.supercoding.supertime.web.entity.user.UserEntity;
@@ -49,7 +51,7 @@ public class AuthService {
     private final UserProfileRepository userProfileRepository;
 
     public CommonResponseDto login(LoginRequestDto loginInfo, HttpServletResponse httpServletResponse) {
-        UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
+        UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
         int isDeleted = user.getIsDeleted();
 
         if(isDeleted == 1) {
@@ -89,13 +91,9 @@ public class AuthService {
 //                .path("/")
 //                .build();
 
-        httpServletResponse.setHeader("Access-Token", tokenDto.getAccessToken());
+        httpServletResponse.setHeader("Authorization", tokenDto.getAccessToken());
 
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("로그인에 성공하였습니다.")
-                .build();
+        return CommonResponseDto.successResponse("로그인에 성공했습니다.");
     }
 
     public CommonResponseDto signup(SignupRequestDto signupInfo) {
@@ -110,7 +108,7 @@ public class AuthService {
         }
 
         List<BoardEntity> userBoard = new ArrayList<>();
-        SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+        SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
         String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
         log.info("보드리스트" + boardList);
 
@@ -124,22 +122,20 @@ public class AuthService {
 
         UserEntity signupUser = UserEntity.builder()
                 .userId(signupInfo.getUserId())
+                .userName(signupInfo.getUserName())
                 .userNickname(signupInfo.getUserNickname())
                 .userPassword(password)
                 .semester(signupInfo.getSemesterCid())
                 .boardList(userBoard)
                 .roles(Roles.ROLE_USER)
+                .part(Part.PART_UNDEFINED)
                 .isDeleted(0)
                 .valified(Valified.COMPLETED) // 인증에 관한 api 구현 전까지 인증 완료상태 반환
                 .build();
 
         userRepository.save(signupUser);
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("회원가입에 성공했습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("회원가입에 성공했습니다.");
     }
 
 
@@ -172,11 +168,7 @@ public class AuthService {
         // 토큰 발급
         //return tokenDto;
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("토큰 갱신에 성공했습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("토큰 갱신에 성공했습니다.");
     }
 
 
@@ -186,11 +178,7 @@ public class AuthService {
             throw new DataIntegrityViolationException("이미 사용중인 이메일입니다.");
         }
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("사용 가능한 email입니다.")
-                .build();
+        return CommonResponseDto.successResponse("사용 가능한 email 입니다.");
     }
 
     public CommonResponseDto nicknameDuplicateTest(String nickname) {
@@ -199,11 +187,7 @@ public class AuthService {
             throw new DataIntegrityViolationException("이미 사용중인 닉네임입니다.");
         }
 
-        return CommonResponseDto.builder()
-                .success(true)
-                .code(200)
-                .message("사용 가능한 닉네임입니다.")
-                .build();
+        return CommonResponseDto.successResponse("사용 가능한 닉네임 입니다.");
     }
 
 
@@ -247,12 +231,7 @@ public class AuthService {
                 .userProfile(userProfile)
                 .build();
 
-        return GetUserInfoResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("유저 정보 불러오기 성공했습니다.")
-                .getUserInfo(getUserInfoDetailDto)
-                .build();
+        return GetUserInfoResponseDto.successResponse("유저 정보를 성공적으로 불러왔습니다.", getUserInfoDetailDto);
     }
 
     public CommonResponseDto logout(User user){

@@ -3,7 +3,6 @@ package org.supercoding.supertime.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.BoardService;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
+import org.supercoding.supertime.web.dto.board.getBoardPost.BoardInfoDto;
 import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
+import org.supercoding.supertime.web.dto.board.getUserPost.GetUserPostResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 import java.util.List;
@@ -26,7 +27,6 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/board")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
@@ -76,9 +76,13 @@ public class BoardController {
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
     @GetMapping("/getBoard/{boardCid}")
-    public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(@PathVariable Long boardCid){
+    public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long boardCid,
+            @RequestParam int page
+    ){
         log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
-        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(boardCid);
+        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid, page);
         log.info("[BOARD] 게시판 조회 요청 결과 = "+ getBoardPostsResult);
 
         return ResponseEntity.ok(getBoardPostsResult);
@@ -92,5 +96,19 @@ public class BoardController {
         log.info("[POST] 게시물 조회 요청 결과 = "+ getPostDetailResult);
 
         return ResponseEntity.ok(getPostDetailResult);
+    }
+
+    @Operation(tags = {"게시판 조회 API"}, summary = "유저 게시물 조회", description = "유저가 작성한 글을 불러오는 api입니다.")
+    @GetMapping("/getUserPost/{boardCid}")
+    public ResponseEntity<GetUserPostResponseDto> getUserPost(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long boardCid,
+            @RequestParam int page
+    ){
+        log.debug("[GET_USER_POST] 유저 게시물 조회 요청이 들어왔습니다.");
+        GetUserPostResponseDto getUserPostResult = boardService.getUserPost(user, boardCid, page);
+        log.debug("[GET_USER_POST] 유저 게시물 조회 결과 = {} ", getUserPostResult);
+
+        return ResponseEntity.ok(getUserPostResult);
     }
 }

@@ -3,6 +3,7 @@ package org.supercoding.supertime.web.dto.semester;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -25,4 +26,13 @@ public class GetAllSemesterResponseDto {
 
     @Schema(description = "기수 리스트")
     private List<GetSemesterDto> semesterList;
+
+    public static GetAllSemesterResponseDto successResponse(final String message, final List<GetSemesterDto> semesters) {
+        return GetAllSemesterResponseDto.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message(message)
+                .semesterList(semesters)
+                .build();
+    }
 }

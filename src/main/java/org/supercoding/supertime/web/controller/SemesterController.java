@@ -20,7 +20,6 @@ import org.supercoding.supertime.web.entity.user.UserEntity;
 @Slf4j
 @RequestMapping("/semester")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "기수 관리 API")
 public class SemesterController {
     private final SemesterService semesterService;
