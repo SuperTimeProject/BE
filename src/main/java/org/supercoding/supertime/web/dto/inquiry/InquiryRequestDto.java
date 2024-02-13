@@ -1,13 +1,9 @@
 package org.supercoding.supertime.web.dto.inquiry;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.supercoding.supertime.web.entity.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.user.UserEntity;
-
-import java.util.List;
 
 @Getter
 @Setter

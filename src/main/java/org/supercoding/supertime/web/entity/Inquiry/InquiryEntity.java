@@ -1,11 +1,9 @@
-package org.supercoding.supertime.web.entity;
+package org.supercoding.supertime.web.entity.Inquiry;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
-import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailImageDto;
-import org.supercoding.supertime.web.dto.inquiry.InquiryImageDto;
-import org.supercoding.supertime.web.entity.board.PostImageEntity;
+import org.supercoding.supertime.web.entity.TimeEntity;
 import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
@@ -18,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "inquiry_table")
-public class InquiryEntity extends TimeEntity{
+public class InquiryEntity extends TimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inquiry_cid")

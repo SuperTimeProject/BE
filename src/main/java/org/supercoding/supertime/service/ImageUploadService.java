@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.InquiryImageRepository;
 import org.supercoding.supertime.repository.PostImageRepository;
-import org.supercoding.supertime.web.entity.InquiryImageEntity;
+import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
 
 import java.io.ByteArrayInputStream;
