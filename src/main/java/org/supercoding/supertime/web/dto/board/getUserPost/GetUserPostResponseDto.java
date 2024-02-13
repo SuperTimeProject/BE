@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.supercoding.supertime.web.dto.board.getBoardPost.BoardInfoDto;
 
 import java.util.List;
 
@@ -23,12 +24,15 @@ public class GetUserPostResponseDto {
     @Schema(description = "유저 게시물 리스트")
     private List<GetUserPostDto> userPostList;
 
-    public static GetUserPostResponseDto success(String message, List<GetUserPostDto> userPosts){
+    private BoardInfoDto boardInfo;
+
+    public static GetUserPostResponseDto success(String message, List<GetUserPostDto> userPosts, BoardInfoDto boardInfo){
         return GetUserPostResponseDto.builder()
                 .code(200)
                 .success(true)
                 .message(message)
                 .userPostList(userPosts)
+                .boardInfo(boardInfo)
                 .build();
     }
 }

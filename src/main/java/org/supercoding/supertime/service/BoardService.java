@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
+import org.supercoding.supertime.web.dto.board.getBoardPost.BoardInfoDto;
 import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostDetailDto;
 import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
@@ -153,7 +157,7 @@ public class BoardService {
         return CommonResponseDto.successResponse("게시물을 성공적으로 삭제하였습니다.");
     }
 
-    public GetBoardPostResponseDto getBoardPost(User user, Long boardCid) {
+    public GetBoardPostResponseDto getBoardPost(User user, Long boardCid, int page) {
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(() -> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
@@ -163,8 +167,16 @@ public class BoardService {
         ) {
             throw new CustomAccessDeniedException("게시판 조회 권한이 없습니다.");
         }
-        List<PostEntity> postList = postRepository.findAllByBoardEntity_BoardCid(boardCid);
+
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<PostEntity> postList = postRepository.findAllByBoardEntity_BoardCid(boardCid, pageable);
         List<GetBoardPostDetailDto> postListDto = new ArrayList<>();
+
+        BoardInfoDto boardInfo = BoardInfoDto.builder()
+                .page(page)
+                .totalElements(postList.getTotalElements())
+                .totalPages(postList.getTotalPages())
+                .build();
 
         if(postList.isEmpty()){
             throw new NoSuchElementException("게시판에 게시글이 없습니다.");
@@ -182,7 +194,7 @@ public class BoardService {
             postListDto.add(postDetail);
         }
 
-        return GetBoardPostResponseDto.successResponse("게시판에 포함된 게시물을 불러왔습니다.", postListDto);
+        return GetBoardPostResponseDto.successResponse("게시판에 포함된 게시물을 불러왔습니다.", postListDto, boardInfo);
     }
 
     @Transactional
@@ -245,7 +257,7 @@ public class BoardService {
 
     }
 
-    public GetUserPostResponseDto getUserPost(User user, Long boardCid) {
+    public GetUserPostResponseDto getUserPost(User user, Long boardCid, int page) {
         // TODO
         // 유저가 해당 게시판에 포함되어있는지 확인
         // 해당 보드에 유저가 작성한 글 불러오기
@@ -263,7 +275,14 @@ public class BoardService {
             throw new CustomAccessDeniedException("게시물 조회 권한이 없습니다.");
         }
 
-        List<PostEntity> userPostList = postRepository.findAllByBoardEntity_BoardCidAndUserEntity_UserCid(userEntity.getUserCid(), boardCid);
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<PostEntity> userPostList = postRepository.findAllByBoardEntity_BoardCidAndUserEntity_UserCid(userEntity.getUserCid(), boardCid, pageable);
+
+        BoardInfoDto boardInfo = BoardInfoDto.builder()
+                .page(page)
+                .totalElements(userPostList.getTotalElements())
+                .totalPages(userPostList.getTotalPages())
+                .build();
 
         if(userPostList.isEmpty()) {
             throw new CustomNoSuchElementException("리스트가 비어있습니다.");
@@ -279,7 +298,7 @@ public class BoardService {
             userPostDtoList.add(userPost);
         }
 
-        return GetUserPostResponseDto.success("성공적으로 유저 게시물을 불러왔습니다.", userPostDtoList);
+        return GetUserPostResponseDto.success("성공적으로 유저 게시물을 불러왔습니다.", userPostDtoList, boardInfo);
     }
 
 
