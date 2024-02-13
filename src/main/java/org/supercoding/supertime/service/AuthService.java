@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
+import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
 import org.supercoding.supertime.web.dto.auth.TokenDto;
@@ -50,7 +51,7 @@ public class AuthService {
     private final UserProfileRepository userProfileRepository;
 
     public CommonResponseDto login(LoginRequestDto loginInfo, HttpServletResponse httpServletResponse) {
-        UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new NotFoundException("일치하는 유저가 존재하지 않습니다."));
+        UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
         int isDeleted = user.getIsDeleted();
 
         if(isDeleted == 1) {
@@ -107,7 +108,7 @@ public class AuthService {
         }
 
         List<BoardEntity> userBoard = new ArrayList<>();
-        SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+        SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
         String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
         log.info("보드리스트" + boardList);
 

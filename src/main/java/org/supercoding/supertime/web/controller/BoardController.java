@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.BoardService;
 import org.supercoding.supertime.web.dto.board.CreatePostRequestDto;
 import org.supercoding.supertime.web.dto.board.EditPostRequestDto;
+import org.supercoding.supertime.web.dto.board.getBoardPost.BoardInfoDto;
 import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostResponseDto;
 import org.supercoding.supertime.web.dto.board.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.web.dto.board.getUserPost.GetUserPostResponseDto;
@@ -77,9 +78,11 @@ public class BoardController {
     @GetMapping("/getBoard/{boardCid}")
     public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(
             @AuthenticationPrincipal User user,
-            @PathVariable Long boardCid){
+            @PathVariable Long boardCid,
+            @RequestParam int page
+    ){
         log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
-        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid);
+        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid, page);
         log.info("[BOARD] 게시판 조회 요청 결과 = "+ getBoardPostsResult);
 
         return ResponseEntity.ok(getBoardPostsResult);
@@ -99,10 +102,11 @@ public class BoardController {
     @GetMapping("/getUserPost/{boardCid}")
     public ResponseEntity<GetUserPostResponseDto> getUserPost(
             @AuthenticationPrincipal User user,
-            @PathVariable Long boardCid
+            @PathVariable Long boardCid,
+            @RequestParam int page
     ){
         log.debug("[GET_USER_POST] 유저 게시물 조회 요청이 들어왔습니다.");
-        GetUserPostResponseDto getUserPostResult = boardService.getUserPost(user, boardCid);
+        GetUserPostResponseDto getUserPostResult = boardService.getUserPost(user, boardCid, page);
         log.debug("[GET_USER_POST] 유저 게시물 조회 결과 = {} ", getUserPostResult);
 
         return ResponseEntity.ok(getUserPostResult);

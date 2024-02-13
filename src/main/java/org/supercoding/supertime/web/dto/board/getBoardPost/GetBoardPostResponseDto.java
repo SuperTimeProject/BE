@@ -29,12 +29,15 @@ public class GetBoardPostResponseDto {
     @Schema(description = "게시물 리스트")
     private List<GetBoardPostDetailDto> postList;
 
-    public static GetBoardPostResponseDto successResponse(final String message, final List<GetBoardPostDetailDto> postList) {
+    private BoardInfoDto boardInfo;
+
+    public static GetBoardPostResponseDto successResponse(final String message, final List<GetBoardPostDetailDto> postList, BoardInfoDto boardInfo) {
         return GetBoardPostResponseDto.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
                 .message(message)
                 .postList(postList)
+                .boardInfo(boardInfo)
                 .build();
     }
 }
