@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
+import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.semester.CreateSemesterRequestDto;
 import org.supercoding.supertime.web.dto.semester.GetAllSemesterResponseDto;
@@ -83,7 +84,7 @@ public class SemesterService {
         List<GetSemesterDto> resultList = new ArrayList<>();
 
         if(semesterList.isEmpty()){
-            throw new NoSuchElementException("기수 리스트가 비어있습니다.");
+            throw new CustomNoSuchElementException("기수 리스트가 비어있습니다.");
         }
         for(SemesterEntity semester:semesterList){
             GetSemesterDto newSemesterDto = GetSemesterDto.builder()

@@ -55,7 +55,7 @@ public class AuthService {
         int isDeleted = user.getIsDeleted();
 
         if(isDeleted == 1) {
-            throw new NotFoundException("탈퇴 처리된 유저입니다.");
+            throw new CustomNotFoundException("탈퇴 처리된 유저입니다.");
         };
 
         if(!passwordEncoder.matches(loginInfo.getUserPassword(), user.getUserPassword()))
@@ -193,7 +193,7 @@ public class AuthService {
 
     public GetUserInfoResponseDto getUserInfo(User user) {
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
         List<Long> boardList = new ArrayList<>();
         for(BoardEntity board:loggedInUser.getBoardList()){
@@ -201,7 +201,7 @@ public class AuthService {
         }
 
         SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
-                .orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+                .orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
         UserSemesterDto semester = UserSemesterDto.builder()
                 .semesterCid(semesterEntity.getSemesterCid())
                 .semesterDetailName(semesterEntity.getSemesterDetailName())
@@ -211,7 +211,7 @@ public class AuthService {
         UserProfileDto userProfile = null;
         if(loggedInUser.getUserProfileCid() != null){
             UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
-                    .orElseThrow(()->new NotFoundException("찾는 프로필이 존재하지 않습니다."));
+                    .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
             userProfile = UserProfileDto.builder()
                     .userProfileCid(userProfileEntity.getUserProfileCid())
                     .userProfileFileName(userProfileEntity.getUserProfileFileName())
@@ -239,7 +239,7 @@ public class AuthService {
         String userCid = user.getUsername();
         //TODO 로그아웃 구현
         RefreshToken token = refreshTokenRepository.findByKey(user.getUsername())
-                .orElseThrow(() -> new NotFoundException("삭제하려는 토큰이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomNotFoundException("삭제하려는 토큰이 존재하지 않습니다."));
 
         refreshTokenRepository.delete(token);
 

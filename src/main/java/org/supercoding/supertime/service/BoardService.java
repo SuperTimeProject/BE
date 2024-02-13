@@ -97,7 +97,7 @@ public class BoardService {
                 .orElseThrow(()->new CustomNotFoundException("수정하려는 게시물이 존재하지 않습니다."));
 
         if(!targetPost.getUserEntity().getUserId().equals(user.getUsername())){
-            throw new AccessDeniedException("수정 권한이 없습니다.");
+            throw new CustomAccessDeniedException("수정 권한이 없습니다.");
         }
         List<PostImageEntity> imageList = targetPost.getPostImages();
 
@@ -137,10 +137,10 @@ public class BoardService {
     @Transactional
     public CommonResponseDto deletePost(Long postCid, User user) {
         PostEntity targetPost = postRepository.findById(postCid)
-                .orElseThrow(() -> new NotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomNotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
 
         if(!targetPost.getUserEntity().getUserId().equals(user.getUsername())){
-            throw new AccessDeniedException("삭제 권한이 없습니다.");
+            throw new CustomAccessDeniedException("삭제 권한이 없습니다.");
         }
 
         List<PostImageEntity> postImages = targetPost.getPostImages();
@@ -179,7 +179,7 @@ public class BoardService {
                 .build();
 
         if(postList.isEmpty()){
-            throw new NoSuchElementException("게시판에 게시글이 없습니다.");
+            throw new CustomNoSuchElementException("게시판에 게시글이 없습니다.");
         }
 
         for(PostEntity post: postList){
