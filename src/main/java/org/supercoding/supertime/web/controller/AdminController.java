@@ -19,7 +19,7 @@ import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
 @Tag(name = "관리자 관련 API")
 public class AdminController {
 
-    private AdminService adminService;
+    private final AdminService adminService;
 
     @Operation(summary = "회원 인증 관리", description = "회원 인증상태를 변경하는 api입니다.")
     @PutMapping("/verification")

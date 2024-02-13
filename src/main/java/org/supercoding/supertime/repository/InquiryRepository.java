@@ -10,5 +10,5 @@ import java.util.List;
 public interface InquiryRepository extends JpaRepository<InquiryEntity, Long> {
     List<InquiryEntity> findAllByUser_UserId(String userName);
 
-    List<GetUnclosedInquiryDetailDto> findAllByIsClosed(InquiryClosed inquiryClosed);
+    List<InquiryEntity> findAllByIsClosed(InquiryClosed inquiryClosed);
 }

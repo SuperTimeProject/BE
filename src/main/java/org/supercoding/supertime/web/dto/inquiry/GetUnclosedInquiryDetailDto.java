@@ -1,7 +1,16 @@
 package org.supercoding.supertime.web.dto.inquiry;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+@ToString
+@Slf4j
 public class GetUnclosedInquiryDetailDto {
     @Schema(description = "문의 cid")
     private Long inquiryCid;
