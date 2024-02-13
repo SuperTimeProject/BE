@@ -233,4 +233,20 @@ public class AuthService {
 
         return GetUserInfoResponseDto.successResponse("유저 정보를 성공적으로 불러왔습니다.", getUserInfoDetailDto);
     }
+
+    public CommonResponseDto logout(User user){
+
+        String userCid = user.getUsername();
+        //TODO 로그아웃 구현
+        RefreshToken token = refreshTokenRepository.findByKey(user.getUsername())
+                .orElseThrow(() -> new NotFoundException("삭제하려는 토큰이 존재하지 않습니다."));
+
+        refreshTokenRepository.delete(token);
+
+        return CommonResponseDto.builder()
+                .success(true)
+                .code(200)
+                .message("로그아웃 성공 했습니다.")
+                .build();
+    }
 }
