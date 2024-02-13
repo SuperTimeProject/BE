@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.repository.InquiryImageRepository;
 import org.supercoding.supertime.repository.PostImageRepository;
+import org.supercoding.supertime.web.entity.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
 
 import java.io.ByteArrayInputStream;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class ImageUploadService {
     private final PostImageRepository postImageRepository;
     private final AmazonS3 amazonS3;
+    private final InquiryImageRepository inquiryImageRepository;
 
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
@@ -80,6 +83,30 @@ public class ImageUploadService {
 
         return uploadedImages;
     }
+
+    public List<InquiryImageEntity> uploadInquiryImages(List<MultipartFile> images, String folderName) {
+
+        List<InquiryImageEntity> uploadedImages = new ArrayList<>();
+
+        for(MultipartFile image : images){
+            String originName = image.getOriginalFilename();
+            String storedImagedPath = uploadImageToS3(image, folderName);
+
+            log.info("[uploadImage] 이미지가 s3업데이트 메서드로 넘어갈 예정입니다. originName = " + originName);
+
+            InquiryImageEntity newProductImage = InquiryImageEntity.builder()
+                    .inquiryImageFileName(originName)
+                    .inquiryImageFilePath(storedImagedPath)
+                    .build();
+
+            inquiryImageRepository.save(newProductImage);
+
+            uploadedImages.add(newProductImage);
+        }
+
+        return uploadedImages;
+    }
+
 
     public void deleteImage(String productImagePath) {
         String key = extractKey(productImagePath);

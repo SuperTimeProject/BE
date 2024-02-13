@@ -3,7 +3,13 @@ package org.supercoding.supertime.web.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailImageDto;
+import org.supercoding.supertime.web.dto.inquiry.InquiryImageDto;
+import org.supercoding.supertime.web.entity.board.PostImageEntity;
+import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 import org.supercoding.supertime.web.entity.user.UserEntity;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,11 +38,14 @@ public class InquiryEntity extends TimeEntity{
     @Schema(description = "문의 내용")
     private String inquiryContent;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<InquiryImageEntity> inquiryImages;
+
     @Column(name = "answer", columnDefinition = "TEXT")
     @Schema(description = "답변 내용")
     private String answer;
 
     @Column(name = "isClosed")
     @Schema(description = "문의 닫힘 여부 (1 or 0)", example = "1")
-    private Integer isClosed;
+    private InquiryClosed isClosed;
 }

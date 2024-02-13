@@ -54,7 +54,8 @@ public class SecurityConfig {
     private final String[] AUTHENTICATION_URL = {
             "/api/**",
             "/board/**",
-            "/semester/**"
+            "/semester/**",
+            "/user/**"
     };
 
     @Bean
