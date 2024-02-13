@@ -30,13 +30,13 @@ public class AdminController {
         return ResponseEntity.ok().body(verifiResult);
     }
 
-    @Operation(summary = "문의 답변하기", description = "문의에 대한 답변을 하는 api입니다.")
-    @GetMapping("/inquiry/answer/{inquiryCid}")
+    @Operation(summary = "문의 조회하기", description = "답변이 없는 문의를 조회하는 api입니다.")
+    @GetMapping("/inquiry/get")
     public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(){
-        log.info("[ADMIN] 문의 답변 요청이 들어왔습니다.");
-        GetUnclosedInquiryResponseDto answerResult = adminService.getUnclosedInquiry();
-        log.info("[ADMIN] 답변 결과 = " + answerResult);
-        return ResponseEntity.ok().body(answerResult);
+        log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
+        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry();
+        log.info("[ADMIN] 문의 조회 결과 = " + getInquiryResult);
+        return ResponseEntity.ok().body(getInquiryResult);
     }
 
     @Operation(summary = "문의 답변하기", description = "문의에 대한 답변을 하는 api입니다.")
@@ -49,5 +49,16 @@ public class AdminController {
         CommonResponseDto answerResult = adminService.answerInquiry(inquiryCid,inquiryContent);
         log.info("[ADMIN] 답변 결과 = " + answerResult);
         return ResponseEntity.ok().body(answerResult);
+    }
+
+    @Operation(summary = "문의 삭제하기", description = "문의를 삭제하는 api입니다.")
+    @PutMapping("/inquiry/delete/{inquiryCid}")
+    public ResponseEntity<CommonResponseDto> deleteInquiry(
+            @PathVariable Long inquiryCid
+    ){
+        log.info("[ADMIN] 문의 삭제 요청이 들어왔습니다.");
+        CommonResponseDto deleteResult = adminService.deleteInquiry(inquiryCid);
+        log.info("[ADMIN] 답변 결과 = " + deleteResult);
+        return ResponseEntity.ok().body(deleteResult);
     }
 }

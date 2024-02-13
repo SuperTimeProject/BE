@@ -72,4 +72,13 @@ public class AdminService {
 
         return CommonResponseDto.successResponse("문의 답변에 성공했습니다.");
     }
+
+    public CommonResponseDto deleteInquiry(Long inquiryCid){
+        InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
+                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
+
+        inquiryRepository.delete(inquiryEntity);
+
+        return CommonResponseDto.successResponse("문의 삭제에 성공했습니다.");
+    }
 }
