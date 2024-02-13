@@ -61,6 +61,7 @@ public class MyPageController {
 
     }
 
+    //내가 쓴 글 조회(게시판 별로)
     @Operation(summary = "문의하기", description = "관리자에게 문의하는 api입니다.")
     @PostMapping(value = "/inquiry/request", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> inquiry(
@@ -75,14 +76,13 @@ public class MyPageController {
     }
 
     @Operation(summary = "주특기 선택", description = "주특기를 선택하는 api입니다.")
-    @PutMapping(value = "/part", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/part/{partName}")
     public ResponseEntity<CommonResponseDto> selectPart(
             @AuthenticationPrincipal User user,
-            @PathVariable String part
+            @PathVariable String partName
     ){
-        //TODO Part enum을 어떻게 처리할지?
         log.info("[USER] 주특기 선택 요청이 들어왔습니다.");
-        CommonResponseDto selectPartResult = userService.selectPart(user,part);
+        CommonResponseDto selectPartResult = userService.selectPart(user,partName);
         log.info("[USER] 주특기 선택 결과 = " + selectPartResult);
         return ResponseEntity.ok(selectPartResult);
     }

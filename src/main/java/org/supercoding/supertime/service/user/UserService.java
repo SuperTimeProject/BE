@@ -222,10 +222,14 @@ public class UserService {
 
         Long Period = (now.getTime() - semester.getStartDate().getTime())/(1000 * 60 * 60 * 24);
 
-        boolean isSelectPeriod = Period >= SELECT_START_DAY && Period <= SELECT_START_DAY + PERIOD;
+        //TODO 1차배포용으로 열어놓음
+        boolean isSelectPeriod =true;
+        //boolean isSelectPeriod = Period >= SELECT_START_DAY && Period <= SELECT_START_DAY + PERIOD;
 
         if(isSelectPeriod) {
-            userEntity.setPart(part);
+            userEntity.setPart(Part.valueOf(part));
+
+            userRepository.save(userEntity);
 
             return CommonResponseDto.builder()
                     .success(true)
