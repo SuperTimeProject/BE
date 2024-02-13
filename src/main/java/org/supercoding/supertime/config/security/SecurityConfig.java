@@ -48,7 +48,7 @@ public class SecurityConfig {
 
     // 관리자만 접근 가능
     private final String[] ADMIN_URL = {
-            "/api/admin/**"
+            "/admin/**"
     };
 
     private final String[] AUTHENTICATION_URL = {
@@ -87,6 +87,7 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers(PERMIT_URL).permitAll()
                                 .requestMatchers(ADMIN_URL).hasRole("ADMIN")
+                                .requestMatchers(AUTHENTICATION_URL).hasRole("ADMIN")
                                 .requestMatchers(AUTHENTICATION_URL).hasRole("USER")
                                 .anyRequest().hasRole("ADMIN")
                 );
