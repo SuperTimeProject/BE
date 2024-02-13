@@ -75,11 +75,11 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
-    @GetMapping("/getBoard/{boardCid}")
+    @GetMapping("/getBoard/{boardCid}/{page}")
     public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(
             @AuthenticationPrincipal User user,
             @PathVariable Long boardCid,
-            @RequestParam int page
+            @PathVariable int page
     ){
         log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
         GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid, page);
@@ -99,11 +99,11 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "유저 게시물 조회", description = "유저가 작성한 글을 불러오는 api입니다.")
-    @GetMapping("/getUserPost/{boardCid}")
+    @GetMapping("/getUserPost/{boardCid}/{page}")
     public ResponseEntity<GetUserPostResponseDto> getUserPost(
             @AuthenticationPrincipal User user,
             @PathVariable Long boardCid,
-            @RequestParam int page
+            @PathVariable int page
     ){
         log.debug("[GET_USER_POST] 유저 게시물 조회 요청이 들어왔습니다.");
         GetUserPostResponseDto getUserPostResult = boardService.getUserPost(user, boardCid, page);
