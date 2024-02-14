@@ -56,16 +56,14 @@ public class MyPageController {
     }
 
     @Operation(summary = "문의 조회", description = "문의한 기록을 불러오는 api입니다.")
-    @GetMapping("/inquiry")
+    @GetMapping("/inquiry/get")
     public ResponseEntity<InquiryResponseDto> getInquiryHistory(@AuthenticationPrincipal User user){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
         InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user);
         log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
-        return ResponseEntity.ok(getInquiryHistoryResult);
-
+        return ResponseEntity.ok().body(getInquiryHistoryResult);
     }
-
-    //내가 쓴 글 조회(게시판 별로)
+    
     @Operation(summary = "문의하기", description = "관리자에게 문의하는 api입니다.")
     @PostMapping(value = "/inquiry/request", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> inquiry(

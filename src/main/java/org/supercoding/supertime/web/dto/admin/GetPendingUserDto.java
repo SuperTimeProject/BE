@@ -1,9 +1,9 @@
-package org.supercoding.supertime.web.dto.inquiry;
+package org.supercoding.supertime.web.dto.admin;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.supercoding.supertime.web.dto.board.getBoardPost.GetBoardPostDetailDto;
+import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryDetailDto;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @ToString
 @Slf4j
-public class GetUnclosedInquiryResponseDto {
+public class GetPendingUserDto {
     @Schema(description = "요청의 성공 상태", example = "true")
     private Boolean success;
 
@@ -24,6 +24,6 @@ public class GetUnclosedInquiryResponseDto {
     @Schema(description = "요청 코드의 에러 메시지", example = "잘못되었습니다")
     private String message;
 
-    @Schema(description = "미답변 문의 리스트")
-    private List<GetUnclosedInquiryDetailDto> inquiryList;
+    @Schema(description = "승인 대기중인 유저 리스트")
+    private List<GetPendingUserDetailDto> userList;
 }

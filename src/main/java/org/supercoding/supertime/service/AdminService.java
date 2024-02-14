@@ -11,6 +11,8 @@ import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
+import org.supercoding.supertime.web.dto.admin.GetPendingUserDetailDto;
+import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryDetailDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
@@ -36,7 +38,36 @@ public class AdminService {
     private final UserProfileRepository userProfileRepository;
     private final InquiryRepository inquiryRepository;
 
+
+    public GetPendingUserDto getPendingUser(){
+        log.info("[ADMIN] 사용자 인증 대기 조회 요청이 들어왔습니다.");
+        List<GetPendingUserDetailDto> userList = new ArrayList<>();
+
+        List<UserEntity> userEntities = userRepository.findAllbyValified(Valified.PENDING)
+                .orElseThrow(()-> new CustomNotFoundException("인증을 신청한 유저가 존재하지 않습니다."));
+
+        for(UserEntity user : userEntities) {
+            GetPendingUserDetailDto dto = GetPendingUserDetailDto.builder()
+                    .userId(user.getUserId())
+                    .part(user.getPart())
+                    .userNickname(user.getUserNickname())
+                    .semester(user.getSemester())
+                    .userName(user.getUserName())
+                    .build();
+
+            userList.add(dto);
+        }
+
+        return GetPendingUserDto.builder()
+                .code(200)
+                .success(true)
+                .message("인증 대기 조회 요청에 성공했습니다.")
+                .userList(userList)
+                .build();
+    }
+
     public CommonResponseDto verification(String userName) {
+        log.info("[ADMIN] 사용자 인증 요청이 들어왔습니다.");
         UserEntity user = userRepository.findByUserId(userName)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
 
@@ -50,6 +81,7 @@ public class AdminService {
     }
 
     public GetUnclosedInquiryResponseDto getUnclosedInquiry(){
+        log.info("[ADMIN] 미응답 문의 조회 요청이 들어왔습니다.");
         List<InquiryEntity> inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
         List<GetUnclosedInquiryDetailDto> inquiryDtoList =  new ArrayList<>();
 
@@ -79,6 +111,7 @@ public class AdminService {
     }
 
     public CommonResponseDto answerInquiry(Long inquiryCid, String inquiryContent) {
+        log.info("[ADMIN] 문의 답변 요청이 들어왔습니다.");
         InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
                 .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
 
@@ -91,6 +124,7 @@ public class AdminService {
     }
 
     public CommonResponseDto deleteInquiry(Long inquiryCid){
+        log.info("[ADMIN] 문의 삭제 요청이 들어왔습니다.");
         InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
                 .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
 

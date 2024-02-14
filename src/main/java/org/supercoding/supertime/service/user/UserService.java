@@ -23,6 +23,7 @@ import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
+import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 import org.supercoding.supertime.web.entity.user.UserProfileEntity;
@@ -129,14 +130,14 @@ public class UserService {
     }
 
     public InquiryResponseDto getInquiryHistory(User user) {
-        String userId = user.getUsername();
-        UserEntity userEntity = userRepository.findByUserId(userId)
+        log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        List<InquiryEntity> inquiryList = inquiryRepository.findAllByUser_UserId(userId);
+        List<InquiryEntity> inquiryList = inquiryRepository.findAllByUser(userEntity);
         List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
 
-
+        log.info("[GET_INQUIRY] entity를 조회 했습니다.");
 
         if(inquiryList.isEmpty()){
             throw new CustomNotFoundException("문의내용이 없습니다.");
@@ -154,8 +155,8 @@ public class UserService {
                 imageListDto.add(dto);
             }
 
-            InquiryDetailDto dto = InquiryDetailDto.builder()
-                    .user(userEntity)
+            InquiryDetailDto inquiryDto = InquiryDetailDto.builder()
+                    .userId(userEntity.getUserId())
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryContent(inquiry.getInquiryContent())
                     .imageList(imageListDto)
@@ -163,7 +164,7 @@ public class UserService {
                     .isClosed(inquiry.getIsClosed())
                     .build();
 
-            inquiryListDto.add(dto);
+            inquiryListDto.add(inquiryDto);
         }
 
         return InquiryResponseDto.builder()
@@ -182,6 +183,7 @@ public class UserService {
                 .inquiryTitle(inquiryRequestDto.getInquiryTitle())
                 .inquiryContent(inquiryRequestDto.getInquiryContent())
                 .user(userEntity)
+                .isClosed(InquiryClosed.OPEN)
                 .build();
 
         if(images != null){
