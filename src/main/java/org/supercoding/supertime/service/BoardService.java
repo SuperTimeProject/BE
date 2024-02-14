@@ -276,7 +276,7 @@ public class BoardService {
         }
 
         Pageable pageable = PageRequest.of(page-1, 10);
-        Page<PostEntity> userPostList = postRepository.findAllByBoardEntity_BoardCidAndUserEntity_UserCid(userEntity.getUserCid(), boardCid, pageable);
+        Page<PostEntity> userPostList = postRepository.findAllByBoardEntity_BoardCidAndUserEntity_UserCid( boardCid, userEntity.getUserCid(), pageable);
 
         BoardInfoDto boardInfo = BoardInfoDto.builder()
                 .page(page)
