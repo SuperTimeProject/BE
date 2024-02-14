@@ -1,6 +1,5 @@
 package org.supercoding.supertime.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +19,9 @@ import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
 import org.supercoding.supertime.web.dto.auth.TokenDto;
 import org.supercoding.supertime.web.dto.auth.TokenRequestDto;
-import org.supercoding.supertime.web.dto.user.getUserDto.GetUserInfoDetailDto;
-import org.supercoding.supertime.web.dto.user.getUserDto.GetUserInfoResponseDto;
+import org.supercoding.supertime.web.dto.user.getUserInfo.GetUserInfoBoardInfoDto;
+import org.supercoding.supertime.web.dto.user.getUserInfo.GetUserInfoDetailDto;
+import org.supercoding.supertime.web.dto.user.getUserInfo.GetUserInfoResponseDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserProfileDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
@@ -195,9 +195,14 @@ public class AuthService {
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
-        List<Long> boardList = new ArrayList<>();
+        List<GetUserInfoBoardInfoDto> boardList = new ArrayList<>();
         for(BoardEntity board:loggedInUser.getBoardList()){
-            boardList.add(board.getBoardCid());
+            GetUserInfoBoardInfoDto boardInfo = GetUserInfoBoardInfoDto.builder()
+                    .boardCid(board.getBoardCid())
+                    .boardName(board.getBoardName())
+                    .build();
+
+            boardList.add(boardInfo);
         }
 
         SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
