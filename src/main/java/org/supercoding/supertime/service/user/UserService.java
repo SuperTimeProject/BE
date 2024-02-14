@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.service.ImageUploadService;
+import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryDetailDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryImageDto;
@@ -100,31 +101,25 @@ public class UserService {
 
     public CommonResponseDto editUserInfo(
             User user,
-            EditUserInfoRequestDto editUserInfoRequestDto
+            String nickName,
+            MultipartFile profileImg
     ) {
-        log.info("0");
-
+        log.info("[EDIT_USER_INFO] 프로필 수정 요청이 들어왔습니다.");
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("로그인된 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        log.info("11");
+        loggedInUser.setUserNickname(nickName);
 
-
-        UserProfileEntity userProfileEntity = userProfileRepository.findById(editUserInfoRequestDto.getUserProfileCid())
-                .orElseThrow(()-> new NotFoundException("변경하려는 프로필 사진이 존재하지 않습니다."));
-
-        log.info("1");
-
-        if(editUserInfoRequestDto != null){
-            loggedInUser.setUserNickname(editUserInfoRequestDto.getUserNickname());
-            loggedInUser.setUserProfileCid(editUserInfoRequestDto.getUserProfileCid());
+        if(profileImg != null){
+            UserProfileEntity userProfileEntity = imageUploadService.uploadUserProfileImages(profileImg,"profile");
+            loggedInUser.setUserProfileCid(userProfileEntity.getUserProfileCid());
+            log.info("[EDIT_USER_INFO] 프로필 이미지가 추가되었습니다.");
+        } else{
+            loggedInUser.setUserProfileCid(null);
+            log.info("[EDIT_USER_INFO] 프로필 이미지가 삭제되었습니다.");
         }
-        log.info("2");
 
         userRepository.save(loggedInUser);
-
-        log.info("3");
-
 
         return CommonResponseDto.builder()
                 .success(true)
@@ -136,7 +131,7 @@ public class UserService {
     public InquiryResponseDto getInquiryHistory(User user) {
         String userId = user.getUsername();
         UserEntity userEntity = userRepository.findByUserId(userId)
-                .orElseThrow(()-> new NotFoundException("로그인된 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
         List<InquiryEntity> inquiryList = inquiryRepository.findAllByUser_UserId(userId);
         List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
@@ -144,11 +139,9 @@ public class UserService {
 
 
         if(inquiryList.isEmpty()){
-            throw new NoSuchElementException("문의내용이 없습니다.");
+            throw new CustomNotFoundException("문의내용이 없습니다.");
         }
-
-
-
+        
         for(InquiryEntity inquiry: inquiryList){
             List<InquiryImageDto> imageListDto = new ArrayList<>();
 

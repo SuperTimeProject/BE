@@ -43,10 +43,14 @@ public class MyPageController {
     }
 
     @Operation(summary = "유저 정보 수정", description = "로그인한 유저 정보를 수정하는 api입니다.")
-    @PutMapping("/info/edit")
-    public ResponseEntity<CommonResponseDto> editUserInfo(@AuthenticationPrincipal User user, EditUserInfoRequestDto editUserInfoRequestDto){
+    @PutMapping(value = "/info/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> editUserInfo(
+            @AuthenticationPrincipal User user,
+            @RequestParam(name = "userNickname") String userNickName,
+            @RequestPart(name = "userProfileImage", required = false) MultipartFile userProfileImage
+            ){
         log.info("[USER] 유저 정보 조회 요청이 들어왔습니다.");
-        CommonResponseDto editUserInfoResult = userService.editUserInfo(user,editUserInfoRequestDto);
+        CommonResponseDto editUserInfoResult = userService.editUserInfo(user,userNickName,userProfileImage);
         log.info("[USER] 유저 정보 조회 결과 = " + editUserInfoResult);
         return ResponseEntity.ok(editUserInfoResult);
     }
