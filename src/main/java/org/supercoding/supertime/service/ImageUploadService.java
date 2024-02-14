@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.InquiryImageRepository;
 import org.supercoding.supertime.repository.PostImageRepository;
+import org.supercoding.supertime.repository.UserProfileRepository;
 import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
+import org.supercoding.supertime.web.entity.user.UserProfileEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,6 +29,7 @@ public class ImageUploadService {
     private final PostImageRepository postImageRepository;
     private final AmazonS3 amazonS3;
     private final InquiryImageRepository inquiryImageRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
@@ -82,6 +85,23 @@ public class ImageUploadService {
         }
 
         return uploadedImages;
+    }
+
+    public UserProfileEntity uploadUserProfileImages(MultipartFile image, String folderName) {
+
+        String originName = image.getOriginalFilename();
+        String storedImagedPath = uploadImageToS3(image, folderName);
+
+        log.info("[uploadProfileImage] 이미지가 s3업데이트 메서드로 넘어갈 예정입니다. originName = " + originName);
+
+        UserProfileEntity newProfileImage = UserProfileEntity.builder()
+                    .userProfileFileName(originName)
+                    .userProfileFilePath(storedImagedPath)
+                    .build();
+
+        userProfileRepository.save(newProfileImage);
+
+        return newProfileImage;
     }
 
     public List<InquiryImageEntity> uploadInquiryImages(List<MultipartFile> images, String folderName) {
