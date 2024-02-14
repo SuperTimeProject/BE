@@ -49,7 +49,7 @@ public class UserService {
 
     public GetUserPageResponseDto GetUserInfo(User user){
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
         List<Long> boardList = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class UserService {
         }
 
         SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
-                .orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+                .orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
 
         UserSemesterDto semester = UserSemesterDto.builder()
                 .semesterCid(semesterEntity.getSemesterCid())
@@ -69,7 +69,7 @@ public class UserService {
         UserProfileDto userProfile = null;
         if(loggedInUser.getUserProfileCid() != null){
             UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
-                    .orElseThrow(()->new NotFoundException("찾는 프로필이 존재하지 않습니다."));
+                    .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
 
             userProfile = UserProfileDto.builder()
                     .userProfileCid(userProfileEntity.getUserProfileCid())
@@ -141,7 +141,7 @@ public class UserService {
         if(inquiryList.isEmpty()){
             throw new CustomNotFoundException("문의내용이 없습니다.");
         }
-        
+
         for(InquiryEntity inquiry: inquiryList){
             List<InquiryImageDto> imageListDto = new ArrayList<>();
 
@@ -176,7 +176,7 @@ public class UserService {
 
     public CommonResponseDto createInquiry(User user, InquiryRequestDto inquiryRequestDto, List<MultipartFile> images) {
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("탈퇴한 유저입니다."));
+                .orElseThrow(()-> new CustomNotFoundException("탈퇴한 유저입니다."));
 
         InquiryEntity inquiryEntity = InquiryEntity.builder()
                 .inquiryTitle(inquiryRequestDto.getInquiryTitle())
@@ -202,10 +202,10 @@ public class UserService {
     public CommonResponseDto selectPart(User user,String part){
 
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
         SemesterEntity semester = semesterRepository.findById(userEntity.getSemester())
-                .orElseThrow(()-> new NotFoundException("기수가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("기수가 존재하지 않습니다."));
 
         Date now = new Date();
 
