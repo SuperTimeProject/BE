@@ -33,11 +33,13 @@ public class AdminService {
     private final InquiryRepository inquiryRepository;
 
 
-    public GetPendingUserDto getPendingUser(){
-        log.info("[ADMIN] 사용자 인증 대기 조회 요청이 들어왔습니다.");
+    public GetPendingUserDto getUserByValified(String valifiedStr){
+        log.info("[ADMIN SERVICE] 사용자 인증 대기 조회 요청이 들어왔습니다.");
         List<GetPendingUserDetailDto> userList = new ArrayList<>();
 
-        List<UserEntity> userEntities = userRepository.findAllByValified(Valified.PENDING);
+        Valified valified = Valified.valueOf(valifiedStr);
+
+        List<UserEntity> userEntities = userRepository.findAllByValified(valified);
 
         if(userEntities==null){
             throw new NoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");

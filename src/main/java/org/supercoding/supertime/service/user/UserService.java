@@ -48,59 +48,6 @@ public class UserService {
     private static final long SELECT_START_DAY = 2 * 14;
     private static final long PERIOD = 3;
 
-    /*
-    public GetUserPageResponseDto GetUserInfo(User user){
-        UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
-
-        List<Long> boardList = new ArrayList<>();
-
-        for(BoardEntity board:loggedInUser.getBoardList()){
-            boardList.add(board.getBoardCid());
-        }
-
-        SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
-                .orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
-
-        UserSemesterDto semester = UserSemesterDto.builder()
-                .semesterCid(semesterEntity.getSemesterCid())
-                .semesterDetailName(semesterEntity.getSemesterDetailName())
-                .isFull(semesterEntity.getIsFull())
-                .build();
-
-        UserProfileDto userProfile = null;
-        if(loggedInUser.getUserProfileCid() != null){
-            UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
-                    .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
-
-            userProfile = UserProfileDto.builder()
-                    .userProfileCid(userProfileEntity.getUserProfileCid())
-                    .userProfileFileName(userProfileEntity.getUserProfileFileName())
-                    .userProfileFilePath(userProfileEntity.getUserProfileFilePath())
-                    .build();
-        }
-
-        List<PostEntity> posts = postRepository.findAllByUserEntity_UserCid(loggedInUser.getUserCid());
-
-        GetUserPageResponseDto responseDto
-                = GetUserPageResponseDto.builder()
-                .userCid(loggedInUser.getUserCid())
-                .userId(loggedInUser.getUserId())
-                .part(loggedInUser.getPart())
-                .userName(loggedInUser.getUserName())
-                .userNickname(loggedInUser.getUserNickname())
-                .part(loggedInUser.getPart())
-                .posts(posts)
-                .userProfile(userProfile)
-                .build();
-
-        log.debug("GetUserPageResponseDto 성공" +responseDto);
-        System.out.println("PART = "+loggedInUser.getPart() );
-
-        return responseDto;
-    }
-*/
-
     public CommonResponseDto editUserInfo(
             User user,
             String nickName,
@@ -140,11 +87,11 @@ public class UserService {
         InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
 
         if(inquiryClosed == InquiryClosed.OPEN){
-            log.info("[ADMIN] 미답변 문의 기록 조회");
+            log.info("[USER] 미답변 문의 기록 조회");
             inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
 
         } else{
-            log.info("[ADMIN] 답변완료 문의 기록 조회");
+            log.info("[USER] 답변완료 문의 기록 조회");
             inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED);
         }
 
@@ -250,4 +197,59 @@ public class UserService {
                 .message("파트 선택에 실패했습니다.")
                 .build();
     }
+
+
+    /* 유저정보 조회 사용안할듯
+    public GetUserPageResponseDto GetUserInfo(User user){
+        UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
+
+        List<Long> boardList = new ArrayList<>();
+
+        for(BoardEntity board:loggedInUser.getBoardList()){
+            boardList.add(board.getBoardCid());
+        }
+
+        SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
+                .orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
+
+        UserSemesterDto semester = UserSemesterDto.builder()
+                .semesterCid(semesterEntity.getSemesterCid())
+                .semesterDetailName(semesterEntity.getSemesterDetailName())
+                .isFull(semesterEntity.getIsFull())
+                .build();
+
+        UserProfileDto userProfile = null;
+        if(loggedInUser.getUserProfileCid() != null){
+            UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
+                    .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
+
+            userProfile = UserProfileDto.builder()
+                    .userProfileCid(userProfileEntity.getUserProfileCid())
+                    .userProfileFileName(userProfileEntity.getUserProfileFileName())
+                    .userProfileFilePath(userProfileEntity.getUserProfileFilePath())
+                    .build();
+        }
+
+        List<PostEntity> posts = postRepository.findAllByUserEntity_UserCid(loggedInUser.getUserCid());
+
+        GetUserPageResponseDto responseDto
+                = GetUserPageResponseDto.builder()
+                .userCid(loggedInUser.getUserCid())
+                .userId(loggedInUser.getUserId())
+                .part(loggedInUser.getPart())
+                .userName(loggedInUser.getUserName())
+                .userNickname(loggedInUser.getUserNickname())
+                .part(loggedInUser.getPart())
+                .posts(posts)
+                .userProfile(userProfile)
+                .build();
+
+        log.debug("GetUserPageResponseDto 성공" +responseDto);
+        System.out.println("PART = "+loggedInUser.getPart() );
+
+        return responseDto;
+    }
+*/
+
 }

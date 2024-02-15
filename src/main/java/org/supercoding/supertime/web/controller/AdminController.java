@@ -8,10 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AdminService;
+import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.web.entity.enums.InquiryClosed;
+import org.supercoding.supertime.web.entity.enums.Valified;
 
 @RestController
 @Slf4j
@@ -22,9 +24,18 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
+    @PutMapping("/pendingUser")
+    public ResponseEntity<GetPendingUserDto> getUserByValified(@RequestParam String valified){
+        log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
+        GetPendingUserDto getPendingResult = adminService.getUserByValified(valified);
+        log.info("[ADMIN] 인증 결과 = " + getPendingResult);
+        return ResponseEntity.ok().body(getPendingResult);
+    }
+
     @Operation(summary = "회원 인증 관리", description = "회원 인증상태를 변경하는 api입니다.")
     @PutMapping("/verification")
-    public ResponseEntity<CommonResponseDto> verification(String userName){
+    public ResponseEntity<CommonResponseDto> verification(@RequestParam String userName){
         log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
         CommonResponseDto verifiResult = adminService.verification(userName);
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
