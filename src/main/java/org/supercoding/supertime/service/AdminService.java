@@ -41,7 +41,7 @@ public class AdminService {
 
         List<UserEntity> userEntities = userRepository.findAllByValified(valified);
 
-        if(userEntities==null){
+        if(userEntities.isEmpty()){
             throw new NoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");
         }
 
@@ -65,15 +65,18 @@ public class AdminService {
                 .build();
     }
 
-    public CommonResponseDto verification(String userName) {
-        log.info("[ADMIN] 사용자 인증 요청이 들어왔습니다.");
-        UserEntity user = userRepository.findByUserId(userName)
+    public CommonResponseDto verification(String userId, String valifiedStr) {
+        log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");
+        UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        Valified valified = Valified.valueOf(valifiedStr);
 
         if(user.getValified()==Valified.COMPLETED)
             throw new DataIntegrityViolationException("이미 인증된 사용자 입니다.");
 
-        user.setValified(Valified.COMPLETED);
+        user.setValified(valified);
+
         userRepository.save(user);
 
         return CommonResponseDto.successResponse("회원 인증에 성공했습니다.");

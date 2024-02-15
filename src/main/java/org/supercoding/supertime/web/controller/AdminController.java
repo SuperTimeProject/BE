@@ -35,9 +35,12 @@ public class AdminController {
 
     @Operation(summary = "회원 인증 관리", description = "회원 인증상태를 변경하는 api입니다.")
     @PutMapping("/verification")
-    public ResponseEntity<CommonResponseDto> verification(@RequestParam String userName){
+    public ResponseEntity<CommonResponseDto> verification(
+            @RequestParam String userId,
+            @RequestParam String verificationState
+    ){
         log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
-        CommonResponseDto verifiResult = adminService.verification(userName);
+        CommonResponseDto verifiResult = adminService.verification(userId, verificationState);
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
         return ResponseEntity.ok().body(verifiResult);
     }
