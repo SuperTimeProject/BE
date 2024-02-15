@@ -111,7 +111,7 @@ public class BoardService {
 
         List<PostImageEntity> deletedImages = new ArrayList<>();
 
-        if(!imageList.isEmpty()){
+        if(!imageList.isEmpty() && editPostInfo.getDeleteImageList() != null && !editPostInfo.getDeleteImageList().isEmpty()){
             for(PostImageEntity image: imageList){
                 if(editPostInfo.getDeleteImageList().contains(image.getPostImageCid())){
                     deletedImages.add(image);
