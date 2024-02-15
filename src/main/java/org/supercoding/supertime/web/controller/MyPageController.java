@@ -94,6 +94,16 @@ public class MyPageController {
         return ResponseEntity.ok(selectPartResult);
     }
 
+    @Operation(summary = "프로필 이미지 삭제", description = "프로필 이미지를 삭제하는 api입니다.")
+    @PutMapping(value = "/info/profileImage/delete")
+    public ResponseEntity<CommonResponseDto> deleteProfileImage(
+            @AuthenticationPrincipal User user
+    ){
+        log.info("[USER] 프로필 이미지 삭제 요청이 들어왔습니다.");
+        CommonResponseDto deleteImgResult = userService.deleteProfileImage(user);
+        log.info("[USER] 프로필 이미지 삭제 결과 = " + deleteImgResult);
+        return ResponseEntity.ok(deleteImgResult);
+    }
 
 
 }

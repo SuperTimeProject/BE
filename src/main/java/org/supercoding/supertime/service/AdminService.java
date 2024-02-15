@@ -17,6 +17,7 @@ import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryDetailDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.web.entity.Inquiry.InquiryEntity;
+import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 import org.supercoding.supertime.web.entity.enums.Valified;
 import org.supercoding.supertime.web.entity.user.UserEntity;
@@ -31,6 +32,8 @@ import java.util.NoSuchElementException;
 public class AdminService {
     private final UserRepository userRepository;
     private final InquiryRepository inquiryRepository;
+    private final ImageUploadService imageUploadService;
+    private final InquiryImageRepository inquiryImageRepository;
 
 
     public GetPendingUserDto getUserByValified(String valifiedStr){
@@ -143,7 +146,11 @@ public class AdminService {
         InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
                 .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
 
+        InquiryImageEntity inquiryImageEntity = inquiryImageRepository.findById(inquiryEntity.getInquiryCid())
+                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
+
         inquiryRepository.delete(inquiryEntity);
+        imageUploadService.deleteImage(inquiryImageEntity.getInquiryImageFilePath());
 
         return CommonResponseDto.successResponse("문의 삭제에 성공했습니다.");
     }

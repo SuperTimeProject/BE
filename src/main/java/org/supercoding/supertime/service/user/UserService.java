@@ -1,6 +1,7 @@
 package org.supercoding.supertime.service.user;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
@@ -61,22 +62,41 @@ public class UserService {
            loggedInUser.setUserNickname(nickName);
 
         if(profileImg != null){
-            UserProfileEntity userProfileEntity = imageUploadService.uploadUserProfileImages(profileImg,"profile");
+            UserProfileEntity userProfileEntity = userProfileRepository.findByUserProfileCid(loggedInUser.getUserProfileCid());
+            //기존 이미지 삭제
+            imageUploadService.deleteImage(userProfileEntity.getUserProfileFilePath());
+            userProfileRepository.delete(userProfileEntity);
+
+            //이미지 업로드
+            userProfileEntity = imageUploadService.uploadUserProfileImages(profileImg,"profile");
+            userProfileRepository.save(userProfileEntity);
             loggedInUser.setUserProfileCid(userProfileEntity.getUserProfileCid());
+
             log.info("[EDIT_USER_INFO] 프로필 이미지가 추가되었습니다.");
-        } else{
-            loggedInUser.setUserProfileCid(null);
-            log.info("[EDIT_USER_INFO] 프로필 이미지가 삭제되었습니다.");
         }
 
         userRepository.save(loggedInUser);
 
         return CommonResponseDto.builder()
                 .success(true)
-                .code(200)
+                .code(201)
                 .message("유저 정보 수정에 성공했습니다.")
                 .build();
     }
+
+    public CommonResponseDto deleteProfileImage(User user){
+        log.info("[EDIT_USER_INFO] 프로필 수정 요청이 들어왔습니다.");
+        UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
+
+        UserProfileEntity userProfileEntity = userProfileRepository.findByUserProfileCid(loggedInUser.getUserProfileCid());
+
+        imageUploadService.deleteImage(userProfileEntity.getUserProfileFilePath());
+        userProfileRepository.delete(null);
+
+        return CommonResponseDto.successResponse("프로필 사진 삭제에 성공했습니다");
+    }
+
 
     public InquiryResponseDto getInquiryHistory(User user,String inquiryClosedStr) {
         log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
