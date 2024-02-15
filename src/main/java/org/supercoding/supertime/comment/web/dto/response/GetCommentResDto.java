@@ -31,7 +31,7 @@ public class GetCommentResDto {
     public static GetCommentResDto success(final List<GetCommentDetailDto> commentList){
         return GetCommentResDto.builder()
                 .success(true)
-                .code(HttpStatus.CREATED.value())
+                .code(HttpStatus.OK.value())
                 .message("성공적으로 댓글 리스트를 불러왔습니다.")
                 .commentList(commentList)
                 .build();

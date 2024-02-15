@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,7 +42,7 @@ public class AuthController {
         log.info("[AUTH] 회원가입 요청이 들어왔습니다.");
         CommonResponseDto signupResult = authService.signup(signupInfo);
         log.info("[AUTH] 회원가입 결과 = " + signupResult);
-        return ResponseEntity.ok().body(signupResult);
+        return ResponseEntity.status(HttpStatus.CREATED).body(signupResult);
     }
 
     @Operation(summary = "이메일 중복확인", description = "이메일 중복을 확인하는 api입니다.")

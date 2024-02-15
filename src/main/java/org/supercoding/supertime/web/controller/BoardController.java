@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,7 +44,7 @@ public class BoardController {
         CommonResponseDto createPostResult = boardService.createPost(boardCid,user, createPostInfo, postImages);
         log.info("[BOARD] 게시물 생성 결과 = " + createPostResult);
 
-        return ResponseEntity.ok(createPostResult);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createPostResult);
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
