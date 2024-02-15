@@ -59,9 +59,12 @@ public class MyPageController {
 
     @Operation(summary = "문의 조회", description = "문의한 기록을 불러오는 api입니다.")
     @GetMapping("/inquiry/get")
-    public ResponseEntity<InquiryResponseDto> getInquiryHistory(@AuthenticationPrincipal User user){
+    public ResponseEntity<InquiryResponseDto> getInquiryHistory(
+            @AuthenticationPrincipal User user,
+            @RequestParam String inquiryClosed
+    ){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
-        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user);
+        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,inquiryClosed);
         log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
         return ResponseEntity.ok().body(getInquiryHistoryResult);
     }

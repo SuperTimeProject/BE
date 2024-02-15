@@ -11,6 +11,7 @@ import org.supercoding.supertime.service.AdminService;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
+import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 
 @RestController
 @Slf4j
@@ -30,11 +31,11 @@ public class AdminController {
         return ResponseEntity.ok().body(verifiResult);
     }
 
-    @Operation(summary = "문의 조회하기", description = "답변이 없는 문의를 조회하는 api입니다.")
+    @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
     @GetMapping("/inquiry/get")
-    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(){
+    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(@RequestParam String inquiryClosed){
         log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
-        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry();
+        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(inquiryClosed);
         log.info("[ADMIN] 문의 조회 결과 = " + getInquiryResult);
         return ResponseEntity.ok().body(getInquiryResult);
     }

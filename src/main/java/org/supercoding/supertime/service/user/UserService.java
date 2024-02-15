@@ -130,15 +130,29 @@ public class UserService {
                 .build();
     }
 
-    public InquiryResponseDto getInquiryHistory(User user) {
+    public InquiryResponseDto getInquiryHistory(User user,String inquiryClosedStr) {
         log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        List<InquiryEntity> inquiryList = inquiryRepository.findAllByUser(userEntity);
-        List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
+        List<InquiryEntity> inquiryList = new ArrayList<>();
+
+        InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
+
+        if(inquiryClosed == InquiryClosed.OPEN){
+            log.info("[ADMIN] 미답변 문의 기록 조회");
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
+
+        } else{
+            log.info("[ADMIN] 답변완료 문의 기록 조회");
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED);
+        }
 
         log.info("[GET_INQUIRY] entity를 조회 했습니다.");
+
+
+
+        List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
 
         if(inquiryList.isEmpty()){
             throw new CustomNotFoundException("문의내용이 없습니다.");

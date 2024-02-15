@@ -30,13 +30,6 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class AdminService {
     private final UserRepository userRepository;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final PasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final BoardRepository boardRepository;
-    private final SemesterRepository semesterRepository;
-    private final UserProfileRepository userProfileRepository;
     private final InquiryRepository inquiryRepository;
 
 
@@ -84,9 +77,22 @@ public class AdminService {
         return CommonResponseDto.successResponse("회원 인증에 성공했습니다.");
     }
 
-    public GetUnclosedInquiryResponseDto getUnclosedInquiry(){
-        log.info("[ADMIN] 미응답 문의 조회 요청이 들어왔습니다.");
-        List<InquiryEntity> inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
+    public GetUnclosedInquiryResponseDto getUnclosedInquiry(String inquiryClosedStr){
+        log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
+
+        InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
+        List<InquiryEntity> inquiryList = new ArrayList<>();
+
+        if(inquiryClosed == InquiryClosed.OPEN){
+            log.info("[ADMIN] 미답변 문의 기록 조회");
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
+
+        } else{
+            log.info("[ADMIN] 답변완료 문의 기록 조회");
+           inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED);
+        }
+
+
         List<GetUnclosedInquiryDetailDto> inquiryDtoList =  new ArrayList<>();
 
         if(inquiryList.isEmpty()){
@@ -109,7 +115,7 @@ public class AdminService {
         return GetUnclosedInquiryResponseDto.builder()
                 .code(200)
                 .success(true)
-                .message("문의 조회에 성공했습니다.")
+                .message("문의 기록 조회에 성공했습니다.")
                 .inquiryList(inquiryDtoList)
                 .build();
     }
