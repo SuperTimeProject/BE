@@ -3,14 +3,12 @@ package org.supercoding.supertime.service.user;
 import com.amazonaws.services.kms.model.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.service.ImageUploadService;
+import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryDetailDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryImageDto;
@@ -20,12 +18,12 @@ import org.supercoding.supertime.web.dto.user.EditUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.GetUserPageResponseDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserProfileDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserSemesterDto;
-import org.supercoding.supertime.web.entity.InquiryEntity;
-import org.supercoding.supertime.web.entity.InquiryImageEntity;
+import org.supercoding.supertime.web.entity.Inquiry.InquiryEntity;
+import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
-import org.supercoding.supertime.web.entity.board.PostImageEntity;
+import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 import org.supercoding.supertime.web.entity.user.UserProfileEntity;
@@ -52,7 +50,7 @@ public class UserService {
 
     public GetUserPageResponseDto GetUserInfo(User user){
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
         List<Long> boardList = new ArrayList<>();
 
@@ -61,7 +59,7 @@ public class UserService {
         }
 
         SemesterEntity semesterEntity = semesterRepository.findById(loggedInUser.getSemester())
-                .orElseThrow(()->new NotFoundException("기수가 존재하지 않습니다."));
+                .orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
 
         UserSemesterDto semester = UserSemesterDto.builder()
                 .semesterCid(semesterEntity.getSemesterCid())
@@ -72,7 +70,7 @@ public class UserService {
         UserProfileDto userProfile = null;
         if(loggedInUser.getUserProfileCid() != null){
             UserProfileEntity userProfileEntity = userProfileRepository.findById(loggedInUser.getUserProfileCid())
-                    .orElseThrow(()->new NotFoundException("찾는 프로필이 존재하지 않습니다."));
+                    .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
 
             userProfile = UserProfileDto.builder()
                     .userProfileCid(userProfileEntity.getUserProfileCid())
@@ -104,31 +102,25 @@ public class UserService {
 
     public CommonResponseDto editUserInfo(
             User user,
-            EditUserInfoRequestDto editUserInfoRequestDto
+            String nickName,
+            MultipartFile profileImg
     ) {
-        log.info("0");
-
+        log.info("[EDIT_USER_INFO] 프로필 수정 요청이 들어왔습니다.");
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("로그인된 유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        log.info("11");
+        loggedInUser.setUserNickname(nickName);
 
-
-        UserProfileEntity userProfileEntity = userProfileRepository.findById(editUserInfoRequestDto.getUserProfileCid())
-                .orElseThrow(()-> new NotFoundException("변경하려는 프로필 사진이 존재하지 않습니다."));
-
-        log.info("1");
-
-        if(editUserInfoRequestDto != null){
-            loggedInUser.setUserNickname(editUserInfoRequestDto.getUserNickname());
-            loggedInUser.setUserProfileCid(editUserInfoRequestDto.getUserProfileCid());
+        if(profileImg != null){
+            UserProfileEntity userProfileEntity = imageUploadService.uploadUserProfileImages(profileImg,"profile");
+            loggedInUser.setUserProfileCid(userProfileEntity.getUserProfileCid());
+            log.info("[EDIT_USER_INFO] 프로필 이미지가 추가되었습니다.");
+        } else{
+            loggedInUser.setUserProfileCid(null);
+            log.info("[EDIT_USER_INFO] 프로필 이미지가 삭제되었습니다.");
         }
-        log.info("2");
 
         userRepository.save(loggedInUser);
-
-        log.info("3");
-
 
         return CommonResponseDto.builder()
                 .success(true)
@@ -138,20 +130,18 @@ public class UserService {
     }
 
     public InquiryResponseDto getInquiryHistory(User user) {
-        String userId = user.getUsername();
-        UserEntity userEntity = userRepository.findByUserId(userId)
-                .orElseThrow(()-> new NotFoundException("로그인된 유저가 존재하지 않습니다."));
+        log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        List<InquiryEntity> inquiryList = inquiryRepository.findAllByUser_UserId(userId);
+        List<InquiryEntity> inquiryList = inquiryRepository.findAllByUser(userEntity);
         List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
 
-
+        log.info("[GET_INQUIRY] entity를 조회 했습니다.");
 
         if(inquiryList.isEmpty()){
-            throw new NoSuchElementException("문의내용이 없습니다.");
+            throw new CustomNotFoundException("문의내용이 없습니다.");
         }
-
-
 
         for(InquiryEntity inquiry: inquiryList){
             List<InquiryImageDto> imageListDto = new ArrayList<>();
@@ -165,8 +155,8 @@ public class UserService {
                 imageListDto.add(dto);
             }
 
-            InquiryDetailDto dto = InquiryDetailDto.builder()
-                    .user(userEntity)
+            InquiryDetailDto inquiryDto = InquiryDetailDto.builder()
+                    .userId(userEntity.getUserId())
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryContent(inquiry.getInquiryContent())
                     .imageList(imageListDto)
@@ -174,7 +164,7 @@ public class UserService {
                     .isClosed(inquiry.getIsClosed())
                     .build();
 
-            inquiryListDto.add(dto);
+            inquiryListDto.add(inquiryDto);
         }
 
         return InquiryResponseDto.builder()
@@ -187,12 +177,13 @@ public class UserService {
 
     public CommonResponseDto createInquiry(User user, InquiryRequestDto inquiryRequestDto, List<MultipartFile> images) {
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("탈퇴한 유저입니다."));
+                .orElseThrow(()-> new CustomNotFoundException("탈퇴한 유저입니다."));
 
         InquiryEntity inquiryEntity = InquiryEntity.builder()
                 .inquiryTitle(inquiryRequestDto.getInquiryTitle())
                 .inquiryContent(inquiryRequestDto.getInquiryContent())
                 .user(userEntity)
+                .isClosed(InquiryClosed.OPEN)
                 .build();
 
         if(images != null){
@@ -213,10 +204,10 @@ public class UserService {
     public CommonResponseDto selectPart(User user,String part){
 
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new NotFoundException("유저가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
 
         SemesterEntity semester = semesterRepository.findById(userEntity.getSemester())
-                .orElseThrow(()-> new NotFoundException("기수가 존재하지 않습니다."));
+                .orElseThrow(()-> new CustomNotFoundException("기수가 존재하지 않습니다."));
 
         Date now = new Date();
 

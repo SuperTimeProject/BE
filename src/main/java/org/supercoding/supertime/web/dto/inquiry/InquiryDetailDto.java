@@ -21,7 +21,7 @@ public class InquiryDetailDto {
     private Long inquiryCid;
 
     @Schema(description = "사용자 식별번호")
-    private UserEntity user;
+    private String userId;
 
     @Schema(description = "문의 제목", example = "문의 제목 예시")
     private String inquiryTitle;
