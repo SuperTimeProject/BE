@@ -23,6 +23,7 @@ import org.supercoding.supertime.web.entity.user.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +44,11 @@ public class AdminService {
         log.info("[ADMIN] 사용자 인증 대기 조회 요청이 들어왔습니다.");
         List<GetPendingUserDetailDto> userList = new ArrayList<>();
 
-        List<UserEntity> userEntities = userRepository.findAllbyValified(Valified.PENDING)
-                .orElseThrow(()-> new CustomNotFoundException("인증을 신청한 유저가 존재하지 않습니다."));
+        List<UserEntity> userEntities = userRepository.findAllByValified(Valified.PENDING);
+
+        if(userEntities==null){
+            throw new NoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");
+        }
 
         for(UserEntity user : userEntities) {
             GetPendingUserDetailDto dto = GetPendingUserDetailDto.builder()

@@ -16,5 +16,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByUserNickname(String userNickname);
 
-    Optional<List<UserEntity>> findAllbyValified(Valified valified);
+    List<UserEntity> findAllByValified(Valified valified);
 }
