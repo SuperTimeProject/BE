@@ -25,7 +25,7 @@ public class AdminController {
     private final AdminService adminService;
 
     @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
-    @PutMapping("/pendingUser")
+    @GetMapping("/pendingUser")
     public ResponseEntity<GetPendingUserDto> getUserByValified(@RequestParam String valified){
         log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
         GetPendingUserDto getPendingResult = adminService.getUserByValified(valified);
@@ -67,7 +67,7 @@ public class AdminController {
     }
 
     @Operation(summary = "문의 삭제하기", description = "문의를 삭제하는 api입니다.")
-    @PutMapping("/inquiry/delete/{inquiryCid}")
+    @DeleteMapping("/inquiry/delete/{inquiryCid}")
     public ResponseEntity<CommonResponseDto> deleteInquiry(
             @PathVariable Long inquiryCid
     ){
