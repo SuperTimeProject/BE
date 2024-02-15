@@ -10,13 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AuthService;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
-import org.supercoding.supertime.web.dto.user.getUserDto.GetUserInfoResponseDto;
+import org.supercoding.supertime.web.dto.user.getUserInfo.GetUserInfoResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 @RestController

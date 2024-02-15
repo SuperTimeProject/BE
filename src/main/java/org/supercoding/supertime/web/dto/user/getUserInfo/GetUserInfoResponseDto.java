@@ -1,4 +1,4 @@
-package org.supercoding.supertime.web.dto.user.getUserDto;
+package org.supercoding.supertime.web.dto.user.getUserInfo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

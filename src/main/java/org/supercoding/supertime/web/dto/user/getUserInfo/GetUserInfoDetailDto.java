@@ -1,8 +1,10 @@
-package org.supercoding.supertime.web.dto.user.getUserDto;
+package org.supercoding.supertime.web.dto.user.getUserInfo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.supercoding.supertime.web.dto.user.getUserDto.UserProfileDto;
+import org.supercoding.supertime.web.dto.user.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
 
@@ -35,7 +37,7 @@ public class GetUserInfoDetailDto {
     private Roles role;
 
     @Schema(description = "유저 소속 게시판", example = "[1,3,5]")
-    private List<Long> boardList;
+    private List<GetUserInfoBoardInfoDto> boardList;
 
     @Schema(description = "유저 소속 기수")
     private UserSemesterDto semester;
