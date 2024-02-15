@@ -48,6 +48,7 @@ public class UserService {
     private static final long SELECT_START_DAY = 2 * 14;
     private static final long PERIOD = 3;
 
+    /*
     public GetUserPageResponseDto GetUserInfo(User user){
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
@@ -98,7 +99,7 @@ public class UserService {
 
         return responseDto;
     }
-
+*/
 
     public CommonResponseDto editUserInfo(
             User user,

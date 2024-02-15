@@ -33,6 +33,7 @@ public class MyPageController {
 
     private final UserService userService;
 
+    /*
     @Operation(summary = "유저 정보 조회", description = "로그인한 유저 정보를 보여주는 api입니다.")
     @GetMapping("/info")
     public ResponseEntity<GetUserPageResponseDto> userInfo(@AuthenticationPrincipal User user){
@@ -41,6 +42,7 @@ public class MyPageController {
         log.info("[USER] 유저 정보 조회 결과 = " + getUserInfoResult);
         return ResponseEntity.ok(getUserInfoResult);
     }
+     */
 
     @Operation(summary = "유저 정보 수정", description = "로그인한 유저 정보를 수정하는 api입니다.")
     @PutMapping(value = "/info/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
