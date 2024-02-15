@@ -4,6 +4,10 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -98,22 +102,23 @@ public class UserService {
     }
 
 
-    public InquiryResponseDto getInquiryHistory(User user,String inquiryClosedStr) {
+    public InquiryResponseDto getInquiryHistory(User user,String inquiryClosedStr,int page) {
         log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        List<InquiryEntity> inquiryList = new ArrayList<>();
-
         InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
+
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<InquiryEntity> inquiryList = null;
 
         if(inquiryClosed == InquiryClosed.OPEN){
             log.info("[USER] 미답변 문의 기록 조회");
-            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN,pageable);
 
         } else{
             log.info("[USER] 답변완료 문의 기록 조회");
-            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED);
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED,pageable);
         }
 
         log.info("[GET_INQUIRY] entity를 조회 했습니다.");

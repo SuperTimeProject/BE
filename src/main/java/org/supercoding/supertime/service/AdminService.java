@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,13 +39,14 @@ public class AdminService {
     private final InquiryImageRepository inquiryImageRepository;
 
 
-    public GetPendingUserDto getUserByValified(String valifiedStr){
+    public GetPendingUserDto getUserByValified(String valifiedStr, int page){
         log.info("[ADMIN SERVICE] 사용자 인증 대기 조회 요청이 들어왔습니다.");
         List<GetPendingUserDetailDto> userList = new ArrayList<>();
 
         Valified valified = Valified.valueOf(valifiedStr);
 
-        List<UserEntity> userEntities = userRepository.findAllByValified(valified);
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<UserEntity> userEntities = userRepository.findAllByValified(valified,pageable);
 
         if(userEntities.isEmpty()){
             throw new NoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");
@@ -85,19 +89,21 @@ public class AdminService {
         return CommonResponseDto.successResponse("회원 인증에 성공했습니다.");
     }
 
-    public GetUnclosedInquiryResponseDto getUnclosedInquiry(String inquiryClosedStr){
+    public GetUnclosedInquiryResponseDto getUnclosedInquiry(String inquiryClosedStr,int page) {
         log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
 
         InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
-        List<InquiryEntity> inquiryList = new ArrayList<>();
+
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<InquiryEntity> inquiryList = null;
 
         if(inquiryClosed == InquiryClosed.OPEN){
             log.info("[ADMIN] 미답변 문의 기록 조회");
-            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN,pageable);
 
         } else{
             log.info("[ADMIN] 답변완료 문의 기록 조회");
-           inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED);
+           inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED,pageable);
         }
 
 

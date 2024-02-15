@@ -26,9 +26,12 @@ public class AdminController {
 
     @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
     @GetMapping("/pendingUser")
-    public ResponseEntity<GetPendingUserDto> getUserByValified(@RequestParam String valified){
+    public ResponseEntity<GetPendingUserDto> getUserByValified(
+            @RequestParam String valified,
+            @PathVariable int page
+    ){
         log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
-        GetPendingUserDto getPendingResult = adminService.getUserByValified(valified);
+        GetPendingUserDto getPendingResult = adminService.getUserByValified(valified,page);
         log.info("[ADMIN] 인증 결과 = " + getPendingResult);
         return ResponseEntity.ok().body(getPendingResult);
     }
@@ -47,9 +50,12 @@ public class AdminController {
 
     @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
     @GetMapping("/inquiry/get")
-    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(@RequestParam String inquiryClosed){
+    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(
+            @RequestParam String inquiryClosed,
+            @PathVariable int page
+    ){
         log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
-        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(inquiryClosed);
+        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(inquiryClosed,page);
         log.info("[ADMIN] 문의 조회 결과 = " + getInquiryResult);
         return ResponseEntity.ok().body(getInquiryResult);
     }
