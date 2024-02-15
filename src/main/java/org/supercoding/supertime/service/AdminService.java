@@ -10,12 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.admin.GetPendingUserDetailDto;
 import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
+import org.supercoding.supertime.web.dto.admin.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryDetailDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
@@ -71,6 +73,93 @@ public class AdminService {
                 .userList(userList)
                 .build();
     }
+
+
+    public CommonResponseDto updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto){
+
+        UserEntity userEntity = userRepository.findByUserId(updateUserInfoRequestDto.getUserName())
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        //DB조회하는것보다는 효율적이지 않을까?
+        if(updateUserInfoRequestDto.getSemester()!=null){
+            userEntity.setSemester(updateUserInfoRequestDto.getSemester());
+        }
+        if(updateUserInfoRequestDto.getUserPassword()!=null){
+            userEntity.setUserPassword(updateUserInfoRequestDto.getUserPassword());
+        }
+        if(updateUserInfoRequestDto.getUserName()!=null){
+            userEntity.setUserName(updateUserInfoRequestDto.getUserName());
+        }
+        if(updateUserInfoRequestDto.getUserNickname()!=null){
+            userEntity.setUserNickname(updateUserInfoRequestDto.getUserNickname());
+        }
+        if(updateUserInfoRequestDto.getValified()!=null){
+            userEntity.setValified(updateUserInfoRequestDto.getValified());
+        }
+        if(updateUserInfoRequestDto.getPart()!=null){
+            userEntity.setPart(updateUserInfoRequestDto.getPart());
+        }
+        if(updateUserInfoRequestDto.getRoles()!=null){
+            userEntity.setRoles(updateUserInfoRequestDto.getRoles());
+        }
+        if(updateUserInfoRequestDto.getIsDeleted()!=null){
+            userEntity.setIsDeleted(updateUserInfoRequestDto.getIsDeleted());
+        }
+
+        userRepository.save(userEntity);
+
+        return CommonResponseDto.successResponse("회원 정보 변경에 성공했습니다.");
+    }
+    /* 아니면 가독성과 디비 왕창조회를 챙길것인가..? 어차피 한번에 많이 수정되는건 아닌데..
+    public void updateUserSemester(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserNickname() != null){
+            user.setUserNickname(updateUserInfoRequestDto.getUserNickname());
+        }
+        userRepository.save(user);
+    }
+    public void updateUserPassword(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserPassword() != null){
+            user.setUserPassword(updateUserInfoRequestDto.getUserPassword());
+        }
+        userRepository.save(user);
+    }
+    public void updateUserName(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserName() != null){
+            user.setUserName(updateUserInfoRequestDto.getUserName());
+        }
+        userRepository.save(user);
+    }
+    public void updateUserNickname(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserNickname() != null){
+            user.setUserNickname(updateUserInfoRequestDto.getUserNickname());
+        }
+        userRepository.save(user);
+    }
+    public void updateValified(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getValified() != null){
+            user.setValified(updateUserInfoRequestDto.getValified());
+        }
+        userRepository.save(user);
+    }
+    public void updatePart(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getPart() != null){
+            user.setPart(updateUserInfoRequestDto.getPart());
+        }
+        userRepository.save(user);
+    }
+    public void updateRoles(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getRoles() != null){
+            user.setRoles(updateUserInfoRequestDto.getRoles());
+        }
+        userRepository.save(user);
+    }
+    public void updateIsDeleted(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getIsDeleted() != null){
+            user.setIsDeleted(updateUserInfoRequestDto.getIsDeleted());
+        }
+        userRepository.save(user);
+    }
+*/
 
     public CommonResponseDto verification(String userId, String valifiedStr) {
         log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");

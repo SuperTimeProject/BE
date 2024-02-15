@@ -1,6 +1,8 @@
 package org.supercoding.supertime.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AdminService;
 import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
+import org.supercoding.supertime.web.dto.admin.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
@@ -47,6 +50,20 @@ public class AdminController {
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
         return ResponseEntity.ok().body(verifiResult);
     }
+
+    @Operation(summary = "회원 정보 수정", description = "회원의 모든 정보를 수정 할 수 있는 api입니다.")
+    @PutMapping("/update/userInfo")
+    public ResponseEntity<CommonResponseDto> updateUserInfo(
+            @RequestPart(name="userInfo")
+            @Parameter(schema = @Schema(type = "string", format = "binary"))
+            UpdateUserInfoRequestDto updateUserInfoRequestDto
+            ){
+        log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
+        CommonResponseDto updateUserInfoResult = adminService.updateUserInfo(updateUserInfoRequestDto);
+        log.info("[ADMIN] 인증 결과 = " + updateUserInfoResult);
+        return ResponseEntity.ok().body(updateUserInfoResult);
+    }
+
 
     @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
     @GetMapping("/inquiry/get")
