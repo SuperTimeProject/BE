@@ -48,7 +48,7 @@ public class MyPageController {
     @PutMapping(value = "/info/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editUserInfo(
             @AuthenticationPrincipal User user,
-            @RequestParam(name = "userNickname") String userNickName,
+            @RequestParam(name = "userNickname", required = false) String userNickName,
             @RequestPart(name = "userProfileImage", required = false) MultipartFile userProfileImage
             ){
         log.info("[USER] 유저 정보 조회 요청이 들어왔습니다.");

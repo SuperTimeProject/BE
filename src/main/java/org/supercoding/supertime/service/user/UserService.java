@@ -57,7 +57,8 @@ public class UserService {
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        loggedInUser.setUserNickname(nickName);
+        if(nickName!=null)
+           loggedInUser.setUserNickname(nickName);
 
         if(profileImg != null){
             UserProfileEntity userProfileEntity = imageUploadService.uploadUserProfileImages(profileImg,"profile");
