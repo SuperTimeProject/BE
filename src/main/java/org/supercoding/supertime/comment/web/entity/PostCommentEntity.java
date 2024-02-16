@@ -1,8 +1,10 @@
-package org.supercoding.supertime.web.entity.board;
+package org.supercoding.supertime.comment.web.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.supercoding.supertime.web.entity.TimeEntity;
+import org.supercoding.supertime.web.entity.board.PostEntity;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
 @Entity
@@ -12,12 +14,12 @@ import org.supercoding.supertime.web.entity.user.UserEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "post_comment_table")
-public class PostCommentEntity {
+public class PostCommentEntity extends TimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_comment_cid")
     @Schema(description = "게시판 댓글 식별번호", example = "1")
-    private Long postImageCid;
+    private Long postCommentCid;
 
     @ManyToOne
     @JoinColumn(name = "user_cid",referencedColumnName = "user_cid", nullable = false)
@@ -31,6 +33,6 @@ public class PostCommentEntity {
 
     @Column(name = "content", columnDefinition = "TEXT")
     @Schema(description = "댓글 내용", example = "예시 댓글 내용")
-    private String postImageFileName;
+    private String comment;
 
 }
