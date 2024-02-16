@@ -112,28 +112,16 @@ public class UserService {
     }
 
     @Transactional
-    public InquiryResponseDto getInquiryHistory(User user,String inquiryClosedStr,int page) {
+    public InquiryResponseDto getInquiryHistory(User user,int page) {
         log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
-        InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
-
         Pageable pageable = PageRequest.of(page-1, 10);
         Page<InquiryEntity> inquiryList = null;
 
-        if(inquiryClosed == InquiryClosed.OPEN){
-            log.info("[USER] 미답변 문의 기록 조회");
-            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN,pageable);
-
-        } else{
-            log.info("[USER] 답변완료 문의 기록 조회");
-            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED,pageable);
-        }
-
-        log.info("[GET_INQUIRY] entity를 조회 했습니다.");
-
-
+        log.info("[USER]문의 기록 조회");
+        inquiryList = inquiryRepository.findAllByUser(userEntity,pageable);
 
         List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
 
