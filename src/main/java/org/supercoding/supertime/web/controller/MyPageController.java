@@ -94,6 +94,17 @@ public class MyPageController {
         return ResponseEntity.ok(selectPartResult);
     }
 
+    @Operation(summary = "주특기 확정", description = "주특기를 확정하는 api입니다.")
+    @PutMapping(value = "/part/confirmed")
+    public ResponseEntity<CommonResponseDto> confirmedPart(
+            @AuthenticationPrincipal User user
+    ){
+        log.info("[USER] 주특기 선택 요청이 들어왔습니다.");
+        CommonResponseDto selectPartResult = userService.confirmedPart(user);
+        log.info("[USER] 주특기 선택 결과 = " + selectPartResult);
+        return ResponseEntity.ok(selectPartResult);
+    }
+
     @Operation(summary = "프로필 이미지 삭제", description = "프로필 이미지를 삭제하는 api입니다.")
     @PutMapping(value = "/info/profileImage/delete")
     public ResponseEntity<CommonResponseDto> deleteProfileImage(

@@ -42,6 +42,16 @@ public class SemesterService {
                 .build();
         boardRepository.save(newSemesterBoard);
 
+        List<String> partList = Arrays.asList("FE", "BE", "FULL");
+
+        for(String part: partList){
+            // 파트별 스터디 게시판 생성
+            BoardEntity newSemesterPartBoard = BoardEntity.builder()
+                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+part+")")
+                    .build();
+            boardRepository.save(newSemesterPartBoard);
+        }
+
         List<String> enumList = Arrays.asList("FULL", "HALF");
 
         for(String isFull:enumList){
@@ -55,12 +65,6 @@ public class SemesterService {
                     .build();
 
             semesterRepository.save(newSemester);
-
-            // 파트별 스터디 게시판 생성
-            BoardEntity newSemesterPartBoard = BoardEntity.builder()
-                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+isFull+")")
-                    .build();
-            boardRepository.save(newSemesterPartBoard);
         }
         // 결과 전달
 
