@@ -1,5 +1,7 @@
 package org.supercoding.supertime.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.supercoding.supertime.web.entity.enums.Valified;
@@ -16,5 +18,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByUserNickname(String userNickname);
 
-    List<UserEntity> findAllByValified(Valified valified);
+    Page<UserEntity> findAllByValified(Valified valified, Pageable pageable);
 }

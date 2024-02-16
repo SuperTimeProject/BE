@@ -1,6 +1,8 @@
 package org.supercoding.supertime.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -8,9 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AdminService;
+import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
+import org.supercoding.supertime.web.dto.admin.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
+import org.supercoding.supertime.web.entity.enums.InquiryClosed;
+import org.supercoding.supertime.web.entity.enums.Valified;
 
 @RestController
 @Slf4j
@@ -21,20 +27,52 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
+    @GetMapping("/pendingUser")
+    public ResponseEntity<GetPendingUserDto> getUserByValified(
+            @RequestParam String valified,
+            @PathVariable int page
+    ){
+        log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
+        GetPendingUserDto getPendingResult = adminService.getUserByValified(valified,page);
+        log.info("[ADMIN] 인증 결과 = " + getPendingResult);
+        return ResponseEntity.ok().body(getPendingResult);
+    }
+
     @Operation(summary = "회원 인증 관리", description = "회원 인증상태를 변경하는 api입니다.")
     @PutMapping("/verification")
-    public ResponseEntity<CommonResponseDto> verification(String userName){
+    public ResponseEntity<CommonResponseDto> verification(
+            @RequestParam String userId,
+            @RequestParam String verificationState
+    ){
         log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
-        CommonResponseDto verifiResult = adminService.verification(userName);
+        CommonResponseDto verifiResult = adminService.verification(userId, verificationState);
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
         return ResponseEntity.ok().body(verifiResult);
     }
 
-    @Operation(summary = "문의 조회하기", description = "답변이 없는 문의를 조회하는 api입니다.")
+    @Operation(summary = "회원 정보 수정", description = "회원의 모든 정보를 수정 할 수 있는 api입니다.")
+    @PutMapping("/update/userInfo")
+    public ResponseEntity<CommonResponseDto> updateUserInfo(
+            @RequestPart(name="userInfo")
+            @Parameter(schema = @Schema(type = "string", format = "binary"))
+            UpdateUserInfoRequestDto updateUserInfoRequestDto
+            ){
+        log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
+        CommonResponseDto updateUserInfoResult = adminService.updateUserInfo(updateUserInfoRequestDto);
+        log.info("[ADMIN] 인증 결과 = " + updateUserInfoResult);
+        return ResponseEntity.ok().body(updateUserInfoResult);
+    }
+
+
+    @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
     @GetMapping("/inquiry/get")
-    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(){
+    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(
+            @RequestParam String inquiryClosed,
+            @PathVariable int page
+    ){
         log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
-        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry();
+        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(inquiryClosed,page);
         log.info("[ADMIN] 문의 조회 결과 = " + getInquiryResult);
         return ResponseEntity.ok().body(getInquiryResult);
     }
@@ -52,7 +90,7 @@ public class AdminController {
     }
 
     @Operation(summary = "문의 삭제하기", description = "문의를 삭제하는 api입니다.")
-    @PutMapping("/inquiry/delete/{inquiryCid}")
+    @DeleteMapping("/inquiry/delete/{inquiryCid}")
     public ResponseEntity<CommonResponseDto> deleteInquiry(
             @PathVariable Long inquiryCid
     ){

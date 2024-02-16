@@ -33,6 +33,7 @@ public class MyPageController {
 
     private final UserService userService;
 
+    /*
     @Operation(summary = "유저 정보 조회", description = "로그인한 유저 정보를 보여주는 api입니다.")
     @GetMapping("/info")
     public ResponseEntity<GetUserPageResponseDto> userInfo(@AuthenticationPrincipal User user){
@@ -41,12 +42,13 @@ public class MyPageController {
         log.info("[USER] 유저 정보 조회 결과 = " + getUserInfoResult);
         return ResponseEntity.ok(getUserInfoResult);
     }
+     */
 
     @Operation(summary = "유저 정보 수정", description = "로그인한 유저 정보를 수정하는 api입니다.")
     @PutMapping(value = "/info/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editUserInfo(
             @AuthenticationPrincipal User user,
-            @RequestParam(name = "userNickname") String userNickName,
+            @RequestParam(name = "userNickname", required = false) String userNickName,
             @RequestPart(name = "userProfileImage", required = false) MultipartFile userProfileImage
             ){
         log.info("[USER] 유저 정보 조회 요청이 들어왔습니다.");
@@ -57,9 +59,13 @@ public class MyPageController {
 
     @Operation(summary = "문의 조회", description = "문의한 기록을 불러오는 api입니다.")
     @GetMapping("/inquiry/get")
-    public ResponseEntity<InquiryResponseDto> getInquiryHistory(@AuthenticationPrincipal User user){
+    public ResponseEntity<InquiryResponseDto> getInquiryHistory(
+            @AuthenticationPrincipal User user,
+            @RequestParam String inquiryClosed,
+            @PathVariable int page
+    ){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
-        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user);
+        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,inquiryClosed,page);
         log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
         return ResponseEntity.ok().body(getInquiryHistoryResult);
     }
@@ -89,6 +95,16 @@ public class MyPageController {
         return ResponseEntity.ok(selectPartResult);
     }
 
+    @Operation(summary = "프로필 이미지 삭제", description = "프로필 이미지를 삭제하는 api입니다.")
+    @PutMapping(value = "/info/profileImage/delete")
+    public ResponseEntity<CommonResponseDto> deleteProfileImage(
+            @AuthenticationPrincipal User user
+    ){
+        log.info("[USER] 프로필 이미지 삭제 요청이 들어왔습니다.");
+        CommonResponseDto deleteImgResult = userService.deleteProfileImage(user);
+        log.info("[USER] 프로필 이미지 삭제 결과 = " + deleteImgResult);
+        return ResponseEntity.ok(deleteImgResult);
+    }
 
 
 }

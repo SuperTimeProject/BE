@@ -4,19 +4,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.admin.GetPendingUserDetailDto;
 import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
+import org.supercoding.supertime.web.dto.admin.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryDetailDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.web.entity.Inquiry.InquiryEntity;
+import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
 import org.supercoding.supertime.web.entity.enums.InquiryClosed;
 import org.supercoding.supertime.web.entity.enums.Valified;
 import org.supercoding.supertime.web.entity.user.UserEntity;
@@ -30,23 +36,21 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class AdminService {
     private final UserRepository userRepository;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final PasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final BoardRepository boardRepository;
-    private final SemesterRepository semesterRepository;
-    private final UserProfileRepository userProfileRepository;
     private final InquiryRepository inquiryRepository;
+    private final ImageUploadService imageUploadService;
+    private final InquiryImageRepository inquiryImageRepository;
 
 
-    public GetPendingUserDto getPendingUser(){
-        log.info("[ADMIN] 사용자 인증 대기 조회 요청이 들어왔습니다.");
+    public GetPendingUserDto getUserByValified(String valifiedStr, int page){
+        log.info("[ADMIN SERVICE] 사용자 인증 대기 조회 요청이 들어왔습니다.");
         List<GetPendingUserDetailDto> userList = new ArrayList<>();
 
-        List<UserEntity> userEntities = userRepository.findAllByValified(Valified.PENDING);
+        Valified valified = Valified.valueOf(valifiedStr);
 
-        if(userEntities==null){
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<UserEntity> userEntities = userRepository.findAllByValified(valified,pageable);
+
+        if(userEntities.isEmpty()){
             throw new NoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");
         }
 
@@ -70,23 +74,128 @@ public class AdminService {
                 .build();
     }
 
-    public CommonResponseDto verification(String userName) {
-        log.info("[ADMIN] 사용자 인증 요청이 들어왔습니다.");
-        UserEntity user = userRepository.findByUserId(userName)
+
+    public CommonResponseDto updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto){
+
+        UserEntity userEntity = userRepository.findByUserId(updateUserInfoRequestDto.getUserName())
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        //DB조회하는것보다는 효율적이지 않을까?
+        if(updateUserInfoRequestDto.getSemester()!=null){
+            userEntity.setSemester(updateUserInfoRequestDto.getSemester());
+        }
+        if(updateUserInfoRequestDto.getUserPassword()!=null){
+            userEntity.setUserPassword(updateUserInfoRequestDto.getUserPassword());
+        }
+        if(updateUserInfoRequestDto.getUserName()!=null){
+            userEntity.setUserName(updateUserInfoRequestDto.getUserName());
+        }
+        if(updateUserInfoRequestDto.getUserNickname()!=null){
+            userEntity.setUserNickname(updateUserInfoRequestDto.getUserNickname());
+        }
+        if(updateUserInfoRequestDto.getValified()!=null){
+            userEntity.setValified(updateUserInfoRequestDto.getValified());
+        }
+        if(updateUserInfoRequestDto.getPart()!=null){
+            userEntity.setPart(updateUserInfoRequestDto.getPart());
+        }
+        if(updateUserInfoRequestDto.getRoles()!=null){
+            userEntity.setRoles(updateUserInfoRequestDto.getRoles());
+        }
+        if(updateUserInfoRequestDto.getIsDeleted()!=null){
+            userEntity.setIsDeleted(updateUserInfoRequestDto.getIsDeleted());
+        }
+
+        userRepository.save(userEntity);
+
+        return CommonResponseDto.successResponse("회원 정보 변경에 성공했습니다.");
+    }
+    /* 아니면 가독성과 디비 왕창조회를 챙길것인가..? 어차피 한번에 많이 수정되는건 아닌데..
+    public void updateUserSemester(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserNickname() != null){
+            user.setUserNickname(updateUserInfoRequestDto.getUserNickname());
+        }
+        userRepository.save(user);
+    }
+    public void updateUserPassword(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserPassword() != null){
+            user.setUserPassword(updateUserInfoRequestDto.getUserPassword());
+        }
+        userRepository.save(user);
+    }
+    public void updateUserName(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserName() != null){
+            user.setUserName(updateUserInfoRequestDto.getUserName());
+        }
+        userRepository.save(user);
+    }
+    public void updateUserNickname(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getUserNickname() != null){
+            user.setUserNickname(updateUserInfoRequestDto.getUserNickname());
+        }
+        userRepository.save(user);
+    }
+    public void updateValified(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getValified() != null){
+            user.setValified(updateUserInfoRequestDto.getValified());
+        }
+        userRepository.save(user);
+    }
+    public void updatePart(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getPart() != null){
+            user.setPart(updateUserInfoRequestDto.getPart());
+        }
+        userRepository.save(user);
+    }
+    public void updateRoles(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getRoles() != null){
+            user.setRoles(updateUserInfoRequestDto.getRoles());
+        }
+        userRepository.save(user);
+    }
+    public void updateIsDeleted(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        if(updateUserInfoRequestDto.getIsDeleted() != null){
+            user.setIsDeleted(updateUserInfoRequestDto.getIsDeleted());
+        }
+        userRepository.save(user);
+    }
+*/
+
+    public CommonResponseDto verification(String userId, String valifiedStr) {
+        log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        Valified valified = Valified.valueOf(valifiedStr);
 
         if(user.getValified()==Valified.COMPLETED)
             throw new DataIntegrityViolationException("이미 인증된 사용자 입니다.");
 
-        user.setValified(Valified.COMPLETED);
+        user.setValified(valified);
+
         userRepository.save(user);
 
         return CommonResponseDto.successResponse("회원 인증에 성공했습니다.");
     }
 
-    public GetUnclosedInquiryResponseDto getUnclosedInquiry(){
-        log.info("[ADMIN] 미응답 문의 조회 요청이 들어왔습니다.");
-        List<InquiryEntity> inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN);
+    public GetUnclosedInquiryResponseDto getUnclosedInquiry(String inquiryClosedStr,int page) {
+        log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
+
+        InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
+
+        Pageable pageable = PageRequest.of(page-1, 10);
+        Page<InquiryEntity> inquiryList = null;
+
+        if(inquiryClosed == InquiryClosed.OPEN){
+            log.info("[ADMIN] 미답변 문의 기록 조회");
+            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN,pageable);
+
+        } else{
+            log.info("[ADMIN] 답변완료 문의 기록 조회");
+           inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED,pageable);
+        }
+
+
         List<GetUnclosedInquiryDetailDto> inquiryDtoList =  new ArrayList<>();
 
         if(inquiryList.isEmpty()){
@@ -109,7 +218,7 @@ public class AdminService {
         return GetUnclosedInquiryResponseDto.builder()
                 .code(200)
                 .success(true)
-                .message("문의 조회에 성공했습니다.")
+                .message("문의 기록 조회에 성공했습니다.")
                 .inquiryList(inquiryDtoList)
                 .build();
     }
@@ -132,7 +241,11 @@ public class AdminService {
         InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
                 .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
 
+        InquiryImageEntity inquiryImageEntity = inquiryImageRepository.findById(inquiryEntity.getInquiryCid())
+                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
+
         inquiryRepository.delete(inquiryEntity);
+        imageUploadService.deleteImage(inquiryImageEntity.getInquiryImageFilePath());
 
         return CommonResponseDto.successResponse("문의 삭제에 성공했습니다.");
     }
