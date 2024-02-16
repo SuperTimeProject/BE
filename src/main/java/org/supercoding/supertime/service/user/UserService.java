@@ -183,11 +183,11 @@ public class UserService {
 
         if(images != null){
             List<InquiryImageEntity> uploadImages = imageUploadService.uploadInquiryImages(images, "inquiry");
-            inquiryEntity.setInquiryImages(uploadImages);
+            //inquiryEntity.setInquiryImages(uploadImages);
             log.info("[CREATE_INQUIRY] 문의에 이미지가 추가되었습니다.");
         }
 
-        inquiryRepository.save(inquiryEntity);
+        //inquiryRepository.save(inquiryEntity);
 
         return CommonResponseDto.builder()
                 .success(true)
