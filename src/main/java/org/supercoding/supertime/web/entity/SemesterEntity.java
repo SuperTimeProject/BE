@@ -40,6 +40,6 @@ public class SemesterEntity {
     private Date startDate;
 
     @Enumerated(EnumType.STRING)
-    private Part part;
+    private IsFull isFull;
 
 }
