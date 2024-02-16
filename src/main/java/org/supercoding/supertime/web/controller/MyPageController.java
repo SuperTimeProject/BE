@@ -61,11 +61,10 @@ public class MyPageController {
     @GetMapping("/inquiry/get")
     public ResponseEntity<InquiryResponseDto> getInquiryHistory(
             @AuthenticationPrincipal User user,
-            @RequestParam String inquiryClosed,
             @RequestParam int page
     ){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
-        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,inquiryClosed,page);
+        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,page);
         log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
         return ResponseEntity.ok().body(getInquiryHistoryResult);
     }
