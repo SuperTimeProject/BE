@@ -67,9 +67,12 @@ public class UserService {
 
         if(profileImg != null){
             UserProfileEntity userProfileEntity = userProfileRepository.findByUserProfileCid(loggedInUser.getUserProfileCid());
-            //기존 이미지 삭제
-            imageUploadService.deleteImage(userProfileEntity.getUserProfileFilePath());
-            userProfileRepository.delete(userProfileEntity);
+
+            if(userProfileEntity!=null){
+                //기존 이미지 삭제
+                imageUploadService.deleteImage(userProfileEntity.getUserProfileFilePath());
+                userProfileRepository.delete(userProfileEntity);
+            }
 
             //이미지 업로드
             userProfileEntity = imageUploadService.uploadUserProfileImages(profileImg,"profile");
