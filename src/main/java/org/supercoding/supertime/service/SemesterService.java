@@ -42,23 +42,23 @@ public class SemesterService {
                 .build();
         boardRepository.save(newSemesterBoard);
 
-        List<String> enumList = Arrays.asList("FULL", "HALF");
+        List<String> partList = Arrays.asList("FE", "BE", "FULL");
 
-        for(String isFull:enumList){
-            String detailName = createSemesterInfo.getSemesterName() + isFull;
+        for(String part:partList){
+            String detailName = createSemesterInfo.getSemesterName() + part;
 
             SemesterEntity newSemester = SemesterEntity.builder()
                     .semesterName(createSemesterInfo.getSemesterName())
                     .semesterDetailName(detailName)
                     .startDate(createSemesterInfo.getStartDate())
-                    .isFull(getIsFullEnum(isFull))
+                    .part(getPartEnum(part))
                     .build();
 
             semesterRepository.save(newSemester);
 
             // 파트별 스터디 게시판 생성
             BoardEntity newSemesterPartBoard = BoardEntity.builder()
-                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+isFull+")")
+                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+part+")")
                     .build();
             boardRepository.save(newSemesterPartBoard);
         }
@@ -67,12 +67,14 @@ public class SemesterService {
         return CommonResponseDto.createSuccessResponse("기수 생성이 완료되었습니다.");
     }
 
-    private static IsFull getIsFullEnum(String inputString) {
+    private static Part getPartEnum(String inputString) {
         switch (inputString) {
+            case "FE":
+                return Part.PART_FE;
+            case "BE":
+                return Part.PART_BE;
             case "FULL":
-                return IsFull.FULL;
-            case "HALF":
-                return IsFull.HALF;
+                return Part.PART_FULL;
             default:
                 // 부적절한 문자열인 경우에는 null을 반환하거나 예외처리를 수행할 수 있음
                 return null;

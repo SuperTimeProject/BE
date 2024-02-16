@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.supercoding.supertime.web.entity.enums.IsFull;
+import org.supercoding.supertime.web.entity.enums.Part;
 
 import java.util.Date;
 
@@ -39,6 +40,6 @@ public class SemesterEntity {
     private Date startDate;
 
     @Enumerated(EnumType.STRING)
-    private IsFull isFull;
+    private Part part;
 
 }
