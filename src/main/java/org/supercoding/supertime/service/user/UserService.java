@@ -29,6 +29,7 @@ import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.board.PostEntity;
 import org.supercoding.supertime.web.entity.enums.InquiryClosed;
+import org.supercoding.supertime.web.entity.enums.IsFull;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 import org.supercoding.supertime.web.entity.user.UserProfileEntity;
@@ -49,6 +50,7 @@ public class UserService {
     private final InquiryRepository inquiryRepository;
     private final InquiryImageRepository inquiryImageRepository;
     private final ImageUploadService imageUploadService;
+    private final BoardRepository boardRepository;
 
     private static final long SELECT_START_DAY = 2 * 14;
     private static final long PERIOD = 3;
@@ -230,6 +232,44 @@ public class UserService {
                 .message("파트 선택에 실패했습니다.")
                 .build();
     }
+
+    public CommonResponseDto confirmedPart(User user) {
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
+
+        List<BoardEntity> userBoard = new ArrayList<>();
+        SemesterEntity userSemester = semesterRepository.findById(userEntity.getSemester())
+                .orElseThrow(()-> new CustomNotFoundException("기수가 존재하지 않습니다."));
+
+        if(userEntity.getPart()==null || userEntity.getPart()==Part.PART_UNDEFINED)
+            throw new CustomNotFoundException("주특기를 선택하지 않았습니다.");
+
+        String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
+        log.info("보드리스트" + boardList);
+
+        for(String boardName : boardList){
+            BoardEntity board = boardRepository.findByBoardName(boardName);
+            userBoard.add(board);
+        }
+
+        //풀스택은 둘다 추가
+        if(userEntity.getPart()==Part.PART_FE || userEntity.getPart()==Part.PART_FULL){
+            BoardEntity board = boardRepository.findByBoardName("FE 스터디");
+            userBoard.add(board);
+        }
+
+        if(userEntity.getPart()==Part.PART_BE || userEntity.getPart()==Part.PART_FULL){
+            BoardEntity board = boardRepository.findByBoardName("BE 스터디");
+            userBoard.add(board);
+        }
+
+        userEntity.setBoardList(userBoard);
+
+        userRepository.save(userEntity);
+
+        return CommonResponseDto.successResponse("주특기 확정에 성공했습니다");
+    }
+
 
 
     /* 유저정보 조회 사용안할듯
