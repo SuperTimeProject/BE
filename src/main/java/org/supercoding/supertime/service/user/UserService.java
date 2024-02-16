@@ -93,6 +93,10 @@ public class UserService {
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
 
+        if (loggedInUser.getUserProfileCid()==null){
+            throw new CustomNotFoundException("프로필 이미지가 존재하지 않습니다.");
+        }
+
         UserProfileEntity userProfileEntity = userProfileRepository.findByUserProfileCid(loggedInUser.getUserProfileCid());
 
         imageUploadService.deleteImage(userProfileEntity.getUserProfileFilePath());

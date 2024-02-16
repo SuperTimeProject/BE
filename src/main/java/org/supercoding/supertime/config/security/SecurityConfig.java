@@ -43,7 +43,8 @@ public class SecurityConfig {
             "/v3/**",
             "/login/**",
             "/oauth2/**",
-            "/semester/**"
+            "/semester/**",
+            "/error"
     };
 
     // 관리자만 접근 가능
@@ -88,7 +89,7 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers(PERMIT_URL).permitAll()
                                 .requestMatchers(ADMIN_URL).hasRole("ADMIN")
-                                .requestMatchers(AUTHENTICATION_URL).hasRole("USER")
+                                .requestMatchers(AUTHENTICATION_URL).hasAnyRole("ADMIN","USER")
                                 .anyRequest().hasRole("ADMIN")
                 );
 

@@ -13,9 +13,6 @@ import org.supercoding.supertime.web.entity.user.UserEntity;
 @ToString
 @Slf4j
 public class InquiryRequestDto {
-    @Schema(description = "사용자 식별번호")
-    private UserEntity user;
-
     @Schema(description = "문의 제목", example = "문의 제목 예시")
     private String inquiryTitle;
 

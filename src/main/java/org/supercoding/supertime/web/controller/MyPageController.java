@@ -62,7 +62,7 @@ public class MyPageController {
     public ResponseEntity<InquiryResponseDto> getInquiryHistory(
             @AuthenticationPrincipal User user,
             @RequestParam String inquiryClosed,
-            @PathVariable int page
+            @RequestParam int page
     ){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
         InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,inquiryClosed,page);
@@ -71,7 +71,7 @@ public class MyPageController {
     }
     
     @Operation(summary = "문의하기", description = "관리자에게 문의하는 api입니다.")
-    @PostMapping(value = "/inquiry/request", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/inquiry", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> inquiry(
             @AuthenticationPrincipal User user,
             @RequestPart(name = "inquiryInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) InquiryRequestDto inquiryRequestDto,
