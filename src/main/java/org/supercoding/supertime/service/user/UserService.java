@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.service.ImageUploadService;
@@ -53,6 +54,7 @@ public class UserService {
     private static final long SELECT_START_DAY = 2 * 14;
     private static final long PERIOD = 3;
 
+    @Transactional
     public CommonResponseDto editUserInfo(
             User user,
             String nickName,
@@ -91,6 +93,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public CommonResponseDto deleteProfileImage(User user){
         log.info("[EDIT_USER_INFO] 프로필 수정 요청이 들어왔습니다.");
         UserEntity loggedInUser = userRepository.findByUserId(user.getUsername())
@@ -108,7 +111,7 @@ public class UserService {
         return CommonResponseDto.successResponse("프로필 사진 삭제에 성공했습니다");
     }
 
-
+    @Transactional
     public InquiryResponseDto getInquiryHistory(User user,String inquiryClosedStr,int page) {
         log.info("[GET_INQUIRY] 문의내역 조회 요청이 들어왔습니다.");
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
@@ -170,6 +173,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public CommonResponseDto createInquiry(User user, InquiryRequestDto inquiryRequestDto, List<MultipartFile> images) {
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("탈퇴한 유저입니다."));
@@ -183,11 +187,11 @@ public class UserService {
 
         if(images != null){
             List<InquiryImageEntity> uploadImages = imageUploadService.uploadInquiryImages(images, "inquiry");
-            //inquiryEntity.setInquiryImages(uploadImages);
+            inquiryEntity.setInquiryImages(uploadImages);
             log.info("[CREATE_INQUIRY] 문의에 이미지가 추가되었습니다.");
         }
 
-        //inquiryRepository.save(inquiryEntity);
+        inquiryRepository.save(inquiryEntity);
 
         return CommonResponseDto.builder()
                 .success(true)
@@ -196,6 +200,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public CommonResponseDto selectPart(User user,String part){
 
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
