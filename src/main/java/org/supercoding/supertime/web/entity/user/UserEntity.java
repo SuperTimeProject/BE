@@ -66,7 +66,7 @@ public class UserEntity extends TimeEntity {
     @Schema(name = "게시판 리스트")
     private List<BoardEntity> boardList;
 
-    @ManyToMany(mappedBy = "user_cid")
+    @ManyToMany(mappedBy = "chatRoomMember")
     private List<ChatRoomEntity> chatRoomList;
 
     @Enumerated(EnumType.STRING)

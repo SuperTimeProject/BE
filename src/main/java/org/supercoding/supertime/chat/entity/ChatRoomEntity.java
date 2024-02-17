@@ -31,4 +31,6 @@ public class ChatRoomEntity extends TimeEntity {
     @Column(name = "chat_room_member")
     @Schema(description = "사용자 식별번호")
     private List<UserEntity> chatRoomMember;
+
+    private String chatRoomName;
 }

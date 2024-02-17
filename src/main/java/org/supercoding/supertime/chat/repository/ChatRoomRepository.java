@@ -6,4 +6,5 @@ import org.supercoding.supertime.chat.entity.ChatRoomEntity;
 
 @Repository
 public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> {
+    Boolean existsByChatRoomName(String name);
 }

@@ -17,13 +17,14 @@ public class ChatMessageResponseDto {
     private Long roomCid;
     private LocalDateTime createdAt;
 
-    public static ChatMessageResponseDto from(final ChatMessageEntity chatMessage, final MessageType type){
+    public static ChatMessageResponseDto from(final ChatMessageEntity chatMessage){
         return ChatMessageResponseDto.builder()
-                .type(type)
-                .content(chatMessage.getChattingMessageContent())
+                .type(chatMessage.getType())
+                .content(chatMessage.getChatMessageContent())
                 .sender(chatMessage.getUser().getUserNickname())
-                .roomCid(chatMessage.getChattingRoom().getChattingRoomCid())
+                .roomCid(chatMessage.getChatRoom().getChatRoomCid())
                 .createdAt(chatMessage.getCreatedAt())
                 .build();
     }
+
 }

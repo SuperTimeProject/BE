@@ -44,7 +44,9 @@ public class SecurityConfig {
             "/login/**",
             "/oauth2/**",
             "/semester/**",
-            "/ws/**"
+            "/ws/**",
+            "/chatroom",
+            "/message"
     };
 
     // 관리자만 접근 가능

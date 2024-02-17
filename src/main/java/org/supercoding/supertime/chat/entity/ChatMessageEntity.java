@@ -34,5 +34,7 @@ public class ChatMessageEntity extends TimeEntity {
     @Schema(description = "채팅 내용", example = "안녕?")
     private String chatMessageContent;
 
+    private MessageType type;
+
 
 }

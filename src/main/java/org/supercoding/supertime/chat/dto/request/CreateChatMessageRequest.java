@@ -7,5 +7,6 @@ import lombok.Getter;
 @Builder
 public class CreateChatMessageRequest {
 
+    private String author;
     private String content;
 }
