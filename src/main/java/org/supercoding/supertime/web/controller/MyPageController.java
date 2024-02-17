@@ -74,7 +74,7 @@ public class MyPageController {
     @GetMapping("/inquiry/get/{inquiryCid}")
     public ResponseEntity<InquiryDetailResponseDto> getInquiryDetail(
             @AuthenticationPrincipal User user,
-            @RequestParam Long inquiryCid
+            @PathVariable Long inquiryCid
             ){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
         InquiryDetailResponseDto getInquiryDetailResult = userService.getInquiryDetail(user,inquiryCid);
