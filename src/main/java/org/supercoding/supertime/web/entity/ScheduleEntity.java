@@ -3,6 +3,10 @@ package org.supercoding.supertime.web.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.supercoding.supertime.web.entity.enums.IsFull;
+import org.supercoding.supertime.web.entity.enums.Part;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,15 +22,14 @@ public class ScheduleEntity extends TimeEntity {
     @Schema(description = "시간표 식별번호")
     private Long scheduleCid;
 
-    @Column(name = "week_number")
-    @Schema(description = "부트캠프 주차", example = "1주차 or 기초주차")
-    private String weekNumber;
+    @Column(name = "part")
+    @Schema(description = "주특기", example = "PART_BE")
+    private Part part;
 
-    @Column(name = "schedule_image_file_name")
-    @Schema(description = "시간표 이미지파일 이름", example = "시간표이미지.png")
-    private String scheduleImageFileName;
+    @Column(name = "isFull")
+    @Schema(description = "풀타임 여부", example = "FULL")
+    private IsFull isFull;
 
-    @Column(name = "schedule_image_file_path")
-    @Schema(description = "시간표 이미지파일 URL", example = "www.시간표이미지.com")
-    private String scheduleImageFilePath;
+    @OneToMany
+    private List<ScheduleImageEntity> imageList;
 }
