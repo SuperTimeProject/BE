@@ -2,20 +2,21 @@ package org.supercoding.supertime.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.service.AuthService;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
-import org.supercoding.supertime.web.dto.user.CustomUserDetailDto;
-import org.supercoding.supertime.web.dto.user.getUserDto.GetUserInfoResponseDto;
+import org.supercoding.supertime.web.dto.user.getUserInfo.GetUserInfoResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
 @RestController
@@ -41,7 +42,7 @@ public class AuthController {
         log.info("[AUTH] 회원가입 요청이 들어왔습니다.");
         CommonResponseDto signupResult = authService.signup(signupInfo);
         log.info("[AUTH] 회원가입 결과 = " + signupResult);
-        return ResponseEntity.ok().body(signupResult);
+        return ResponseEntity.status(HttpStatus.CREATED).body(signupResult);
     }
 
     @Operation(summary = "이메일 중복확인", description = "이메일 중복을 확인하는 api입니다.")
@@ -71,4 +72,22 @@ public class AuthController {
 
         return ResponseEntity.ok(getUserInfoResult);
     }
+
+    @Operation(summary = "로그아웃", description = "로그아웃 api입니다.")
+    @PostMapping("/logout")
+    public ResponseEntity<CommonResponseDto> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication, @AuthenticationPrincipal User user){
+        log.info("[LOGOUT] 로그아웃 요청이 들어왔습니다.");
+        //CommonResponseDto logoutInfoResult = authService.logout(user);
+        new SecurityContextLogoutHandler().logout(request,response,authentication);
+        log.info("[LOGOUT] 로그아웃 성공");
+
+        CommonResponseDto logoutInfoResult = CommonResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message("로그아웃 성공")
+                .build();
+
+        return ResponseEntity.ok(logoutInfoResult);
+    }
+
 }

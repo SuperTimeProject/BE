@@ -56,7 +56,7 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_board", // 중간 테이블 이름
             joinColumns = @JoinColumn(name = "user_cid"), // UserEntity를 참조하는 외래 키

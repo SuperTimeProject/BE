@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
+import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.semester.CreateSemesterRequestDto;
 import org.supercoding.supertime.web.dto.semester.GetAllSemesterResponseDto;
@@ -41,6 +42,16 @@ public class SemesterService {
                 .build();
         boardRepository.save(newSemesterBoard);
 
+        List<String> partList = Arrays.asList("FE", "BE", "FULL");
+
+        for(String part: partList){
+            // 파트별 스터디 게시판 생성
+            BoardEntity newSemesterPartBoard = BoardEntity.builder()
+                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+part+")")
+                    .build();
+            boardRepository.save(newSemesterPartBoard);
+        }
+
         List<String> enumList = Arrays.asList("FULL", "HALF");
 
         for(String isFull:enumList){
@@ -54,21 +65,10 @@ public class SemesterService {
                     .build();
 
             semesterRepository.save(newSemester);
-
-            // 파트별 스터디 게시판 생성
-            BoardEntity newSemesterPartBoard = BoardEntity.builder()
-                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+isFull+")")
-                    .build();
-            boardRepository.save(newSemesterPartBoard);
         }
         // 결과 전달
 
-
-        return CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("기수 생성이 완료되었습니다.")
-                .build();
+        return CommonResponseDto.createSuccessResponse("기수 생성이 완료되었습니다.");
     }
 
     private static IsFull getIsFullEnum(String inputString) {
@@ -88,7 +88,7 @@ public class SemesterService {
         List<GetSemesterDto> resultList = new ArrayList<>();
 
         if(semesterList.isEmpty()){
-            throw new NoSuchElementException("기수 리스트가 비어있습니다.");
+            throw new CustomNoSuchElementException("기수 리스트가 비어있습니다.");
         }
         for(SemesterEntity semester:semesterList){
             GetSemesterDto newSemesterDto = GetSemesterDto.builder()
@@ -99,11 +99,6 @@ public class SemesterService {
             resultList.add(newSemesterDto);
         }
 
-        return GetAllSemesterResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("기수를 성공적으로 불러왔습니다.")
-                .semesterList(resultList)
-                .build();
+        return GetAllSemesterResponseDto.successResponse("기수를 성공적으로 불러왔습니다.", resultList);
     }
 }

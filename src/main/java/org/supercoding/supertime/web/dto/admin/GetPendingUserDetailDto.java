@@ -1,8 +1,9 @@
-package org.supercoding.supertime.web.dto.user.getUserDto;
+package org.supercoding.supertime.web.dto.admin;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.supercoding.supertime.web.dto.user.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
 
@@ -15,10 +16,7 @@ import java.util.List;
 @Builder
 @ToString
 @Slf4j
-public class GetUserInfoDetailDto {
-    @Schema(description = "유저 고유 아이디")
-    private Long userCid;
-
+public class GetPendingUserDetailDto {
     @Schema(description = "유저 아이디", example = "id123")
     private String userId;
 
@@ -31,15 +29,7 @@ public class GetUserInfoDetailDto {
     @Schema(description = "유저 선택 파트", example = "FE")
     private Part part;
 
-    @Schema(description = "유저 권한", example = "ROLE_ADMIN")
-    private Roles role;
-
-    @Schema(description = "유저 소속 게시판", example = "[1,3,5]")
-    private List<Long> boardList;
-
     @Schema(description = "유저 소속 기수")
-    private UserSemesterDto semester;
+    private Long semester;
 
-    @Schema(description = "유저 프로필")
-    private UserProfileDto userProfile;
 }

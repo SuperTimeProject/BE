@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ public class SemesterController {
         CommonResponseDto createSemesterResult = semesterService.createSemester(createSemesterInfo);
         log.info("[SEMESTER] 기수 생성 결과 = " + createSemesterResult);
 
-        return ResponseEntity.ok().body(createSemesterResult);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createSemesterResult);
     }
 
     @Operation(summary = "전체 기수 불러오기", description = "생성되어있는 기수를 불러오는 api입니다.")

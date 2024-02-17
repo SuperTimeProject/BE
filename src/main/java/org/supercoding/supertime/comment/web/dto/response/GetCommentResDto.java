@@ -1,10 +1,11 @@
-package org.supercoding.supertime.web.dto.board.getPostDetail;
+package org.supercoding.supertime.comment.web.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailDto;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,7 +14,8 @@ import org.supercoding.supertime.web.dto.board.getPostDetail.PostDetailDto;
 @Builder
 @ToString
 @Slf4j
-public class GetPostDetailResponseDto {
+public class GetCommentResDto {
+
     @Schema(description = "요청의 성공 상태", example = "true")
     private Boolean success;
 
@@ -23,16 +25,15 @@ public class GetPostDetailResponseDto {
     @Schema(description = "요청 코드의 에러 메시지", example = "잘못되었습니다")
     private String message;
 
-    @Schema(description = "게시물 상세 내용")
-    private PostDetailDto postInfo;
-    // 댓글에 대한 리스트를 어디서 불러올지 정하기
+    @Schema(description = "댓글 리스트")
+    private List<GetCommentDetailDto> commentList;
 
-    public static GetPostDetailResponseDto successResponse(final String message, final PostDetailDto post) {
-        return GetPostDetailResponseDto.builder()
+    public static GetCommentResDto success(final List<GetCommentDetailDto> commentList){
+        return GetCommentResDto.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
-                .message(message)
-                .postInfo(post)
+                .message("성공적으로 댓글 리스트를 불러왔습니다.")
+                .commentList(commentList)
                 .build();
     }
 }

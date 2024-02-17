@@ -1,6 +1,5 @@
 package org.supercoding.supertime.web.advice;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -11,14 +10,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 
+
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 @Slf4j
 public class ExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<CommonResponseDto> handleNotFoundException(NotFoundException e){
+    @ExceptionHandler(CustomNotFoundException.class)
+    public ResponseEntity<CommonResponseDto> handleNotFoundException(CustomNotFoundException e){
         log.error("[NOTFOUND] DB 검색 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 CommonResponseDto.builder()
@@ -42,22 +42,22 @@ public class ExceptionControllerAdvice {
         );
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<CommonResponseDto> handleNoSuchElementException(NoSuchElementException e) {
-        log.error("[CONFLICT] 데이터 무결성 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(CustomNoSuchElementException.class)
+    public ResponseEntity<CommonResponseDto> handleNoSuchElementException(CustomNoSuchElementException e) {
+        log.error("[NO_CONTENT] 데이터 무결성 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
         CommonResponseDto responseDto = CommonResponseDto.builder()
-                .code(HttpStatus.CONFLICT.value())
+                .code(HttpStatus.NOT_FOUND.value())
                 .message(e.getMessage())
                 .success(false)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(responseDto);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<CommonResponseDto> handleAccessDeniedException(AccessDeniedException e) {
+    @ExceptionHandler(CustomAccessDeniedException.class)
+    public ResponseEntity<CommonResponseDto> handleAccessDeniedException(CustomAccessDeniedException e) {
         log.error("[CONFLICT] 인증 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
         CommonResponseDto responseDto = CommonResponseDto.builder()
                 .code(HttpStatus.CONFLICT.value())

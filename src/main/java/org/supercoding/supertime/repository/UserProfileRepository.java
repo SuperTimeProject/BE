@@ -6,4 +6,6 @@ import org.supercoding.supertime.web.entity.user.UserProfileEntity;
 
 @Repository
 public interface UserProfileRepository extends JpaRepository<UserProfileEntity, Long> {
+
+    UserProfileEntity findByUserProfileCid(Long profileCid);
 }

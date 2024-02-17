@@ -47,17 +47,20 @@ public class SecurityConfig {
             "/ws/**",
             "/chatroom",
             "/message"
+            "/error"
     };
 
     // 관리자만 접근 가능
     private final String[] ADMIN_URL = {
-            "/api/admin/**"
+            "/admin/**"
     };
 
     private final String[] AUTHENTICATION_URL = {
             "/api/**",
             "/board/**",
-            "/semester/**"
+            "/semester/**",
+            "/user/**",
+            "/comment/**"
     };
 
     @Bean
@@ -89,7 +92,7 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers(PERMIT_URL).permitAll()
                                 .requestMatchers(ADMIN_URL).hasRole("ADMIN")
-                                .requestMatchers(AUTHENTICATION_URL).hasRole("USER")
+                                .requestMatchers(AUTHENTICATION_URL).hasAnyRole("ADMIN","USER")
                                 .anyRequest().hasRole("ADMIN")
                 );
 
