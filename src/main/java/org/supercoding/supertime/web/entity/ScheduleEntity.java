@@ -30,6 +30,6 @@ public class ScheduleEntity extends TimeEntity {
     @Schema(description = "풀타임 여부", example = "FULL")
     private IsFull isFull;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ScheduleImageEntity> imageList;
 }

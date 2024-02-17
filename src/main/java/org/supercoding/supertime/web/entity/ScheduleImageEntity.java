@@ -18,11 +18,6 @@ public class ScheduleImageEntity extends TimeEntity {
     @Schema(description = "시간표 이미지 식별번호")
     private Long scheduleCid;
 
-    @ManyToOne
-    @JoinColumn(name = "user_cid",referencedColumnName = "user_cid", nullable = false)
-    @Schema(description = "시간표가 포함된 커리큘럼")
-    private ScheduleEntity schedule;
-
     @Column(name = "week_number")
     @Schema(description = "부트캠프 주차", example = "1주차 or 기초주차")
     private Integer weekNumber;
