@@ -1,8 +1,9 @@
-package org.supercoding.supertime.web.entity;
+package org.supercoding.supertime.web.entity.schedule;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.supercoding.supertime.web.entity.TimeEntity;
 import org.supercoding.supertime.web.entity.enums.IsFull;
 import org.supercoding.supertime.web.entity.enums.Part;
 
