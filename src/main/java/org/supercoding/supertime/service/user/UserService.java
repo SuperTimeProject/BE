@@ -144,6 +144,7 @@ public class UserService {
             }
 
             InquiryDetailDto inquiryDto = InquiryDetailDto.builder()
+                    .inquiryCid(inquiry.getInquiryCid())
                     .userId(userEntity.getUserId())
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryContent(inquiry.getInquiryContent())
