@@ -16,10 +16,7 @@ import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.service.ImageUploadService;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
-import org.supercoding.supertime.web.dto.inquiry.InquiryDetailDto;
-import org.supercoding.supertime.web.dto.inquiry.InquiryImageDto;
-import org.supercoding.supertime.web.dto.inquiry.InquiryRequestDto;
-import org.supercoding.supertime.web.dto.inquiry.InquiryResponseDto;
+import org.supercoding.supertime.web.dto.inquiry.*;
 import org.supercoding.supertime.web.dto.user.EditUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.GetUserPageResponseDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserProfileDto;
@@ -111,6 +108,47 @@ public class UserService {
         userProfileRepository.delete(null);
 
         return CommonResponseDto.successResponse("프로필 사진 삭제에 성공했습니다");
+    }
+
+
+    @Transactional
+    public InquiryDetailResponseDto getInquiryDetail(User user, Long inquiryCid) {
+        log.info("[GET_INQUIRY] 문의 상세 내역 조회 요청이 들어왔습니다.");
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
+
+        InquiryEntity inquiry = inquiryRepository.findById(inquiryCid)
+                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
+
+        List<InquiryImageDto> imageListDto = new ArrayList<>();
+
+
+        for(InquiryImageEntity img:inquiry.getInquiryImages()){
+            InquiryImageDto dto = InquiryImageDto.builder()
+                    .postImageFileName(img.getInquiryImageFileName())
+                    .postImageFilePath(img.getInquiryImageFilePath())
+                    .build();
+
+            imageListDto.add(dto);
+        }
+
+        InquiryDetailDto inquiryDto = InquiryDetailDto.builder()
+                .inquiryCid(inquiry.getInquiryCid())
+                .userId(userEntity.getUserId())
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryContent(inquiry.getInquiryContent())
+                .imageList(imageListDto)
+                .answer(inquiry.getAnswer())
+                .isClosed(inquiry.getIsClosed())
+                .build();
+
+
+        return InquiryDetailResponseDto.builder()
+                .success(true)
+                .code(200)
+                .message("상세 문의 조회에 성공했습니다.")
+                .inquiryInfo(inquiryDto)
+                .build();
     }
 
     @Transactional
