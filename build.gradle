@@ -45,6 +45,11 @@ dependencies {
     //oAuth2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+    // webSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+
     // test
 //    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //    testImplementation 'org.springframework.security:spring-security-test'
