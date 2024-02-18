@@ -57,7 +57,8 @@ public class SecurityConfig {
             "/board/**",
             "/semester/**",
             "/user/**",
-            "/comment/**"
+            "/comment/**",
+            "/schedule/**"
     };
 
     @Bean
