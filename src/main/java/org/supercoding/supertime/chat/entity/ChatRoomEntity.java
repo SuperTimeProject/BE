@@ -22,15 +22,10 @@ public class ChatRoomEntity extends TimeEntity {
     @Schema(description = "채팅방 식별번호", example = "1")
     private Long chatRoomCid;
 
-    @ManyToMany
-    @JoinTable(
-            name = "room_member",
-            joinColumns = @JoinColumn(name = "chat_room_cid"),
-            inverseJoinColumns = @JoinColumn(name = "user_cid")
-    )
-    @Column(name = "chat_room_member")
+    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER)
     @Schema(description = "사용자 식별번호")
-    private List<UserEntity> chatRoomMember;
+    private List<ChatRoomMemberEntity> chatRoomMemberList;
 
+    @Schema(description = "채팅방 이름", example = "기수채팅방")
     private String chatRoomName;
 }

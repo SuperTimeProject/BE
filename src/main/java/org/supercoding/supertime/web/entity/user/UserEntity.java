@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.supercoding.supertime.chat.entity.ChatRoomEntity;
+import org.supercoding.supertime.chat.entity.ChatRoomMemberEntity;
 import org.supercoding.supertime.web.entity.TimeEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.Part;
@@ -66,8 +67,9 @@ public class UserEntity extends TimeEntity {
     @Schema(name = "게시판 리스트")
     private List<BoardEntity> boardList;
 
-    @ManyToMany(mappedBy = "chatRoomMember")
-    private List<ChatRoomEntity> chatRoomList;
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @Column(name = "chat_room_list")
+    private List<ChatRoomMemberEntity> chatRoomMemberList;
 
     @Enumerated(EnumType.STRING)
     private Valified valified;
