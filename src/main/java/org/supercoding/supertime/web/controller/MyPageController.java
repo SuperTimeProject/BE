@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.user.UserService;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
+import org.supercoding.supertime.web.dto.inquiry.InquiryDetailResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryRequestDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryResponseDto;
 import org.supercoding.supertime.web.dto.user.EditUserInfoRequestDto;
@@ -61,15 +62,26 @@ public class MyPageController {
     @GetMapping("/inquiry/get")
     public ResponseEntity<InquiryResponseDto> getInquiryHistory(
             @AuthenticationPrincipal User user,
-            @RequestParam String inquiryClosed,
             @RequestParam int page
     ){
         log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
-        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,inquiryClosed,page);
+        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,page);
         log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
         return ResponseEntity.ok().body(getInquiryHistoryResult);
     }
-    
+
+    @Operation(summary = "문의 상세 조회", description = "문의한 기록을 불러오는 api입니다.")
+    @GetMapping("/inquiry/get/{inquiryCid}")
+    public ResponseEntity<InquiryDetailResponseDto> getInquiryDetail(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long inquiryCid
+            ){
+        log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
+        InquiryDetailResponseDto getInquiryDetailResult = userService.getInquiryDetail(user,inquiryCid);
+        log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryDetailResult);
+        return ResponseEntity.ok().body(getInquiryDetailResult);
+    }
+
     @Operation(summary = "문의하기", description = "관리자에게 문의하는 api입니다.")
     @PostMapping(value = "/inquiry", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> inquiry(
@@ -91,6 +103,17 @@ public class MyPageController {
     ){
         log.info("[USER] 주특기 선택 요청이 들어왔습니다.");
         CommonResponseDto selectPartResult = userService.selectPart(user,partName);
+        log.info("[USER] 주특기 선택 결과 = " + selectPartResult);
+        return ResponseEntity.ok(selectPartResult);
+    }
+
+    @Operation(summary = "주특기 확정", description = "주특기를 확정하는 api입니다.")
+    @PutMapping(value = "/part/confirmed")
+    public ResponseEntity<CommonResponseDto> confirmedPart(
+            @AuthenticationPrincipal User user
+    ){
+        log.info("[USER] 주특기 선택 요청이 들어왔습니다.");
+        CommonResponseDto selectPartResult = userService.confirmedPart(user);
         log.info("[USER] 주특기 선택 결과 = " + selectPartResult);
         return ResponseEntity.ok(selectPartResult);
     }

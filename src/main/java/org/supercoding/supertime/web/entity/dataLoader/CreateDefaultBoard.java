@@ -19,7 +19,7 @@ public class CreateDefaultBoard implements CommandLineRunner {
     }
 
     private void createDefaultBoard(){
-        String[] defaultBoardName = {"전체 게시판", "커뮤니티 게시판"};
+        String[] defaultBoardName = {"전체 게시판", "커뮤니티 게시판","FE 스터디","BE 스터디"};
 
         for(String boardName : defaultBoardName){
            if(!repository.existsByBoardName(boardName)){
