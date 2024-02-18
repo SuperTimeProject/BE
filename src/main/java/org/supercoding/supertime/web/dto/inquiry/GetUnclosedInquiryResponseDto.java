@@ -24,6 +24,6 @@ public class GetUnclosedInquiryResponseDto {
     @Schema(description = "요청 코드의 에러 메시지", example = "잘못되었습니다")
     private String message;
 
-    @Schema(description = "미답변 문의 리스트")
+    @Schema(description = " 문의 리스트")
     private List<GetUnclosedInquiryDetailDto> inquiryList;
 }

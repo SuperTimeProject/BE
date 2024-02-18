@@ -24,6 +24,9 @@ public class GetUnclosedInquiryDetailDto {
     @Schema(description = "문의 내용")
     private String inquiryContent;
 
+    @Schema(description = "답변 내용")
+    private String answer;
+
     @Schema(description = "작성일", example = "23-11-10")
     private String createdAt;
 

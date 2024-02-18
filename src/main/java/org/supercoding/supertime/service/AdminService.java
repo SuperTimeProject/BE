@@ -178,23 +178,11 @@ public class AdminService {
         return CommonResponseDto.successResponse("회원 인증에 성공했습니다.");
     }
 
-    public GetUnclosedInquiryResponseDto getUnclosedInquiry(String inquiryClosedStr,int page) {
+    public GetUnclosedInquiryResponseDto getUnclosedInquiry(int page) {
         log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
 
-        InquiryClosed inquiryClosed = InquiryClosed.valueOf(inquiryClosedStr);
-
         Pageable pageable = PageRequest.of(page-1, 10);
-        Page<InquiryEntity> inquiryList = null;
-
-        if(inquiryClosed == InquiryClosed.OPEN){
-            log.info("[ADMIN] 미답변 문의 기록 조회");
-            inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.OPEN,pageable);
-
-        } else{
-            log.info("[ADMIN] 답변완료 문의 기록 조회");
-           inquiryList = inquiryRepository.findAllByIsClosed(InquiryClosed.CLOSED,pageable);
-        }
-
+        Page<InquiryEntity> inquiryList = inquiryRepository.findAll(pageable);
 
         List<GetUnclosedInquiryDetailDto> inquiryDtoList =  new ArrayList<>();
 
@@ -209,6 +197,7 @@ public class AdminService {
                     .inquiryTitle(inquiryEntity.getInquiryTitle())
                     .inquiryContent(inquiryEntity.getInquiryContent())
                     .createdAt(inquiryEntity.getCreatedAt().toString())
+                    .answer(inquiryEntity.getAnswer())
                     .build();
 
             inquiryDtoList.add(dto);
@@ -227,6 +216,9 @@ public class AdminService {
         log.info("[ADMIN] 문의 답변 요청이 들어왔습니다.");
         InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
                 .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
+
+        if(inquiryEntity.getAnswer()!=null)
+            throw new DataIntegrityViolationException("이미 답변한 문의입니다.");
 
         inquiryEntity.setAnswer(inquiryContent);
         inquiryEntity.setIsClosed(InquiryClosed.CLOSED);
