@@ -35,7 +35,7 @@ public class VerificationService {
 
         if(authStateEntity!=null || loggedInUser.getValified()!=Valified.COMPLETED) {
             switch (loggedInUser.getValified()){
-                case NEEDED, PENDING:
+                case PENDING:
                     throw new DataIntegrityViolationException("인증이 대기중입니다.");
                 case COMPLETED:
                     throw new DataIntegrityViolationException("이미 완료된 인증입니다.");
@@ -44,20 +44,18 @@ public class VerificationService {
             }
         }
 
-        AuthStateEntity newAuth = AuthStateEntity.builder()
-                .userId(loggedInUser.getUserId())
-                .valified(Valified.PENDING)
-                .build();
 
         if(image!=null){
             AuthImageEntity img = imageUploadService.uploadAuthImages(image,"authImage");
             authImageRepository.save(img);
-            newAuth.setAuthImageId(img.getAuthImageCid());
+            authStateEntity.setAuthImageId(img.getAuthImageCid());
         }
 
         loggedInUser.setValified(Valified.PENDING);
+        authStateEntity.setValified(Valified.PENDING);
+
         userRepository.save(loggedInUser);
-        authStateRepository.save(newAuth);
+        authStateRepository.save(authStateEntity);
 
         return CommonResponseDto.successResponse("인증 신청 성공");
     }
