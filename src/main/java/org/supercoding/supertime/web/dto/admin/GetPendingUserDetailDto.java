@@ -16,6 +16,9 @@ public class GetPendingUserDetailDto {
     @Schema(description = "유저 아이디", example = "id123")
     private String userId;
 
+    @Schema(description = "유저 Cid", example = "1")
+    private Long userCid;
+
     @Schema(description = "유저 이름", example = "홍길동")
     private String userName;
 

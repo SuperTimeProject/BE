@@ -113,6 +113,7 @@ public class AdminService {
             }
 
             return GetPendingUserDetailDto.builder()
+                    .userCid(user.getUserCid())
                     .userId(user.getUserId())
                     .userName(user.getUserName())
                     .userNickname(user.getUserNickname())
