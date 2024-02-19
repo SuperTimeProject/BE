@@ -66,13 +66,12 @@ public class AdminController {
 
 
     @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
-    @GetMapping("/inquiry/get")
+    @GetMapping("/inquiry/get/{page}")
     public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(
-            @RequestParam String inquiryClosed,
             @PathVariable int page
     ){
         log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
-        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(inquiryClosed,page);
+        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(page);
         log.info("[ADMIN] 문의 조회 결과 = " + getInquiryResult);
         return ResponseEntity.ok().body(getInquiryResult);
     }
@@ -81,7 +80,7 @@ public class AdminController {
     @PutMapping("/inquiry/answer/{inquiryCid}")
     public ResponseEntity<CommonResponseDto> answerInquiry(
            @PathVariable Long inquiryCid,
-           String inquiryContent
+           @RequestParam String inquiryContent
     ){
         log.info("[ADMIN] 문의 답변 요청이 들어왔습니다.");
         CommonResponseDto answerResult = adminService.answerInquiry(inquiryCid,inquiryContent);

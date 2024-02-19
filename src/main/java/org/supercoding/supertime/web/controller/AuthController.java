@@ -18,6 +18,7 @@ import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.auth.SignupRequestDto;
 import org.supercoding.supertime.web.dto.user.getUserInfo.GetUserInfoResponseDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
+import org.supercoding.supertime.web.entity.enums.Roles;
 
 @RestController
 @Slf4j
@@ -90,4 +91,15 @@ public class AuthController {
         return ResponseEntity.ok(logoutInfoResult);
     }
 
+    @Operation(summary = "권한 변경하기", description = "유저 역할을 변경하는 api입니다.")
+    @PutMapping("/setRole")
+    public ResponseEntity<CommonResponseDto> setRole(
+            @RequestParam Long UserCid,
+            @RequestParam Roles role
+    ){
+        log.info("[ADMIN] 역할 변경 요청이 들어왔습니다.");
+        CommonResponseDto setRoleResult = authService.setRole(UserCid,role);
+        log.info("[ADMIN] 답변 결과 = " + setRoleResult);
+        return ResponseEntity.ok().body(setRoleResult);
+    }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.user.UserService;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
+import org.supercoding.supertime.web.dto.inquiry.InquiryDetailResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryRequestDto;
 import org.supercoding.supertime.web.dto.inquiry.InquiryResponseDto;
 import org.supercoding.supertime.web.dto.user.EditUserInfoRequestDto;
@@ -68,7 +69,19 @@ public class MyPageController {
         log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
         return ResponseEntity.ok().body(getInquiryHistoryResult);
     }
-    
+
+    @Operation(summary = "문의 상세 조회", description = "문의한 기록을 불러오는 api입니다.")
+    @GetMapping("/inquiry/get/{inquiryCid}")
+    public ResponseEntity<InquiryDetailResponseDto> getInquiryDetail(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long inquiryCid
+            ){
+        log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
+        InquiryDetailResponseDto getInquiryDetailResult = userService.getInquiryDetail(user,inquiryCid);
+        log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryDetailResult);
+        return ResponseEntity.ok().body(getInquiryDetailResult);
+    }
+
     @Operation(summary = "문의하기", description = "관리자에게 문의하는 api입니다.")
     @PostMapping(value = "/inquiry", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> inquiry(

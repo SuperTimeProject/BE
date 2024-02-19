@@ -1,9 +1,11 @@
 package org.supercoding.supertime.service;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -19,6 +21,8 @@ import org.supercoding.supertime.chat.entity.MessageType;
 import org.supercoding.supertime.chat.repository.ChatMessageRepository;
 import org.supercoding.supertime.chat.repository.ChatRoomMemberRepository;
 import org.supercoding.supertime.chat.repository.ChatRoomRepository;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.supercoding.supertime.config.security.TokenProvider;
 import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
@@ -60,6 +64,16 @@ public class AuthService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final ChatMessageRepository chatMessageRepository;
 
+    public CommonResponseDto setRole(Long userCid,Roles role){
+        UserEntity user = userRepository.findByUserCid(userCid)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        user.setRoles(role);
+
+        userRepository.save(user);
+
+        return CommonResponseDto.successResponse("관리자로 변경에 성공했습니다.");
+    }
     public CommonResponseDto login(LoginRequestDto loginInfo, HttpServletResponse httpServletResponse) {
         UserEntity user = userRepository.findByUserId(loginInfo.getUserId()).orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
         int isDeleted = user.getIsDeleted();

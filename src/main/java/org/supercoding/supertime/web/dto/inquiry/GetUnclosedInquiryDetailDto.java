@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,6 +25,9 @@ public class GetUnclosedInquiryDetailDto {
 
     @Schema(description = "문의 내용")
     private String inquiryContent;
+
+    @Schema(description = "답변 내용")
+    private String answer;
 
     @Schema(description = "작성일", example = "23-11-10")
     private String createdAt;

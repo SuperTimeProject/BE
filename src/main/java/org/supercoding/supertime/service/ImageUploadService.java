@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.InquiryImageRepository;
 import org.supercoding.supertime.repository.PostImageRepository;
+import org.supercoding.supertime.repository.ScheduleImageRepository;
 import org.supercoding.supertime.repository.UserProfileRepository;
 import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
+import org.supercoding.supertime.web.entity.schedule.ScheduleImageEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
 import org.supercoding.supertime.web.entity.user.UserProfileEntity;
 
@@ -30,6 +32,7 @@ public class ImageUploadService {
     private final AmazonS3 amazonS3;
     private final InquiryImageRepository inquiryImageRepository;
     private final UserProfileRepository userProfileRepository;
+    private final ScheduleImageRepository scheduleImageRepository;
 
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
@@ -122,6 +125,34 @@ public class ImageUploadService {
             inquiryImageRepository.save(newProductImage);
 
             uploadedImages.add(newProductImage);
+        }
+
+        return uploadedImages;
+    }
+
+    //TODO 제네릭 사용하고싶은데
+    public List<ScheduleImageEntity> uploadScheduleImages(List<MultipartFile> images, String folderName) {
+
+        List<ScheduleImageEntity> uploadedImages = new ArrayList<>();
+
+        int weekNumber=1;
+
+        for(MultipartFile image : images){
+            String originName = image.getOriginalFilename();
+            String storedImagedPath = uploadImageToS3(image, folderName);
+
+            log.info("[uploadImage] 이미지가 s3업데이트 메서드로 넘어갈 예정입니다. originName = " + originName);
+
+            ScheduleImageEntity newScheduleImage = ScheduleImageEntity.builder()
+                    .scheduleImageFileName(originName)
+                    .scheduleImageFilePath(storedImagedPath)
+                    .weekNumber(weekNumber)
+                    .build();
+
+            scheduleImageRepository.save(newScheduleImage);
+
+            uploadedImages.add(newScheduleImage);
+            weekNumber++;
         }
 
         return uploadedImages;
