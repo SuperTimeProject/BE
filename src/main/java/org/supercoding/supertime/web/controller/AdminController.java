@@ -41,12 +41,12 @@ public class AdminController {
     }
 
     @Operation(summary = "회원 인증요청 상세 조회", description = "회원 인증요청 상세내용을 조회하는 api입니다.")
-    @GetMapping("/pendingUser/detail/{valifiedNumber}")
+    @GetMapping("/pendingUser/detail/{userCid}")
     public ResponseEntity<GetPendingUserDetailDto> getValifiedDetail(
-            @PathVariable Long valifiedNumber
+            @PathVariable Long userCid
     ){
         log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
-        GetPendingUserDetailDto getValifiedDetailResult = adminService.getValifiedDetail(valifiedNumber);
+        GetPendingUserDetailDto getValifiedDetailResult = adminService.getValifiedDetail(userCid);
         log.info("[ADMIN] 조회 결과 = " + getValifiedDetailResult);
         return ResponseEntity.ok().body(getValifiedDetailResult);
     }

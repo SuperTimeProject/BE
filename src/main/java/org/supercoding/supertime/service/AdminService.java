@@ -90,38 +90,37 @@ public class AdminService {
                 .build();
     }
 
+        public GetPendingUserDetailDto getValifiedDetail(Long userId){
+            log.info("[ADMIN SERVICE] 사용자 인증대기 상세 조회 요청이 들어왔습니다.");
+            UserEntity user = userRepository.findByUserCid(userId)
+                    .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
 
-    public GetPendingUserDetailDto getValifiedDetail(Long valifiedNumber){
-        log.info("[ADMIN SERVICE] 사용자 인증대기 상세 조회 요청이 들어왔습니다.");
+            AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
+                    .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증요청이 존재하지 않습니다."));
 
-        AuthStateEntity authState = authStateRepository.findById(valifiedNumber)
-                .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증요청이 존재하지 않습니다."));
 
-        UserEntity user = userRepository.findByUserId(authState.getUserId())
-                .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
+            PendingImgaeDto image = null;
 
-        PendingImgaeDto image = null;
+            if(authState.getAuthImageId()!=null){
+                AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthImageId())
+                        .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 이미지 값이 존재하지 않습니다."));
 
-        if(authState.getAuthImageId()!=null){
-            AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthImageId())
-                    .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 이미지 값이 존재하지 않습니다."));
+                image = PendingImgaeDto.builder()
+                        .authImageCid(authImageEntity.getAuthImageCid())
+                        .authImageFileName(authImageEntity.getAuthImageFileName())
+                        .authImageFilePath(authImageEntity.getAuthImageFilePath())
+                        .build();
+            }
 
-            image = PendingImgaeDto.builder()
-                    .authImageCid(authImageEntity.getAuthImageCid())
-                    .authImageFileName(authImageEntity.getAuthImageFileName())
-                    .authImageFilePath(authImageEntity.getAuthImageFilePath())
+            return GetPendingUserDetailDto.builder()
+                    .userId(user.getUserId())
+                    .userName(user.getUserName())
+                    .userNickname(user.getUserNickname())
+                    .image(image)
+                    .semester(user.getSemester())
+                    .valified(user.getValified())
                     .build();
         }
-
-        return GetPendingUserDetailDto.builder()
-                .userId(user.getUserId())
-                .userName(user.getUserName())
-                .userNickname(user.getUserNickname())
-                .image(image)
-                .semester(user.getSemester())
-                .valified(user.getValified())
-                .build();
-    }
 
 
     public CommonResponseDto updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto){
