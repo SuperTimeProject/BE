@@ -46,6 +46,19 @@ public class ChatRoomService {
 
         return CommonResponseDto.builder().build();
     }
+    public void createDefaultRoom(String semesterName) {
+        Boolean isExist = chatRoomRepository.existsByChatRoomName(semesterName);
+
+        if(isExist){
+            throw new DataIntegrityViolationException("이미 동일한 이름의 채팅방이 존재합니다.");
+        }
+
+        ChatRoomEntity chatRoom = ChatRoomEntity.builder()
+                .chatRoomName(semesterName)
+                .build();
+
+        chatRoomRepository.save(chatRoom);
+    }
 
     public GetUserChatRoomResDto findAllRoom(User user) {
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
