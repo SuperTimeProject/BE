@@ -9,11 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.supercoding.supertime.repository.InquiryImageRepository;
-import org.supercoding.supertime.repository.PostImageRepository;
-import org.supercoding.supertime.repository.ScheduleImageRepository;
-import org.supercoding.supertime.repository.UserProfileRepository;
+import org.supercoding.supertime.repository.*;
 import org.supercoding.supertime.web.entity.Inquiry.InquiryImageEntity;
+import org.supercoding.supertime.web.entity.auth.AuthImageEntity;
 import org.supercoding.supertime.web.entity.schedule.ScheduleImageEntity;
 import org.supercoding.supertime.web.entity.board.PostImageEntity;
 import org.supercoding.supertime.web.entity.user.UserProfileEntity;
@@ -33,6 +31,7 @@ public class ImageUploadService {
     private final InquiryImageRepository inquiryImageRepository;
     private final UserProfileRepository userProfileRepository;
     private final ScheduleImageRepository scheduleImageRepository;
+    private final AuthImageRepository authImageRepository;
 
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
@@ -156,6 +155,24 @@ public class ImageUploadService {
         }
 
         return uploadedImages;
+    }
+
+    public AuthImageEntity uploadAuthImages(MultipartFile images, String folderName) {
+
+            String originName = images.getOriginalFilename();
+            String storedImagedPath = uploadImageToS3(images, folderName);
+
+            log.info("[uploadImage] 이미지가 s3업데이트 메서드로 넘어갈 예정입니다. originName = " + originName);
+
+            AuthImageEntity newImage = AuthImageEntity.builder()
+                    .AuthImageFileName(originName)
+                    .AuthImageFilePath(storedImagedPath)
+                    .build();
+
+            authImageRepository.save(newImage);
+
+
+        return newImage;
     }
 
 

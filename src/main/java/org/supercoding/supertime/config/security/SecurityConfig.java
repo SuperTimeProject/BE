@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/login/**",
             "/oauth2/**",
             "/semester/**",
-            "/error"
+            "/error",
+            "/verification/**"
     };
 
     // 관리자만 접근 가능
