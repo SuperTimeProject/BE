@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface AuthStateRepository extends JpaRepository<AuthStateEntity,Long> {
     Optional<AuthStateEntity> findByUserId(String userId);
+
     Optional<AuthStateEntity> findByValified(Valified valified);
 }

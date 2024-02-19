@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -56,6 +57,8 @@ public class OAuthAttributes {
                 .nameAttributeKey(userNameAttributeName)
                 .build();
     }
+
+    // OAuth2User 객체에 넣어주기 위해서 Map으로 값들을 반환해준다.
 
     public UserEntity toEntity() {
         return UserEntity.builder()

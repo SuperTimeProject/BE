@@ -45,7 +45,8 @@ public class SecurityConfig {
             "/oauth2/**",
             "/semester/**",
             "/error",
-            "/verification/**"
+            "/verification/**",
+            "*"
     };
 
     // 관리자만 접근 가능
@@ -99,6 +100,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2Login ->
                         oauth2Login.userInfoEndpoint(userInfoEndpointConfig ->
                                 userInfoEndpointConfig.userService(customOAuth2UserService)));
+
 
         // 세션 설정
         http

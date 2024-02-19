@@ -91,14 +91,14 @@ public class AdminService {
     }
 
 
-    public GetPendingUserDetailDto getValifiedDetail(Long valifiedNumber){
+    public GetPendingUserDetailDto getValifiedDetail(Long userId){
         log.info("[ADMIN SERVICE] 사용자 인증대기 상세 조회 요청이 들어왔습니다.");
+        UserEntity user = userRepository.findByUserCid(userId)
+                .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
 
-        AuthStateEntity authState = authStateRepository.findById(valifiedNumber)
+        AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
                 .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증요청이 존재하지 않습니다."));
 
-        UserEntity user = userRepository.findByUserId(authState.getUserId())
-                .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
 
         PendingImgaeDto image = null;
 

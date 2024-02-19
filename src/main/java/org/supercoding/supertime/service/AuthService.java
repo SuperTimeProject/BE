@@ -33,6 +33,7 @@ import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.auth.AuthStateEntity;
 import org.supercoding.supertime.web.entity.auth.RefreshToken;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
+import org.supercoding.supertime.web.entity.enums.IsOauth;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.enums.Valified;
@@ -147,6 +148,7 @@ public class AuthService {
                 .roles(Roles.ROLE_USER)
                 .part(Part.PART_UNDEFINED)
                 .isDeleted(0)
+                .isOauth(IsOauth.NORMAL)
                 .valified(Valified.NEEDED) // 인증에 관한 api 구현 전까지 인증 완료상태 반환
                 .build();
 

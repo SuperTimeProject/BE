@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.supercoding.supertime.web.entity.TimeEntity;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
+import org.supercoding.supertime.web.entity.enums.IsOauth;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
 import org.supercoding.supertime.web.entity.enums.Valified;
@@ -78,6 +79,9 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "아이디 삭제 여부", example = "0 or 1으로 삭제여부 판단")
     @Column(name = "is_deleted")
     private int isDeleted;
+
+    @Enumerated(EnumType.STRING)
+    private IsOauth isOauth;
 
     public UserEntity update(String name){
         this.userName = name;
