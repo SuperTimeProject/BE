@@ -260,6 +260,7 @@ public class AuthService {
                 .boardList(boardList)
                 .semester(semester)
                 .userProfile(userProfile)
+                .valified(loggedInUser.getValified())
                 .build();
 
         return GetUserInfoResponseDto.successResponse("유저 정보를 성공적으로 불러왔습니다.", getUserInfoDetailDto);
