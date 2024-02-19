@@ -90,9 +90,9 @@ public class AdminService {
                 .build();
     }
 
-        public GetPendingUserDetailDto getValifiedDetail(Long userId){
+        public GetPendingUserDetailDto getValifiedDetail(String userId){
             log.info("[ADMIN SERVICE] 사용자 인증대기 상세 조회 요청이 들어왔습니다.");
-            UserEntity user = userRepository.findByUserCid(userId)
+            UserEntity user = userRepository.findByUserId(userId)
                     .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
 
             AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
