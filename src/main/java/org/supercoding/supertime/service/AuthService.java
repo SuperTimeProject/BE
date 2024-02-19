@@ -30,6 +30,7 @@ import org.supercoding.supertime.web.dto.user.getUserDto.UserProfileDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.entity.SemesterEntity;
+import org.supercoding.supertime.web.entity.auth.AuthStateEntity;
 import org.supercoding.supertime.web.entity.auth.RefreshToken;
 import org.supercoding.supertime.web.entity.board.BoardEntity;
 import org.supercoding.supertime.web.entity.enums.Part;
@@ -53,6 +54,8 @@ public class AuthService {
     private final BoardRepository boardRepository;
     private final SemesterRepository semesterRepository;
     private final UserProfileRepository userProfileRepository;
+    private final AuthStateRepository authStateRepository;
+
 
     public CommonResponseDto setRole(Long userCid,Roles role){
         UserEntity user = userRepository.findByUserCid(userCid)
@@ -144,10 +147,19 @@ public class AuthService {
                 .roles(Roles.ROLE_USER)
                 .part(Part.PART_UNDEFINED)
                 .isDeleted(0)
-                .valified(Valified.COMPLETED) // 인증에 관한 api 구현 전까지 인증 완료상태 반환
+                .valified(Valified.NEEDED) // 인증에 관한 api 구현 전까지 인증 완료상태 반환
                 .build();
 
         userRepository.save(signupUser);
+
+
+        AuthStateEntity newAuth = AuthStateEntity.builder()
+                .userId(signupUser.getUserId())
+                .valified(Valified.NEEDED)
+                .build();
+
+        authStateRepository.save(newAuth);
+
 
         return CommonResponseDto.createSuccessResponse("회원가입에 성공했습니다.");
     }
