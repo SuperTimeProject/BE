@@ -233,11 +233,15 @@ public class AdminService {
         InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
                 .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
 
-        InquiryImageEntity inquiryImageEntity = inquiryImageRepository.findById(inquiryEntity.getInquiryCid())
-                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
+        List<InquiryImageEntity> inquiryImageEntity = inquiryEntity.getInquiryImages();
 
+        if(!inquiryEntity.getInquiryImages().isEmpty()) {
+            for(InquiryImageEntity image : inquiryImageEntity) {
+                imageUploadService.deleteImage(image.getInquiryImageFilePath());
+            }
+        }
         inquiryRepository.delete(inquiryEntity);
-        imageUploadService.deleteImage(inquiryImageEntity.getInquiryImageFilePath());
+
 
         return CommonResponseDto.successResponse("문의 삭제에 성공했습니다.");
     }
