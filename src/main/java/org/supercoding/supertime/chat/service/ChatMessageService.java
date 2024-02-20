@@ -20,7 +20,9 @@ import org.supercoding.supertime.chat.entity.ChatRoomEntity;
 import org.supercoding.supertime.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.web.entity.user.UserEntity;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -120,6 +122,8 @@ public class ChatMessageService {
 
         List<ChatMessageEntity> chatMessageList = chatMessageRepository.findAllByChatRoom(chatRoom);
 
-        return chatMessageList.stream().map(ChatMessageResponseDto::from).toList();
+        return chatMessageList.stream().map(ChatMessageResponseDto::from)
+                .sorted(Comparator.comparing(ChatMessageResponseDto::getCreatedAt))
+                .collect(Collectors.toList());
     }
 }
