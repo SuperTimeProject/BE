@@ -4,19 +4,25 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.repository.ScheduleImageRepository;
 import org.supercoding.supertime.repository.ScheduleRepository;
+import org.supercoding.supertime.repository.SemesterRepository;
+import org.supercoding.supertime.repository.UserRepository;
 import org.supercoding.supertime.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.schedule.ScheduleImageDto;
 import org.supercoding.supertime.web.dto.schedule.ScheduleResponseDto;
+import org.supercoding.supertime.web.entity.SemesterEntity;
 import org.supercoding.supertime.web.entity.schedule.ScheduleEntity;
 import org.supercoding.supertime.web.entity.schedule.ScheduleImageEntity;
 import org.supercoding.supertime.web.entity.enums.IsFull;
 import org.supercoding.supertime.web.entity.enums.Part;
+import org.supercoding.supertime.web.entity.user.UserEntity;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,6 +32,9 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleImageRepository scheduleImageRepository;
     private final ImageUploadService imageUploadService;
+    private final UserRepository userRepository;
+    private final SemesterRepository semesterRepository;
+
     @Transactional
     public CommonResponseDto createSchedule(Part part, IsFull isFull, List<MultipartFile> images) {
         if(!scheduleRepository.findByPartAndIsFull(part,isFull).isEmpty())
@@ -89,11 +98,23 @@ public class ScheduleService {
 
     @Transactional
     public ScheduleResponseDto getSchedule(
-            Part part, IsFull isFull, Integer weekNumber) {
+            User user, Part part, IsFull isFull) {
         ScheduleEntity schedule = scheduleRepository.findByPartAndIsFull(part,isFull)
                 .orElseThrow(()-> new CustomNotFoundException("시간표가 존재하지 않습니다."));
 
-        ScheduleImageEntity image = scheduleImageRepository.findByScheduleIdAndWeekNumber(schedule.getScheduleCid(),weekNumber)
+        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
+                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
+
+        SemesterEntity semester = semesterRepository.findById(userEntity.getSemester())
+                .orElseThrow(()-> new CustomNotFoundException("기수가 존재하지 않습니다."));
+
+        int startDay = (int)(semester.getStartDate().getTime() / (1000 * 60 * 60 * 24));
+        int nowDay = (int)(new Date().getTime() / (1000 * 60 * 60 * 24));
+
+        int week = (int)((nowDay - startDay) / 7) + 1;
+
+
+        ScheduleImageEntity image = scheduleImageRepository.findByScheduleIdAndWeekNumber(schedule.getScheduleCid(),week)
                 .orElseThrow(()-> new CustomNotFoundException("시간표 이미지가 존재하지 않습니다."));
 
         ScheduleImageDto dto = ScheduleImageDto.builder()
