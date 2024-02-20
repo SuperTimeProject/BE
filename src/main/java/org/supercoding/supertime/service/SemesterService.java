@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.supercoding.supertime.chat.service.ChatRoomService;
 import org.supercoding.supertime.repository.BoardRepository;
 import org.supercoding.supertime.repository.SemesterRepository;
 import org.supercoding.supertime.web.advice.CustomNoSuchElementException;
@@ -29,6 +30,7 @@ import java.util.NoSuchElementException;
 public class SemesterService {
     private final SemesterRepository semesterRepository;
     private final BoardRepository boardRepository;
+    private final ChatRoomService chatRoomService;
 
     @Transactional
     public CommonResponseDto createSemester(CreateSemesterRequestDto createSemesterInfo) {
@@ -66,6 +68,10 @@ public class SemesterService {
 
             semesterRepository.save(newSemester);
         }
+
+        // 기수 채팅방 생성
+        chatRoomService.createDefaultRoom(String.valueOf(createSemesterInfo.getSemesterName()));
+
         // 결과 전달
 
         return CommonResponseDto.createSuccessResponse("기수 생성이 완료되었습니다.");
