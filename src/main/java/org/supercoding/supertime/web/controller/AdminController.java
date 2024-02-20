@@ -64,10 +64,10 @@ public class AdminController {
     @PutMapping("/verification")
     public ResponseEntity<CommonResponseDto> verification(
             @RequestParam String userId,
-            @RequestParam Valified velified
+            @RequestParam Valified valified
     ){
         log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
-        CommonResponseDto verifiResult = adminService.verification(userId, velified);
+        CommonResponseDto verifiResult = adminService.varification(userId, valified);
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
         return ResponseEntity.ok().body(verifiResult);
     }
@@ -122,7 +122,7 @@ public class AdminController {
 
 
     @Operation(summary = "시간표 생성", description = "시간표를 생성하는 api입니다.")
-    @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/timetable/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> createSchedule(
             //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
             @RequestParam Part part,
@@ -137,7 +137,7 @@ public class AdminController {
     }
 
     @Operation(summary = "시간표 수정", description = "시간표를 수정하는 api입니다.")
-    @PutMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/timetable/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editSchedule(
             //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
             @RequestParam Part part,

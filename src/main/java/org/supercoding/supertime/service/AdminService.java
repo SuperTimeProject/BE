@@ -210,7 +210,7 @@ public class AdminService {
     }
 */
 
-    public CommonResponseDto verification(String userId, Valified valified) {
+    public CommonResponseDto varification(String userId, Valified valified) {
         log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");
         UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
