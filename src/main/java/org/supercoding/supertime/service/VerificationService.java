@@ -39,8 +39,6 @@ public class VerificationService {
                     throw new DataIntegrityViolationException("인증이 대기중입니다.");
                 case COMPLETED:
                     throw new DataIntegrityViolationException("이미 완료된 인증입니다.");
-                case DENIED:
-                    throw new DataIntegrityViolationException("인증이 거부되었습니다.");
             }
         }
 
