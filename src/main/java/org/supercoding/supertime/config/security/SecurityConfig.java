@@ -44,6 +44,9 @@ public class SecurityConfig {
             "/login/**",
             "/oauth2/**",
             "/semester/**",
+            "/ws/**",
+            "/chatroom/**",
+            "/message/**",
             "/error",
             "/verification/**"
     };

@@ -14,6 +14,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.supercoding.supertime.chat.entity.ChatMessageEntity;
+import org.supercoding.supertime.chat.entity.ChatRoomEntity;
+import org.supercoding.supertime.chat.entity.ChatRoomMemberEntity;
+import org.supercoding.supertime.chat.entity.MessageType;
+import org.supercoding.supertime.chat.repository.ChatMessageRepository;
+import org.supercoding.supertime.chat.repository.ChatRoomMemberRepository;
+import org.supercoding.supertime.chat.repository.ChatRoomRepository;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.supercoding.supertime.config.security.TokenProvider;
@@ -46,6 +53,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
+  
     private final UserRepository userRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
@@ -54,8 +62,10 @@ public class AuthService {
     private final BoardRepository boardRepository;
     private final SemesterRepository semesterRepository;
     private final UserProfileRepository userProfileRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final AuthStateRepository authStateRepository;
-
 
     public CommonResponseDto setRole(Long userCid,Roles role){
         UserEntity user = userRepository.findByUserCid(userCid)
@@ -113,6 +123,7 @@ public class AuthService {
         return CommonResponseDto.successResponse("로그인에 성공했습니다.");
     }
 
+    @Transactional
     public CommonResponseDto signup(SignupRequestDto signupInfo) {
         Boolean existUserId = userRepository.existsByUserId(signupInfo.getUserName());
         if(existUserId){
@@ -127,7 +138,6 @@ public class AuthService {
         List<BoardEntity> userBoard = new ArrayList<>();
         SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
         String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
-        log.info("보드리스트" + boardList);
 
         for(String boardName : boardList){
             BoardEntity board = boardRepository.findByBoardName(boardName);
@@ -152,7 +162,28 @@ public class AuthService {
 
         userRepository.save(signupUser);
 
+        // 기수 채팅방 입장
+        UserEntity createdUser = userRepository.findByUserId(signupUser.getUserId())
+                .orElseThrow(() -> new CustomNotFoundException("일치하는 유저가 없습니다."));
 
+        ChatRoomEntity chatRoom = chatRoomRepository.findByChatRoomName(userSemester.getSemesterName().toString())
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 채팅방이 존재하지 않습니다."));
+
+        ChatRoomMemberEntity chatRoomMember = ChatRoomMemberEntity.builder()
+                .user(createdUser)
+                .chatRoom(chatRoom)
+                .build();
+        chatRoomMemberRepository.save(chatRoomMember);
+
+        ChatMessageEntity chatMessage = ChatMessageEntity.builder()
+                .type(MessageType.ENTER)
+                .user(createdUser)
+                .chatRoom(chatRoom)
+                .chatMessageContent(createdUser.getUserNickname()+"유저가 들어왔습니다.")
+                .build();
+        chatMessageRepository.save(chatMessage);
+      
+        // 인증상태 
         AuthStateEntity newAuth = AuthStateEntity.builder()
                 .userId(signupUser.getUserId())
                 .valified(Valified.NEEDED)
