@@ -7,16 +7,25 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.service.AdminService;
+import org.supercoding.supertime.service.ScheduleService;
+import org.supercoding.supertime.web.dto.admin.GetPendingUserDetailDto;
 import org.supercoding.supertime.web.dto.admin.GetPendingUserDto;
 import org.supercoding.supertime.web.dto.admin.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.web.dto.auth.LoginRequestDto;
 import org.supercoding.supertime.web.dto.common.CommonResponseDto;
 import org.supercoding.supertime.web.dto.inquiry.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.web.entity.enums.InquiryClosed;
+import org.supercoding.supertime.web.entity.enums.IsFull;
+import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Valified;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -26,27 +35,39 @@ import org.supercoding.supertime.web.entity.enums.Valified;
 public class AdminController {
 
     private final AdminService adminService;
+    private final ScheduleService scheduleService;
 
     @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
-    @GetMapping("/pendingUser")
+    @GetMapping("/pendingUser/{page}")
     public ResponseEntity<GetPendingUserDto> getUserByValified(
-            @RequestParam String valified,
+            @RequestParam Valified valified,
             @PathVariable int page
     ){
         log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
         GetPendingUserDto getPendingResult = adminService.getUserByValified(valified,page);
-        log.info("[ADMIN] 인증 결과 = " + getPendingResult);
+        log.info("[ADMIN] 조회 결과 = " + getPendingResult);
         return ResponseEntity.ok().body(getPendingResult);
+    }
+
+    @Operation(summary = "회원 인증요청 상세 조회", description = "회원 인증요청 상세내용을 조회하는 api입니다.")
+    @GetMapping("/pendingUser/detail/{userId}")
+    public ResponseEntity<GetPendingUserDetailDto> getValifiedDetail(
+            @PathVariable String userId
+    ){
+        log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
+        GetPendingUserDetailDto getValifiedDetailResult = adminService.getValifiedDetail(userId);
+        log.info("[ADMIN] 조회 결과 = " + getValifiedDetailResult);
+        return ResponseEntity.ok().body(getValifiedDetailResult);
     }
 
     @Operation(summary = "회원 인증 관리", description = "회원 인증상태를 변경하는 api입니다.")
     @PutMapping("/verification")
     public ResponseEntity<CommonResponseDto> verification(
             @RequestParam String userId,
-            @RequestParam String verificationState
+            @RequestParam Valified valified
     ){
         log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
-        CommonResponseDto verifiResult = adminService.verification(userId, verificationState);
+        CommonResponseDto verifiResult = adminService.varification(userId, valified);
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
         return ResponseEntity.ok().body(verifiResult);
     }
@@ -98,4 +119,36 @@ public class AdminController {
         log.info("[ADMIN] 답변 결과 = " + deleteResult);
         return ResponseEntity.ok().body(deleteResult);
     }
+
+
+    @Operation(summary = "시간표 생성", description = "시간표를 생성하는 api입니다.")
+    @PostMapping(value = "/timetable/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> createSchedule(
+            //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
+            @RequestParam Part part,
+            @RequestParam IsFull isFull,
+            @RequestPart(name = "scheduleImage") List<MultipartFile> scheduleImage
+    ){
+        log.info("[SCHEDULE] 시간표 생성 요청이 들어왔습니다.");
+        CommonResponseDto createSchedulerResult = scheduleService.createSchedule(part,isFull,scheduleImage);
+        log.info("[SCHEDULE] 시간표 생성 결과 = " + createSchedulerResult);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createSchedulerResult);
+    }
+
+    @Operation(summary = "시간표 수정", description = "시간표를 수정하는 api입니다.")
+    @PutMapping(value = "/timetable/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> editSchedule(
+            //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
+            @RequestParam Part part,
+            @RequestParam IsFull isFull,
+            @RequestPart(name = "scheduleImage") List<MultipartFile> scheduleImage
+    ){
+        log.info("[SCHEDULE] 시간표 수정 요청이 들어왔습니다.");
+        CommonResponseDto editSchedulerResult = scheduleService.editSchedule(part,isFull,scheduleImage);
+        log.info("[SCHEDULE] 시간표 수정 결과 = " + editSchedulerResult);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(editSchedulerResult);
+    }
+
 }
