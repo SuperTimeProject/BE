@@ -47,7 +47,8 @@ public class SecurityConfig {
             "/ws/**",
             "/chatroom/**",
             "/message/**",
-            "/error"
+            "/error",
+            "/verification/**"
     };
 
     // 관리자만 접근 가능

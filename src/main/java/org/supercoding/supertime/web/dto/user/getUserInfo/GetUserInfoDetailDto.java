@@ -7,6 +7,7 @@ import org.supercoding.supertime.web.dto.user.getUserDto.UserProfileDto;
 import org.supercoding.supertime.web.dto.user.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.web.entity.enums.Part;
 import org.supercoding.supertime.web.entity.enums.Roles;
+import org.supercoding.supertime.web.entity.enums.Valified;
 
 import java.util.List;
 
@@ -44,4 +45,7 @@ public class GetUserInfoDetailDto {
 
     @Schema(description = "유저 프로필")
     private UserProfileDto userProfile;
+
+    @Schema(description = "인증 상태")
+    private Valified valified;
 }
