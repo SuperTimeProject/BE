@@ -32,4 +32,16 @@ public class VerificationController {
         log.info("[VERIFY] 인증 신청 요청 결과 = " + applyResult);
         return ResponseEntity.ok().body(applyResult);
     }
+
+    @Operation(summary = "인증 재신청", description = "인증 신청하는 api입니다.")
+    @PutMapping(value = "/reapply" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> reapply(
+            @AuthenticationPrincipal User user,
+            @RequestPart(name = "userProfileImage")MultipartFile image
+    ){
+        log.info("[VERIFY] 인증 신청 요청이 들어왔습니다.");
+        CommonResponseDto reapplyResult = verificationService.reapply(user,image);
+        log.info("[VERIFY] 인증 신청 요청 결과 = " + reapplyResult);
+        return ResponseEntity.ok().body(reapplyResult);
+    }
 }
