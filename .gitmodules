@@ -1,4 +1,0 @@
-[submodule "submodule-config"]
-    path = submodule-config
-    url = https://github.com/SuperTimeProject/submodule-config
-    branch = dev
