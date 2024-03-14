@@ -46,7 +46,7 @@ public class MyPageController {
      */
 
     @Operation(summary = "유저 정보 수정", description = "로그인한 유저 정보를 수정하는 api입니다.")
-    @PutMapping(value = "/info/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editUserInfo(
             @AuthenticationPrincipal User user,
             @RequestParam(name = "userNickname", required = false) String userNickName,
@@ -59,7 +59,7 @@ public class MyPageController {
     }
 
     @Operation(summary = "문의 조회", description = "문의한 기록을 불러오는 api입니다.")
-    @GetMapping("/inquiry/get")
+    @GetMapping("/inquiry")
     public ResponseEntity<InquiryResponseDto> getInquiryHistory(
             @AuthenticationPrincipal User user,
             @RequestParam int page
@@ -71,7 +71,7 @@ public class MyPageController {
     }
 
     @Operation(summary = "문의 상세 조회", description = "문의한 기록을 불러오는 api입니다.")
-    @GetMapping("/inquiry/get/{inquiryCid}")
+    @GetMapping("/inquiry/{inquiryCid}")
     public ResponseEntity<InquiryDetailResponseDto> getInquiryDetail(
             @AuthenticationPrincipal User user,
             @PathVariable Long inquiryCid
@@ -119,7 +119,7 @@ public class MyPageController {
     }
 
     @Operation(summary = "프로필 이미지 삭제", description = "프로필 이미지를 삭제하는 api입니다.")
-    @PutMapping(value = "/info/profileImage/delete")
+    @PutMapping(value = "/info/profile-image")
     public ResponseEntity<CommonResponseDto> deleteProfileImage(
             @AuthenticationPrincipal User user
     ){

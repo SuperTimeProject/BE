@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @Operation(summary = "이메일 중복확인", description = "이메일 중복을 확인하는 api입니다.")
-    @GetMapping("/duplicateTest/email")
+    @GetMapping("/duplicate-test/email")
     public ResponseEntity<CommonResponseDto> emailDuplicateTest(@RequestParam String userEmail){
         log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
         CommonResponseDto duplicateTestResult = authService.emailDuplicateTest(userEmail);
@@ -56,7 +56,7 @@ public class AuthController {
     }
 
     @Operation(summary = "닉네임 중복확인", description = "닉네임 중복을 확인하는 api입니다.")
-    @GetMapping("/duplicateTest/nickname")
+    @GetMapping("/duplicate-test/nickname")
     public ResponseEntity<CommonResponseDto> nicknameDuplicateTest(@RequestParam String nickname){
         log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
         CommonResponseDto duplicateTestResult = authService.nicknameDuplicateTest(nickname);
@@ -65,7 +65,7 @@ public class AuthController {
     }
 
     @Operation(summary = "로그인 유저 불러오기", description = "로그인한 유저의 정보를 불러오는 api입니다.")
-    @GetMapping("/getUserInfo")
+    @GetMapping("/user-info")
     public ResponseEntity<GetUserInfoResponseDto> getUserInfo(@AuthenticationPrincipal User user){
         log.info("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
         GetUserInfoResponseDto getUserInfoResult = authService.getUserInfo(user);
@@ -92,7 +92,7 @@ public class AuthController {
     }
 
     @Operation(summary = "권한 변경하기", description = "유저 역할을 변경하는 api입니다.")
-    @PutMapping("/setRole")
+    @PutMapping("/set-role")
     public ResponseEntity<CommonResponseDto> setRole(
             @RequestParam Long UserCid,
             @RequestParam Roles role

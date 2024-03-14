@@ -38,7 +38,7 @@ public class AdminController {
     private final ScheduleService scheduleService;
 
     @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
-    @GetMapping("/pendingUser/{page}")
+    @GetMapping("/pending-user/{page}")
     public ResponseEntity<GetPendingUserDto> getUserByValified(
             @RequestParam Valified valified,
             @PathVariable int page
@@ -50,7 +50,7 @@ public class AdminController {
     }
 
     @Operation(summary = "회원 인증요청 상세 조회", description = "회원 인증요청 상세내용을 조회하는 api입니다.")
-    @GetMapping("/pendingUser/detail/{userId}")
+    @GetMapping("/pending-user/detail/{userId}")
     public ResponseEntity<GetPendingUserDetailDto> getValifiedDetail(
             @PathVariable String userId
     ){
@@ -73,7 +73,7 @@ public class AdminController {
     }
 
     @Operation(summary = "회원 정보 수정", description = "회원의 모든 정보를 수정 할 수 있는 api입니다.")
-    @PutMapping("/update/userInfo")
+    @PutMapping("/users-info")
     public ResponseEntity<CommonResponseDto> updateUserInfo(
             @RequestPart(name="userInfo")
             @Parameter(schema = @Schema(type = "string", format = "binary"))
@@ -87,7 +87,7 @@ public class AdminController {
 
 
     @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
-    @GetMapping("/inquiry/get/{page}")
+    @GetMapping("/inquiry/{page}")
     public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(
             @PathVariable int page
     ){
@@ -110,7 +110,7 @@ public class AdminController {
     }
 
     @Operation(summary = "문의 삭제하기", description = "문의를 삭제하는 api입니다.")
-    @DeleteMapping("/inquiry/delete/{inquiryCid}")
+    @DeleteMapping("/inquiry/{inquiryCid}")
     public ResponseEntity<CommonResponseDto> deleteInquiry(
             @PathVariable Long inquiryCid
     ){
@@ -122,7 +122,7 @@ public class AdminController {
 
 
     @Operation(summary = "시간표 생성", description = "시간표를 생성하는 api입니다.")
-    @PostMapping(value = "/timetable/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/timetable",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> createSchedule(
             //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
             @RequestParam Part part,
@@ -137,7 +137,7 @@ public class AdminController {
     }
 
     @Operation(summary = "시간표 수정", description = "시간표를 수정하는 api입니다.")
-    @PutMapping(value = "/timetable/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/timetable", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editSchedule(
             //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
             @RequestParam Part part,

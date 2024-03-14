@@ -33,7 +33,7 @@ public class BoardController {
     private final BoardService boardService;
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 생성", description = "스웨거에서 테스트를 진행할 떄에는 productInfo도 json파일로 생성해서 테스트 진행해 주셔야합니다.")
-    @PostMapping(value = "/create/{boardCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{boardCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> createPost(
             @PathVariable Long boardCid,
             @AuthenticationPrincipal User user,
@@ -48,7 +48,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
-    @PutMapping(value = "/edit/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editPost(
             @PathVariable Long postCid,
             @AuthenticationPrincipal User user,
@@ -63,7 +63,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 삭제", description = "게시물을 삭제하는 api입니다.")
-    @DeleteMapping("/delete/{postCid}")
+    @DeleteMapping("/{postCid}")
     public ResponseEntity<CommonResponseDto> deletePost(
             @PathVariable Long postCid,
             @AuthenticationPrincipal User user
@@ -76,7 +76,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
-    @GetMapping("/getBoard/{boardCid}/{page}")
+    @GetMapping("/{boardCid}/{page}")
     public ResponseEntity<GetBoardPostResponseDto> getBoardPosts(
             @AuthenticationPrincipal User user,
             @PathVariable Long boardCid,
@@ -90,7 +90,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시물 조회", description = "게시물의 세부 내용을 불러오는 api입니다.")
-    @GetMapping("/getPost/{postCid}")
+    @GetMapping("/{postCid}")
     public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid, HttpServletRequest req, HttpServletResponse res){
         log.info("[POST] 게시물 조회 요청이 들어왔습니다.");
         GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid, req, res);
@@ -100,7 +100,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "유저 게시물 조회", description = "유저가 작성한 글을 불러오는 api입니다.")
-    @GetMapping("/getUserPost/{boardCid}/{page}")
+    @GetMapping("/{boardCid}/{page}")
     public ResponseEntity<GetUserPostResponseDto> getUserPost(
             @AuthenticationPrincipal User user,
             @PathVariable Long boardCid,
