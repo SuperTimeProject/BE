@@ -10,11 +10,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.comment.service.CommentService;
 import org.supercoding.supertime.comment.web.dto.request.CreateCommentReqDto;
-import org.supercoding.supertime.comment.web.dto.response.GetCommentDetailDto;
 import org.supercoding.supertime.comment.web.dto.response.GetCommentResDto;
-import org.supercoding.supertime.web.dto.common.CommonResponseDto;
-
-import java.nio.file.Path;
+import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 
 @RestController
 @Slf4j

@@ -8,7 +8,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.supercoding.supertime.config.security.TokenProvider;
+import org.supercoding.supertime.golbal.config.security.TokenProvider;
 
 @Configuration
 @RequiredArgsConstructor
