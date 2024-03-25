@@ -16,7 +16,6 @@ import org.supercoding.supertime.golbal.web.enums.Part;
 
 @RestController
 @Slf4j
-@RequestMapping("/user/schedule")
 @RequiredArgsConstructor
 @Tag(name = "시간표 관련 API")
 public class ScheduleController {
@@ -24,7 +23,7 @@ public class ScheduleController {
 
 
     @Operation(summary = "시간표 조회", description = "오늘의 시간표를 조회하는 api입니다.")
-    @GetMapping("/view")
+    @GetMapping("/user/schedule")
     public ResponseEntity<ScheduleResponseDto> getSchedule(
             @AuthenticationPrincipal User user,
             @RequestParam Part part,

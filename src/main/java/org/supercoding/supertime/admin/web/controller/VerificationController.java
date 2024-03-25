@@ -22,7 +22,7 @@ public class VerificationController {
     private final VerificationService verificationService;
 
     @Operation(summary = "인증 신청", description = "인증 신청하는 api입니다.")
-    @PostMapping(value = "/verification/apply" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/apply" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> apply(
             @AuthenticationPrincipal User user,
             @RequestPart(name = "userProfileImage")MultipartFile image
@@ -34,7 +34,7 @@ public class VerificationController {
     }
 
     @Operation(summary = "인증 재신청", description = "인증 신청하는 api입니다.")
-    @PutMapping(value = "/verification/reapply" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/reapply" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> reapply(
             @AuthenticationPrincipal User user,
             @RequestPart(name = "userProfileImage")MultipartFile image

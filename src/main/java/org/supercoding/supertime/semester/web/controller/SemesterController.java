@@ -20,7 +20,7 @@ public class SemesterController {
     private final SemesterService semesterService;
 
     @Operation(summary = "기수 생성", description = "기수를 생성하는 api입니다.")
-    @PostMapping("/admin/semester/create")
+    @PostMapping("/admin/semester")
     public ResponseEntity<CommonResponseDto> createSemester(@RequestBody CreateSemesterRequestDto createSemesterInfo){
         log.info("[SEMESTER] 기수 생성 요청이 들어왔습니다.");
         CommonResponseDto createSemesterResult = semesterService.createSemester(createSemesterInfo);
@@ -30,7 +30,7 @@ public class SemesterController {
     }
 
     @Operation(summary = "전체 기수 불러오기", description = "생성되어있는 기수를 불러오는 api입니다.")
-    @GetMapping("/public/semester/all")
+    @GetMapping("/public/semester")
     public ResponseEntity<GetAllSemesterResponseDto> getAllSemester(){
         log.info("[SEMESTER] 기수 리스트 불러오기 요청이 들어왔습니다.");
         GetAllSemesterResponseDto getAllSemesterResult = semesterService.getAllSemester();
