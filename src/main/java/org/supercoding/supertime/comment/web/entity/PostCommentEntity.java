@@ -3,9 +3,9 @@ package org.supercoding.supertime.comment.web.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
-import org.supercoding.supertime.web.entity.TimeEntity;
-import org.supercoding.supertime.web.entity.board.PostEntity;
-import org.supercoding.supertime.web.entity.user.UserEntity;
+import org.supercoding.supertime.golbal.web.entity.TimeEntity;
+import org.supercoding.supertime.board.web.entity.PostEntity;
+import org.supercoding.supertime.user.entity.user.UserEntity;
 
 @Entity
 @Getter
