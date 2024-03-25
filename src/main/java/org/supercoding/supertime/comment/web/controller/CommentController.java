@@ -15,14 +15,14 @@ import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 
 @RestController
 @Slf4j
-@RequestMapping("/comment")
+@RequestMapping("/user/comment")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "댓글 추가", description = "댓글을 작성하는 api입니다.")
-    @PostMapping("/create")
+    @PostMapping("/")
     public ResponseEntity<CommonResponseDto> createComment(
             @AuthenticationPrincipal User user,
             @RequestBody CreateCommentReqDto commentInfo
@@ -34,7 +34,7 @@ public class CommentController {
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "댓글 조회", description = "댓글을 조회하는 api입니다.")
-    @GetMapping("/getComment/{postCid}/{page}")
+    @GetMapping("/{postCid}/{page}")
     public ResponseEntity<GetCommentResDto> getComment(
             @PathVariable Long postCid,
             @PathVariable int page

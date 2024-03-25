@@ -15,10 +15,10 @@ import org.supercoding.supertime.user.repository.AuthImageRepository;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.board.repository.PostImageRepository;
 import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
-import org.supercoding.supertime.user.entity.AuthImageEntity;
-import org.supercoding.supertime.schedule.entity.ScheduleImageEntity;
+import org.supercoding.supertime.user.web.entity.AuthImageEntity;
+import org.supercoding.supertime.schedule.web.entity.ScheduleImageEntity;
 import org.supercoding.supertime.board.web.entity.PostImageEntity;
-import org.supercoding.supertime.user.entity.user.UserProfileEntity;
+import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

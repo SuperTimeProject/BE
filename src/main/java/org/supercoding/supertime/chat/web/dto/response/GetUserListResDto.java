@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.supercoding.supertime.chat.web.entity.ChatRoomEntity;
 import org.supercoding.supertime.chat.web.entity.ChatRoomMemberEntity;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;

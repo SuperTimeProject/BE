@@ -10,10 +10,10 @@ import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
-import org.supercoding.supertime.schedule.dto.CreateSemesterRequestDto;
-import org.supercoding.supertime.schedule.dto.GetAllSemesterResponseDto;
-import org.supercoding.supertime.schedule.dto.GetSemesterDto;
-import org.supercoding.supertime.semester.entity.SemesterEntity;
+import org.supercoding.supertime.schedule.web.dto.CreateSemesterRequestDto;
+import org.supercoding.supertime.schedule.web.dto.GetAllSemesterResponseDto;
+import org.supercoding.supertime.schedule.web.dto.GetSemesterDto;
+import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.web.enums.IsFull;
 

@@ -3,7 +3,7 @@ package org.supercoding.supertime.golbal.config.security.util;
 import lombok.Builder;
 import lombok.Getter;
 import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.Map;
 

@@ -23,11 +23,11 @@ import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryDetailDto;
 import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
-import org.supercoding.supertime.user.entity.AuthImageEntity;
-import org.supercoding.supertime.user.entity.AuthStateEntity;
+import org.supercoding.supertime.user.web.entity.AuthImageEntity;
+import org.supercoding.supertime.user.web.entity.AuthStateEntity;
 import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
 import org.supercoding.supertime.golbal.web.enums.Valified;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.supercoding.supertime.chat.web.entity.ChatRoomEntity;
 import org.supercoding.supertime.chat.web.entity.ChatRoomMemberEntity;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.List;
 

@@ -15,7 +15,7 @@ import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 
 @RestController
 @Slf4j
-@RequestMapping("/verification")
+@RequestMapping("/user/verification")
 @RequiredArgsConstructor
 @Tag(name = "인증 관련 API")
 public class VerificationController {

@@ -34,19 +34,16 @@ public class SecurityConfig {
     // 모든 유저가 접근 가능(인증X)
     private final String[] PERMIT_URL = {
             "/",
-            "/auth/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/api-docs/**",
             "/v3/**",
-            "/login/**",
+            "/public/**",
             "/oauth2/**",
-            "/semester/**",
             "/ws/**",
             "/chatroom/**",
             "/message/**",
-            "/error",
-            "/verification/**"
+            "/error"
     };
 
     // 관리자만 접근 가능
@@ -55,12 +52,7 @@ public class SecurityConfig {
     };
 
     private final String[] AUTHENTICATION_URL = {
-            "/api/**",
-            "/board/**",
-            "/semester/**",
-            "/user/**",
-            "/comment/**",
-            "/schedule/**"
+            "/user/**"
     };
 
     @Bean

@@ -1,7 +1,7 @@
 package org.supercoding.supertime.schedule.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.supercoding.supertime.schedule.entity.ScheduleImageEntity;
+import org.supercoding.supertime.schedule.web.entity.ScheduleImageEntity;
 
 import java.util.Optional;
 
