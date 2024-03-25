@@ -15,7 +15,7 @@ import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 
 @RestController
 @Slf4j
-@RequestMapping("/comment")
+@RequestMapping("/user/comment")
 @RequiredArgsConstructor
 public class CommentController {
 

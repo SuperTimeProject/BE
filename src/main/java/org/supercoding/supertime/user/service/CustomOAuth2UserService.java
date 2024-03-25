@@ -12,8 +12,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.supercoding.supertime.golbal.config.security.util.OAuthAttributes;
 import org.supercoding.supertime.user.repository.UserRepository;
-import org.supercoding.supertime.user.dto.SessionUser;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.dto.SessionUser;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.Collections;
 

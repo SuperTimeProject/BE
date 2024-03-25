@@ -7,8 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.golbal.auth.token.web.dto.TokenUserDto;
-import org.supercoding.supertime.user.dto.CustomUserDetailDto;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.dto.CustomUserDetailDto;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 @RequiredArgsConstructor
 @Service

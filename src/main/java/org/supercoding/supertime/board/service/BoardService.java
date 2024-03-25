@@ -34,7 +34,7 @@ import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.board.web.entity.PostEntity;
 import org.supercoding.supertime.board.web.entity.PostImageEntity;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

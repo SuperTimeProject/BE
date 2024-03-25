@@ -22,12 +22,12 @@ import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
-import org.supercoding.supertime.semester.entity.SemesterEntity;
+import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
 import org.supercoding.supertime.golbal.web.enums.Part;
-import org.supercoding.supertime.user.entity.user.UserEntity;
-import org.supercoding.supertime.user.entity.user.UserProfileEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
 import java.util.ArrayList;
 import java.util.Date;

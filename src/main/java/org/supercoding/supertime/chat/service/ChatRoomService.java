@@ -17,7 +17,7 @@ import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;

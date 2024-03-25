@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.supercoding.supertime.golbal.web.entity.TimeEntity;
 import org.supercoding.supertime.board.web.entity.PostEntity;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 @Entity
 @Getter

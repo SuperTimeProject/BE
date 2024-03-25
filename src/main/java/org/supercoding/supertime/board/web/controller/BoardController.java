@@ -26,13 +26,13 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@RequestMapping("/board")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 생성", description = "스웨거에서 테스트를 진행할 떄에는 productInfo도 json파일로 생성해서 테스트 진행해 주셔야합니다.")
-    @PostMapping(value = "/{boardCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/posts/{boardCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> createPost(
             @PathVariable Long boardCid,
             @AuthenticationPrincipal User user,
@@ -47,7 +47,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
-    @PutMapping(value = "/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/posts/{postCid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editPost(
             @PathVariable Long postCid,
             @AuthenticationPrincipal User user,
@@ -62,7 +62,7 @@ public class BoardController {
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 삭제", description = "게시물을 삭제하는 api입니다.")
-    @DeleteMapping("/{postCid}")
+    @DeleteMapping("/posts/{postCid}")
     public ResponseEntity<CommonResponseDto> deletePost(
             @PathVariable Long postCid,
             @AuthenticationPrincipal User user

@@ -14,10 +14,10 @@ import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
-import org.supercoding.supertime.user.entity.AuthImageEntity;
-import org.supercoding.supertime.user.entity.AuthStateEntity;
+import org.supercoding.supertime.user.web.entity.AuthImageEntity;
+import org.supercoding.supertime.user.web.entity.AuthStateEntity;
 import org.supercoding.supertime.golbal.web.enums.Valified;
-import org.supercoding.supertime.user.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 @Service
 @RequiredArgsConstructor
