@@ -39,11 +39,11 @@ public class BoardController {
             @RequestPart(name = "postInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) CreatePostRequestDto createPostInfo,
             @RequestPart(name = "postImage", required = false) List<MultipartFile> postImages
     ){
-        log.info("[BOARD] 게시물 생성 요청이 들어왔습니다.");
-        CommonResponseDto createPostResult = boardService.createPost(boardCid,user, createPostInfo, postImages);
-        log.info("[BOARD] 게시물 생성 결과 = " + createPostResult);
+        log.debug("[BOARD] 게시물 생성 요청이 들어왔습니다.");
+        boardService.createPost(boardCid,user, createPostInfo, postImages);
+        log.debug("[BOARD] 성공적으로 게시물을 생성하였습니다.");
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createPostResult);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponseDto.successResponse("게시물 작성이 성공적으로 이루어졌습니다."));
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
@@ -55,10 +55,10 @@ public class BoardController {
             @RequestPart(name = "postImage",required = false) List<MultipartFile> postImages
                                                       ){
         log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
-        CommonResponseDto editPostResult = boardService.editPost(postCid, user, editPostInfo, postImages);
-        log.info("[BOARD] 게시물 수정 결과 = " + editPostResult);
+        boardService.editPost(postCid, user, editPostInfo, postImages);
+        log.info("[BOARD] 게시물이 성공적으로 수정되었습니다." );
 
-        return ResponseEntity.ok(editPostResult);
+        return ResponseEntity.ok(CommonResponseDto.successResponse("게시물이 성공적으로 수정되었습니다."));
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 삭제", description = "게시물을 삭제하는 api입니다.")

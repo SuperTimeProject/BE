@@ -1,20 +1,24 @@
 package org.supercoding.supertime.board.service;
 
+import com.nimbusds.jose.util.Pair;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.board.repository.PostImageRepository;
 import org.supercoding.supertime.board.repository.PostRepository;
+import org.supercoding.supertime.board.util.PostValidation;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
@@ -50,33 +54,16 @@ public class BoardService {
     private final UserRepository userRepository;
     private final ImageUploadService imageUploadService;
     private final PostImageRepository postImageRepository;
+    private final PostValidation postValidation;
 
     @Transactional
-    public CommonResponseDto createPost(Long boardCid, User user, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
-        // TODO
-        // - 게시판 유무 확인
-        // - 게시판 작성 권한 확인
-        // - 게시물 생성
-        BoardEntity targetBoard = boardRepository.findById(boardCid)
-                .orElseThrow(()-> new CustomNotFoundException("게시판이 존재하지 않습니다."));
+    public void createPost(Long boardCid, User user, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
 
-        UserEntity author = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+        Pair<UserEntity, BoardEntity> userAndBoardPair = postValidation.validateUserAccessToBoard(user, boardCid);
+        UserEntity author = userAndBoardPair.getLeft();
+        BoardEntity targetBoard = userAndBoardPair.getRight();
 
-        if(author.getBoardList().stream()
-                .map(BoardEntity::getBoardCid)
-                .noneMatch(cid -> cid.equals(targetBoard.getBoardCid()))
-        ) {
-            throw new CustomAccessDeniedException("게시판 작성 권한이 없습니다.");
-        }
-        // TODO (희망사항) 권한 정보에 대한 칼럼을 추가하여 유저가 포함되어있는지 확인하는 구문 구현
-
-        PostEntity newPost = PostEntity.builder()
-                .boardEntity(targetBoard)
-                .userEntity(author)
-                .postTitle(createPostInfo.getPostTitle())
-                .postContent(createPostInfo.getPostContent())
-                .build();
+        PostEntity newPost = PostEntity.create(targetBoard, author, createPostInfo);
 
         if(images != null){
             List<PostImageEntity> uploadImages = imageUploadService.uploadImages(images, "post");
@@ -85,51 +72,62 @@ public class BoardService {
         }
 
         postRepository.save(newPost);
-
-        return CommonResponseDto.createSuccessResponse("게시물 작성이 성공적으로 이루어졌습니다.");
     }
 
     @Transactional
-    public CommonResponseDto editPost(Long postCid, User user, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
-        PostEntity targetPost = postRepository.findById(postCid)
-                .orElseThrow(()->new CustomNotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+    public void editPost(Long postCid, User user, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
+        PostEntity targetPost = postValidation.validatePostExistence(postCid);
+        postValidation.validatePostEditPermission(targetPost, user);
 
-        if(!targetPost.getUserEntity().getUserId().equals(user.getUsername())){
-            throw new CustomAccessDeniedException("수정 권한이 없습니다.");
-        }
-        List<PostImageEntity> imageList = targetPost.getPostImages();
+        updatePost(targetPost, editPostInfo);
 
-        if(editPostInfo.getPostTitle() != null){
-            targetPost.setPostTitle(editPostInfo.getPostTitle());
-        }
+        List<PostImageEntity> deletedImages = deleteImages(targetPost.getPostImages(), editPostInfo.getDeleteImageList());
 
-        if(editPostInfo.getPostContent() != null){
-            targetPost.setPostContent(editPostInfo.getPostContent());
-        }
-
-        List<PostImageEntity> deletedImages = new ArrayList<>();
-
-        if(!imageList.isEmpty() && editPostInfo.getDeleteImageList() != null && !editPostInfo.getDeleteImageList().isEmpty()){
-            for(PostImageEntity image: imageList){
-                if(editPostInfo.getDeleteImageList().contains(image.getPostImageCid())){
-                    deletedImages.add(image);
-                    imageUploadService.deleteImage(image.getPostImageFilePath());
-                    postImageRepository.deleteById(image.getPostImageCid());
-                }
-            }
-
-            imageList.removeAll(deletedImages);
-        }
-
-        if(images != null){
-            List<PostImageEntity> uploadImages = imageUploadService.uploadImages(images, "post");
-            imageList.addAll(uploadImages);
-            targetPost.setPostImages(imageList);
-        }
+        List<PostImageEntity> uploadedImages = uploadImages(images);
+        targetPost.getPostImages().addAll(uploadedImages);
 
         postRepository.save(targetPost);
 
-        return CommonResponseDto.successResponse("게시물 수정이 성공적으로 이루어졌습니다.");
+        deleteImagesFromS3(deletedImages);
+    }
+
+    private void updatePost(PostEntity targetPost, EditPostRequestDto editPostInfo) {
+        if (editPostInfo.getPostTitle() != null) {
+            targetPost.setPostTitle(editPostInfo.getPostTitle());
+        }
+        if (editPostInfo.getPostContent() != null) {
+            targetPost.setPostContent(editPostInfo.getPostContent());
+        }
+    }
+
+    private List<PostImageEntity> deleteImages(List<PostImageEntity> imageList, List<Long> deleteImageList) {
+        List<PostImageEntity> deletedImages = new ArrayList<>();
+        if (!imageList.isEmpty() && deleteImageList != null && !deleteImageList.isEmpty()) {
+            for (PostImageEntity image : imageList) {
+                if (deleteImageList.contains(image.getPostImageCid())) {
+                    deletedImages.add(image);
+                    postImageRepository.deleteById(image.getPostImageCid());
+                }
+            }
+            imageList.removeAll(deletedImages);
+        }
+        return deletedImages;
+    }
+
+    private List<PostImageEntity> uploadImages(List<MultipartFile> images) {
+        List<PostImageEntity> uploadImages = new ArrayList<>();
+        if (images != null) {
+            uploadImages = imageUploadService.uploadImages(images, "post");
+        }
+        return uploadImages;
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteImagesFromS3(List<PostImageEntity> images) {
+        for (PostImageEntity image : images) {
+            imageUploadService.deleteImage(image.getPostImageFilePath());
+        }
     }
 
     @Transactional
