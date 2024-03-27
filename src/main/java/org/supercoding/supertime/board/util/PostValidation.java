@@ -2,6 +2,7 @@ package org.supercoding.supertime.board.util;
 
 import com.nimbusds.jose.util.Pair;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.supercoding.supertime.board.repository.BoardRepository;
@@ -9,6 +10,7 @@ import org.supercoding.supertime.board.repository.PostRepository;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.board.web.entity.PostEntity;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
+import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
@@ -37,16 +39,39 @@ public class PostValidation {
         return Pair.of(author, targetBoard);
     }
 
+    // 유저 존재 여부를 검증하는 메서드
+    public UserEntity validateUserExistence(String userName) {
+        return userRepository.findByUserId(userName)
+                .orElseThrow(() -> new CustomNotFoundException("유저가 존재하지 않습니다."));
+    }
+
     // 게시물 존재 여부를 검증하는 메서드
     public PostEntity validatePostExistence(Long postCid) {
         return postRepository.findById(postCid)
-                .orElseThrow(() -> new CustomNotFoundException("수정하려는 게시물이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomNotFoundException("게시물이 존재하지 않습니다."));
     }
 
     // 게시물 수정 권한을 검증하는 메서드
     public void validatePostEditPermission(PostEntity targetPost, User user) {
         if (!targetPost.getUserEntity().getUserId().equals(user.getUsername())) {
-            throw new CustomAccessDeniedException("수정 권한이 없습니다.");
+            throw new CustomAccessDeniedException("권한이 없습니다.");
+        }
+    }
+
+    // 게시판 조회 권한을 검증하는 메서드
+    public void validateGetBoardPermission(UserEntity user, Long boardCid) {
+        if(user.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
+                .noneMatch(cid -> cid.equals(boardCid))
+        ) {
+            throw new CustomAccessDeniedException("게시판 조회 권한이 없습니다.");
+        }
+    }
+
+    // 게시판이 비어있는지 검증하는 메서드
+    public void validatePostListIsEmpty(Page<PostEntity> postList) {
+        if(postList.isEmpty()){
+            throw new CustomNoSuchElementException("게시판에 게시글이 없습니다.");
         }
     }
 }

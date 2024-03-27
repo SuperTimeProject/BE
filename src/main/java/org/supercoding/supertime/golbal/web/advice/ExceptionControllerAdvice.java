@@ -15,10 +15,10 @@ public class ExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(CustomNotFoundException.class)
     public ResponseEntity<CommonResponseDto> handleNotFoundException(CustomNotFoundException e){
-        log.error("[NOTFOUND] DB 검색 에러로 다음의 에러메시지를 출력합니다." + e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+        log.error("[NOTFOUND] DB에 일치하는 결과가 없어 다음의 에러메시지를 출력합니다." + e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 CommonResponseDto.builder()
-                        .code(HttpStatus.CONFLICT.value())
+                        .code(HttpStatus.NOT_FOUND.value())
                         .message(e.getMessage())
                         .success(false)
                         .build()

@@ -56,6 +56,15 @@ public class BoardService {
     private final PostImageRepository postImageRepository;
     private final PostValidation postValidation;
 
+    /**
+     * 기능 - 게시물 생성
+     * @param boardCid
+     * @param user
+     * @param createPostInfo
+     * @param images
+     *
+     * @return void
+     */
     @Transactional
     public void createPost(Long boardCid, User user, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
 
@@ -74,6 +83,16 @@ public class BoardService {
         postRepository.save(newPost);
     }
 
+    /**
+     * 기능 - 게시물 수정
+     *
+     * @param postCid
+     * @param user
+     * @param editPostInfo
+     * @param images
+     *
+     * @return void
+     */
     @Transactional
     public void editPost(Long postCid, User user, EditPostRequestDto editPostInfo, List<MultipartFile> images) {
         PostEntity targetPost = postValidation.validatePostExistence(postCid);
@@ -130,67 +149,56 @@ public class BoardService {
         }
     }
 
+    /**
+     * 기능 - 게시물 삭제
+     *
+     * @param postCid
+     * @param user
+     *
+     * @return void
+     */
     @Transactional
-    public CommonResponseDto deletePost(Long postCid, User user) {
-        PostEntity targetPost = postRepository.findById(postCid)
-                .orElseThrow(() -> new CustomNotFoundException("삭제하려는 게시물이 존재하지 않습니다."));
+    public void deletePost(Long postCid, User user) {
+        PostEntity targetPost = postValidation.validatePostExistence(postCid);
 
-        if(!targetPost.getUserEntity().getUserId().equals(user.getUsername())){
-            throw new CustomAccessDeniedException("삭제 권한이 없습니다.");
-        }
+        postValidation.validatePostEditPermission(targetPost, user);
 
         List<PostImageEntity> postImages = targetPost.getPostImages();
 
-        if (!postImages.isEmpty()) {
-            for (PostImageEntity imageEntity : postImages) {
-                imageUploadService.deleteImage(imageEntity.getPostImageFilePath());
-                log.info("[DELETE] " + imageEntity.getPostImageFileName() + " 이미지가 삭제되었습니다");
-            }
-        }
-
         postRepository.delete(targetPost);
 
-        return CommonResponseDto.successResponse("게시물을 성공적으로 삭제하였습니다.");
+        if (!postImages.isEmpty()) {
+           deleteImagesFromS3(postImages);
+        }
     }
 
-    public GetBoardPostResponseDto getBoardPost(User user, Long boardCid, int page) {
-        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(() -> new CustomNotFoundException("유저가 존재하지 않습니다."));
+    /**
+     * 기능 - 게시판 조회
+     *
+     * @param user
+     * @param boardCid
+     * @param page
+     *
+     * @return postList, boardInfo
+     */
+    @Transactional(readOnly = true)
+    public Pair<List<GetBoardPostDetailDto>, BoardInfoDto> getBoardPost(User user, Long boardCid, int page) {
+        UserEntity userEntity = postValidation.validateUserExistence(user.getUsername());
 
-        if(userEntity.getBoardList().stream()
-                .map(BoardEntity::getBoardCid)
-                .noneMatch(cid -> cid.equals(boardCid))
-        ) {
-            throw new CustomAccessDeniedException("게시판 조회 권한이 없습니다.");
-        }
+        postValidation.validateGetBoardPermission(userEntity, boardCid);
 
         Pageable pageable = PageRequest.of(page-1, 10);
         Page<PostEntity> postList = postRepository.findAllByBoardEntity_BoardCid(boardCid, pageable);
         List<GetBoardPostDetailDto> postListDto = new ArrayList<>();
 
-        BoardInfoDto boardInfo = BoardInfoDto.builder()
-                .page(page)
-                .totalElements(postList.getTotalElements())
-                .totalPages(postList.getTotalPages())
-                .build();
-
-        if(postList.isEmpty()){
-            throw new CustomNoSuchElementException("게시판에 게시글이 없습니다.");
-        }
+        postValidation.validatePostListIsEmpty(postList);
 
         for(PostEntity post: postList){
-            GetBoardPostDetailDto postDetail = GetBoardPostDetailDto.builder()
-                    .author(post.getUserEntity().getUserNickname())
-                    .postCid(post.getPostCid())
-                    .postTitle(post.getPostTitle())
-                    .postView(post.getPostView())
-                    .createdAt(toSimpleDate(post.getCreatedAt()))
-                    .build();
-
-            postListDto.add(postDetail);
+            String simpleDate = toSimpleDate(post.getCreatedAt());
+            postListDto.add(GetBoardPostDetailDto.from(post, simpleDate));
         }
 
-        return GetBoardPostResponseDto.successResponse("게시판에 포함된 게시물을 불러왔습니다.", postListDto, boardInfo);
+        return Pair.of(postListDto, BoardInfoDto.from(postList, page));
     }
 
     @Transactional

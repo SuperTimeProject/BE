@@ -1,5 +1,6 @@
 package org.supercoding.supertime.board.web.controller;
 
+import com.nimbusds.jose.util.Pair;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.board.service.BoardService;
 import org.supercoding.supertime.board.web.dto.CreatePostRequestDto;
 import org.supercoding.supertime.board.web.dto.EditPostRequestDto;
+import org.supercoding.supertime.board.web.dto.getBoardPost.BoardInfoDto;
+import org.supercoding.supertime.board.web.dto.getBoardPost.GetBoardPostDetailDto;
 import org.supercoding.supertime.board.web.dto.getBoardPost.GetBoardPostResponseDto;
 import org.supercoding.supertime.board.web.dto.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.board.web.dto.getUserPost.GetUserPostResponseDto;
@@ -54,9 +57,9 @@ public class BoardController {
             @RequestPart(name = "editPostInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) EditPostRequestDto editPostInfo,
             @RequestPart(name = "postImage",required = false) List<MultipartFile> postImages
                                                       ){
-        log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
+        log.debug("[BOARD] 게시물 수정 요청이 들어왔습니다.");
         boardService.editPost(postCid, user, editPostInfo, postImages);
-        log.info("[BOARD] 게시물이 성공적으로 수정되었습니다." );
+        log.debug("[BOARD] 게시물이 성공적으로 수정되었습니다." );
 
         return ResponseEntity.ok(CommonResponseDto.successResponse("게시물이 성공적으로 수정되었습니다."));
     }
@@ -67,11 +70,11 @@ public class BoardController {
             @PathVariable Long postCid,
             @AuthenticationPrincipal User user
     ){
-        log.info("[BOARD] 게시물 삭제 요청이 들어왔습니다.");
-        CommonResponseDto deletePostResult = boardService.deletePost(postCid, user);
-        log.info("[BOARD] 게시물 삭제 결과 = " + deletePostResult);
+        log.debug("[BOARD] 게시물 삭제 요청이 들어왔습니다.");
+        boardService.deletePost(postCid, user);
+        log.debug("[BOARD] 게시물을 성공적으로 삭제하였습니다");
 
-        return ResponseEntity.ok(deletePostResult);
+        return ResponseEntity.ok(CommonResponseDto.successResponse("게시물을 성공적으로 삭제하였습니다."));
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
@@ -82,10 +85,10 @@ public class BoardController {
             @PathVariable int page
     ){
         log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
-        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid, page);
-        log.info("[BOARD] 게시판 조회 요청 결과 = "+ getBoardPostsResult);
+        Pair<List<GetBoardPostDetailDto>, BoardInfoDto> postListAndBoardInfoPair = boardService.getBoardPost(user, boardCid, page);
+        log.info("[BOARD] 게시판 조회 요청 결과 = ");
 
-        return ResponseEntity.ok(getBoardPostsResult);
+        return ResponseEntity.ok(GetBoardPostResponseDto.successResponse("게시판에 포함된 게시물을 불러왔습니다.", postListAndBoardInfoPair.getLeft(), postListAndBoardInfoPair.getRight()));
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시물 조회", description = "게시물의 세부 내용을 불러오는 api입니다.")
