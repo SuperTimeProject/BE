@@ -280,6 +280,7 @@ public class BoardService {
      *
      * @return List<GetUserPostDto>
      */
+    @Transactional(readOnly = true)
     public Pair<List<GetUserPostDto>, BoardInfoDto> getUserPost(User user, Long boardCid, int page) {
 
         UserEntity userEntity = postValidation.validateUserExistence(user.getUsername());
