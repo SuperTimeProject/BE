@@ -22,8 +22,8 @@ public class PostValidation {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    // 유저가 게시판에 접근 가능한지 검증하는 메서드
-    public Pair<UserEntity, BoardEntity> validateUserAccessToBoard(User user, Long boardCid) {
+    // 유저가 게시판에 작성 가능한지 검증하는 메서드
+    public Pair<UserEntity, BoardEntity> validateUserWriteAccessToBoard(User user, Long boardCid) {
         UserEntity author = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(() -> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
 
@@ -37,6 +37,19 @@ public class PostValidation {
         }
 
         return Pair.of(author, targetBoard);
+    }
+
+    // 유저가 게시판에 접근 가능한지 검증하는 메서드
+    public void validateUserAccessToBoard(UserEntity user, Long boardCid) {
+        BoardEntity boardEntity = boardRepository.findById(boardCid)
+                .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
+
+        if(user.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
+                .noneMatch(cid -> cid.equals(boardEntity.getBoardCid()))
+        ) {
+            throw new CustomAccessDeniedException("게시물 조회 권한이 없습니다.");
+        }
     }
 
     // 유저 존재 여부를 검증하는 메서드

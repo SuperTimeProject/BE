@@ -49,12 +49,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BoardService {
-    private final BoardRepository boardRepository;
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final ImageUploadService imageUploadService;
     private final PostImageRepository postImageRepository;
     private final PostValidation postValidation;
+
+    private static final int SECONDS_IN_A_DAY = 60 * 60 * 24;
 
     /**
      * 기능 - 게시물 생성
@@ -68,7 +68,7 @@ public class BoardService {
     @Transactional
     public void createPost(Long boardCid, User user, CreatePostRequestDto createPostInfo, List<MultipartFile> images) {
 
-        Pair<UserEntity, BoardEntity> userAndBoardPair = postValidation.validateUserAccessToBoard(user, boardCid);
+        Pair<UserEntity, BoardEntity> userAndBoardPair = postValidation.validateUserWriteAccessToBoard(user, boardCid);
         UserEntity author = userAndBoardPair.getLeft();
         BoardEntity targetBoard = userAndBoardPair.getRight();
 
@@ -201,112 +201,113 @@ public class BoardService {
         return Pair.of(postListDto, BoardInfoDto.from(postList, page));
     }
 
-    @Transactional
-    public GetPostDetailResponseDto getPostDetail(Long postCid, HttpServletRequest req, HttpServletResponse res) {
-        PostEntity targetPost = postRepository.findById(postCid)
-                .orElseThrow(() -> new CustomNotFoundException("조회하려는 게시물이 존재하지 않습니다."));
-        // 조회수 추가 로직
-        Cookie oldCookie = null;
-        Cookie[] cookies = req.getCookies();
-        if(cookies != null){
-            for(Cookie cookie:cookies){
-                if(cookie.getName().equals("postView")){
-                    oldCookie = cookie;
-                }
-            }
-        }
-        if(oldCookie != null){
-            if(!oldCookie.getValue().contains("["+ postCid +"]")){
+    /**
+     * 기능 - 게시물 조회
+     *
+     * @param postCid
+     * @param req
+     * @param res
+     *
+     * @return PostDetailDto
+     */
+    @Transactional(readOnly = true)
+    public PostDetailDto getPostDetail(Long postCid, HttpServletRequest req, HttpServletResponse res) {
+        PostEntity targetPost = postValidation.validatePostExistence(postCid);
+
+        updatePostView(targetPost, req, res);
+
+        return createPostDetailDto(targetPost);
+
+    }
+
+    private void updatePostView(PostEntity targetPost, HttpServletRequest req, HttpServletResponse res) {
+        Cookie oldCookie = findCookieByNamm("postView", req.getCookies());
+        if (oldCookie != null && !oldCookie.getValue().contains("[" + targetPost.getPostCid() + "]")) {
             targetPost.updatePostView();
-            oldCookie.setValue(oldCookie.getValue() + "_[" + postCid + "]");
-            oldCookie.setPath("/");
-            oldCookie.setMaxAge(60*60*24);
-            res.addCookie(oldCookie);
-            }
-        } else {
+            oldCookie.setValue(oldCookie.getValue() + "_[" + targetPost.getPostCid() + "]");
+            res.addCookie(updateCookie(oldCookie));
+        } else if (oldCookie == null) {
             targetPost.updatePostView();
-            Cookie newCookie = new Cookie("postView", "[" + postCid + "]");
-            newCookie.setPath("/");
-            newCookie.setMaxAge(60 * 60 * 24); 								// 쿠키 시간
+            Cookie newCookie = createNewCookie("postView", "[" + targetPost.getPostCid() + "]");
             res.addCookie(newCookie);
         }
         postRepository.save(targetPost);
+    }
 
+    private Cookie findCookieByNamm(String name, Cookie[] cookies) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Cookie updateCookie(Cookie cookie) {
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24); // 쿠키 시간
+        return cookie;
+    }
+
+    private Cookie createNewCookie(String name, String value) {
+        Cookie newCookie = new Cookie(name, value);
+        newCookie.setPath("/");
+        newCookie.setMaxAge(SECONDS_IN_A_DAY);
+        return newCookie;
+    }
+
+    private PostDetailDto createPostDetailDto(PostEntity targetPost) {
         List<PostDetailImageDto> imageList = new ArrayList<>();
-
-        if(!targetPost.getPostImages().isEmpty()){
-            for(PostImageEntity image: targetPost.getPostImages()){
-                PostDetailImageDto postImage = PostDetailImageDto.builder()
-                        .postImageCid(image.getPostImageCid())
-                        .postImageFileName(image.getPostImageFileName())
-                        .postImageFilePath(image.getPostImageFilePath())
-                        .build();
-
+        if (!targetPost.getPostImages().isEmpty()) {
+            for (PostImageEntity image : targetPost.getPostImages()) {
+                PostDetailImageDto postImage = PostDetailImageDto.from(image);
                 imageList.add(postImage);
             }
         }
 
-        PostDetailDto postDetailDto = PostDetailDto.builder()
-                .postCid(targetPost.getPostCid())
-                .author(targetPost.getUserEntity().getUserNickname()) // 게시판에서는 닉네임을 사용
-                .postTitle(targetPost.getPostTitle())
-                .postContent(targetPost.getPostContent())
-                .imageList(imageList)
-                .postView(targetPost.getPostView())
-                .createdAt(toSimpleDate(targetPost.getCreatedAt()))
-                .build();
-
-
-        return GetPostDetailResponseDto.successResponse("게시물을 성공적으로 불러왔습니다.", postDetailDto);
-
+        final String simpleDate = toSimpleDate(targetPost.getCreatedAt());
+        return PostDetailDto.from(targetPost, imageList, simpleDate);
     }
 
-    public GetUserPostResponseDto getUserPost(User user, Long boardCid, int page) {
-        // TODO
-        // 유저가 해당 게시판에 포함되어있는지 확인
-        // 해당 보드에 유저가 작성한 글 불러오기
+    /**
+     * 기능 - 유저 게시물 조회
+     *
+     * @param user
+     * @param boardCid
+     * @param page
+     *
+     * @return List<GetUserPostDto>
+     */
+    public Pair<List<GetUserPostDto>, BoardInfoDto> getUserPost(User user, Long boardCid, int page) {
 
-        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(() -> new CustomNotFoundException("유저 정보가 없습니다."));
+        UserEntity userEntity = postValidation.validateUserExistence(user.getUsername());
 
-        BoardEntity boardEntity = boardRepository.findById(boardCid)
-                .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
-
-        if(userEntity.getBoardList().stream()
-                .map(BoardEntity::getBoardCid)
-                .noneMatch(cid -> cid.equals(boardEntity.getBoardCid()))
-        ) {
-            throw new CustomAccessDeniedException("게시물 조회 권한이 없습니다.");
-        }
+        postValidation.validateUserAccessToBoard(userEntity, boardCid);
 
         Pageable pageable = PageRequest.of(page-1, 10);
         Page<PostEntity> userPostList = postRepository.findAllByBoardEntity_BoardCidAndUserEntity_UserCid( boardCid, userEntity.getUserCid(), pageable);
 
-        BoardInfoDto boardInfo = BoardInfoDto.builder()
-                .page(page)
-                .totalElements(userPostList.getTotalElements())
-                .totalPages(userPostList.getTotalPages())
-                .build();
+        return Pair.of(createUserPostDtoList(userPostList), BoardInfoDto.from(userPostList, page));
+    }
 
+    private List<GetUserPostDto> createUserPostDtoList(Page<PostEntity> userPostList) {
         if(userPostList.isEmpty()) {
             throw new CustomNoSuchElementException("리스트가 비어있습니다.");
         }
 
         List<GetUserPostDto> userPostDtoList = new ArrayList<>();
         for(PostEntity post : userPostList){
-            GetUserPostDto userPost = GetUserPostDto.builder()
-                    .postCid(post.getPostCid())
-                    .postTitle(post.getPostTitle())
-                    .createdAt(toSimpleDate(post.getCreatedAt()))
-                    .build();
-            userPostDtoList.add(userPost);
+            final String simpleDate = toSimpleDate(post.getCreatedAt());
+            userPostDtoList.add( GetUserPostDto.from(post, simpleDate));
         }
 
-        return GetUserPostResponseDto.success("성공적으로 유저 게시물을 불러왔습니다.", userPostDtoList, boardInfo);
+        return userPostDtoList;
     }
 
 
-    public String toSimpleDate(LocalDateTime date) {
+    private String toSimpleDate(LocalDateTime date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return date.format(formatter);
     }
