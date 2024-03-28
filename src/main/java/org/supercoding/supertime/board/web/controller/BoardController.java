@@ -1,5 +1,6 @@
 package org.supercoding.supertime.board.web.controller;
 
+import com.nimbusds.jose.util.Pair;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,8 +18,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.board.service.BoardService;
 import org.supercoding.supertime.board.web.dto.CreatePostRequestDto;
 import org.supercoding.supertime.board.web.dto.EditPostRequestDto;
+import org.supercoding.supertime.board.web.dto.getBoardPost.BoardInfoDto;
+import org.supercoding.supertime.board.web.dto.getBoardPost.GetBoardPostDetailDto;
 import org.supercoding.supertime.board.web.dto.getBoardPost.GetBoardPostResponseDto;
 import org.supercoding.supertime.board.web.dto.getPostDetail.GetPostDetailResponseDto;
+import org.supercoding.supertime.board.web.dto.getPostDetail.PostDetailDto;
+import org.supercoding.supertime.board.web.dto.getUserPost.GetUserPostDto;
 import org.supercoding.supertime.board.web.dto.getUserPost.GetUserPostResponseDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 
@@ -39,11 +44,11 @@ public class BoardController {
             @RequestPart(name = "postInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) CreatePostRequestDto createPostInfo,
             @RequestPart(name = "postImage", required = false) List<MultipartFile> postImages
     ){
-        log.info("[BOARD] 게시물 생성 요청이 들어왔습니다.");
-        CommonResponseDto createPostResult = boardService.createPost(boardCid,user, createPostInfo, postImages);
-        log.info("[BOARD] 게시물 생성 결과 = " + createPostResult);
+        log.debug("[BOARD] 게시물 생성 요청이 들어왔습니다.");
+        boardService.createPost(boardCid,user, createPostInfo, postImages);
+        log.debug("[BOARD] 성공적으로 게시물을 생성하였습니다.");
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createPostResult);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponseDto.successResponse("게시물 작성이 성공적으로 이루어졌습니다."));
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 수정", description = "게시물을 수정하는 api입니다.")
@@ -54,11 +59,11 @@ public class BoardController {
             @RequestPart(name = "editPostInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) EditPostRequestDto editPostInfo,
             @RequestPart(name = "postImage",required = false) List<MultipartFile> postImages
                                                       ){
-        log.info("[BOARD] 게시물 수정 요청이 들어왔습니다.");
-        CommonResponseDto editPostResult = boardService.editPost(postCid, user, editPostInfo, postImages);
-        log.info("[BOARD] 게시물 수정 결과 = " + editPostResult);
+        log.debug("[BOARD] 게시물 수정 요청이 들어왔습니다.");
+        boardService.editPost(postCid, user, editPostInfo, postImages);
+        log.debug("[BOARD] 게시물이 성공적으로 수정되었습니다." );
 
-        return ResponseEntity.ok(editPostResult);
+        return ResponseEntity.ok(CommonResponseDto.successResponse("게시물이 성공적으로 수정되었습니다."));
     }
 
     @Operation(tags = {"게시판 CRUD API"}, summary = "게시물 삭제", description = "게시물을 삭제하는 api입니다.")
@@ -67,11 +72,11 @@ public class BoardController {
             @PathVariable Long postCid,
             @AuthenticationPrincipal User user
     ){
-        log.info("[BOARD] 게시물 삭제 요청이 들어왔습니다.");
-        CommonResponseDto deletePostResult = boardService.deletePost(postCid, user);
-        log.info("[BOARD] 게시물 삭제 결과 = " + deletePostResult);
+        log.debug("[BOARD] 게시물 삭제 요청이 들어왔습니다.");
+        boardService.deletePost(postCid, user);
+        log.debug("[BOARD] 게시물을 성공적으로 삭제하였습니다");
 
-        return ResponseEntity.ok(deletePostResult);
+        return ResponseEntity.ok(CommonResponseDto.successResponse("게시물을 성공적으로 삭제하였습니다."));
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시판 조회", description = "각 게시판의 게시물을 모두 불러오는 api입니다.")
@@ -81,21 +86,21 @@ public class BoardController {
             @PathVariable Long boardCid,
             @PathVariable int page
     ){
-        log.info("[BOARD] 게시판 조회 요청이 들어왔습니다.");
-        GetBoardPostResponseDto getBoardPostsResult = boardService.getBoardPost(user, boardCid, page);
-        log.info("[BOARD] 게시판 조회 요청 결과 = "+ getBoardPostsResult);
+        log.debug("[BOARD] 게시판 조회 요청이 들어왔습니다.");
+        Pair<List<GetBoardPostDetailDto>, BoardInfoDto> postListAndBoardInfoPair = boardService.getBoardPost(user, boardCid, page);
+        log.debug("[BOARD] 게시판을 성공적으로조회했습니다.");
 
-        return ResponseEntity.ok(getBoardPostsResult);
+        return ResponseEntity.ok(GetBoardPostResponseDto.successResponse("게시판에 포함된 게시물을 불러왔습니다.", postListAndBoardInfoPair.getLeft(), postListAndBoardInfoPair.getRight()));
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "게시물 조회", description = "게시물의 세부 내용을 불러오는 api입니다.")
     @GetMapping("/posts/{postCid}")
     public ResponseEntity<GetPostDetailResponseDto> getPostDetail(@PathVariable Long postCid, HttpServletRequest req, HttpServletResponse res){
-        log.info("[POST] 게시물 조회 요청이 들어왔습니다.");
-        GetPostDetailResponseDto getPostDetailResult = boardService.getPostDetail(postCid, req, res);
-        log.info("[POST] 게시물 조회 요청 결과 = "+ getPostDetailResult);
+        log.debug("[POST] 게시물 조회 요청이 들어왔습니다.");
+       PostDetailDto postDetail = boardService.getPostDetail(postCid, req, res);
+        log.debug("[POST] 게시물을 성곡적으로 조회했습니다.");
 
-        return ResponseEntity.ok(getPostDetailResult);
+        return ResponseEntity.ok(GetPostDetailResponseDto.successResponse("성공적으로 게시물을 불러왔습니다.",postDetail));
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "유저 게시물 조회", description = "유저가 작성한 글을 불러오는 api입니다.")
@@ -106,9 +111,9 @@ public class BoardController {
             @PathVariable int page
     ){
         log.debug("[GET_USER_POST] 유저 게시물 조회 요청이 들어왔습니다.");
-        GetUserPostResponseDto getUserPostResult = boardService.getUserPost(user, boardCid, page);
-        log.debug("[GET_USER_POST] 유저 게시물 조회 결과 = {} ", getUserPostResult);
+        Pair<List<GetUserPostDto>, BoardInfoDto> userPostListAndBoardInfoPair = boardService.getUserPost(user, boardCid, page);
+        log.debug("[GET_USER_POST] 유저 게시물을 성공적으로 불러왔습니다.");
 
-        return ResponseEntity.ok(getUserPostResult);
+        return ResponseEntity.ok(GetUserPostResponseDto.success("성공적으로 유저 게시물을 불러왔습니다.", userPostListAndBoardInfoPair.getLeft(), userPostListAndBoardInfoPair.getRight()));
     }
 }

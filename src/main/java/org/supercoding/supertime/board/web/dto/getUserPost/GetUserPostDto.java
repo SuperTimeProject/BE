@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.supercoding.supertime.board.web.entity.PostEntity;
 
 @Getter
 @Setter
@@ -18,4 +19,12 @@ public class GetUserPostDto {
 
     @Schema(description = "작성일", example = "0000-00-00")
     private String createdAt;
+
+    public static GetUserPostDto from(PostEntity post, String simpleDate) {
+        return GetUserPostDto.builder()
+                .postCid(post.getPostCid())
+                .postTitle(post.getPostTitle())
+                .createdAt(simpleDate)
+                .build();
+    }
 }

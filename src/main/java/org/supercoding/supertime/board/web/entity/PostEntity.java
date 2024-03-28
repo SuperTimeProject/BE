@@ -3,6 +3,7 @@ package org.supercoding.supertime.board.web.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.supercoding.supertime.board.web.dto.CreatePostRequestDto;
 import org.supercoding.supertime.golbal.web.entity.TimeEntity;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
@@ -49,5 +50,14 @@ public class PostEntity extends TimeEntity {
 
     public void updatePostView(){
         this.postView++;
+    }
+
+    public static PostEntity create(final BoardEntity board, final UserEntity user, final CreatePostRequestDto postInfo){
+        return PostEntity.builder()
+                .boardEntity(board)
+                .userEntity(user)
+                .postTitle(postInfo.getPostTitle())
+                .postContent(postInfo.getPostContent())
+                .build();
     }
 }

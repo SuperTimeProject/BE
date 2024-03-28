@@ -3,6 +3,7 @@ package org.supercoding.supertime.board.web.dto.getPostDetail;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.supercoding.supertime.board.web.entity.PostEntity;
 
 import java.util.List;
 
@@ -34,4 +35,16 @@ public class PostDetailDto {
 
     @Schema(description = "게시물 조회수", example = "39")
     private int postView;
+
+    public static PostDetailDto from(PostEntity post, List<PostDetailImageDto> imageList, String simpleDate) {
+        return PostDetailDto.builder()
+                .postCid(post.getPostCid())
+                .author(post.getUserEntity().getUserNickname()) // 게시판에서는 닉네임을 사용
+                .postTitle(post.getPostTitle())
+                .postContent(post.getPostContent())
+                .imageList(imageList)
+                .postView(post.getPostView())
+                .createdAt(simpleDate)
+                .build();
+    }
 }

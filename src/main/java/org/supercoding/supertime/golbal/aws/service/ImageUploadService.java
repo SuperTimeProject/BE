@@ -7,7 +7,9 @@ import com.amazonaws.util.IOUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.inquiry.repository.InquiryImageRepository;
 import org.supercoding.supertime.schedule.repository.ScheduleImageRepository;
@@ -178,7 +180,6 @@ public class ImageUploadService {
 
         return newImage;
     }
-
 
     public void deleteImage(String productImagePath) {
         String key = extractKey(productImagePath);
