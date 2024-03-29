@@ -1,24 +1,23 @@
 package org.supercoding.supertime.semester.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.supercoding.supertime.admin.util.AdminValidation;
 import org.supercoding.supertime.chat.service.ChatRoomService;
 import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
-import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
-import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.schedule.web.dto.CreateSemesterRequestDto;
-import org.supercoding.supertime.schedule.web.dto.GetAllSemesterResponseDto;
 import org.supercoding.supertime.schedule.web.dto.GetSemesterDto;
+import org.supercoding.supertime.semester.util.SemesterValidation;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.web.enums.IsFull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -29,49 +28,50 @@ public class SemesterService {
     private final BoardRepository boardRepository;
     private final ChatRoomService chatRoomService;
 
-    @Transactional
-    public CommonResponseDto createSemester(CreateSemesterRequestDto createSemesterInfo) {
-        // 중복된 기수가 있는지 확인
-        Boolean isExist = semesterRepository.existsBySemesterName(createSemesterInfo.getSemesterName());
-        if(isExist){
-            throw new DataIntegrityViolationException("이미 중복된 기수가 존재합니다.");
-        }
-        BoardEntity newSemesterBoard = BoardEntity.builder()
-                .boardName("기수 게시판 ("+createSemesterInfo.getSemesterName()+")")
-                .build();
-        boardRepository.save(newSemesterBoard);
+    private final SemesterValidation semesterValidation;
+    private final AdminValidation adminValidation;
 
-        List<String> partList = Arrays.asList("FE", "BE", "FULL");
+    @Value("${spring.default.part_list}")
+    private List<String> partList;
+    @Value("${spring.default.time_list}")
+    private List<String> timeList;
+
+    /**
+     * 기능 - 기수 생성
+     *
+     * @param createSemesterInfo
+     *
+     * @return void
+     */
+    @Transactional
+    public void createSemester(CreateSemesterRequestDto createSemesterInfo, User user) {
+
+        adminValidation.validateAdminRole(user);
+
+        int semesterName = createSemesterInfo.getSemesterName();
+
+        semesterValidation.validateSemesterExist(semesterName);
+
+        createSemesterBoard(semesterName);
+
+        createSemesterEntity(createSemesterInfo);
+
+        chatRoomService.createDefaultRoom(String.valueOf(createSemesterInfo.getSemesterName()));
+    }
+
+    private void createSemesterBoard(int semesterName) {
+        boardRepository.save(BoardEntity.toSemesterBoard(semesterName));
 
         for(String part: partList){
-            // 파트별 스터디 게시판 생성
-            BoardEntity newSemesterPartBoard = BoardEntity.builder()
-                    .boardName("스터디 게시판 ("+createSemesterInfo.getSemesterName()+part+")")
-                    .build();
-            boardRepository.save(newSemesterPartBoard);
+            boardRepository.save(BoardEntity.toStudyBoard(semesterName, part));
         }
+    }
 
-        List<String> enumList = Arrays.asList("FULL", "HALF");
-
-        for(String isFull:enumList){
-            String detailName = createSemesterInfo.getSemesterName() + isFull;
-
-            SemesterEntity newSemester = SemesterEntity.builder()
-                    .semesterName(createSemesterInfo.getSemesterName())
-                    .semesterDetailName(detailName)
-                    .startDate(createSemesterInfo.getStartDate())
-                    .isFull(getIsFullEnum(isFull))
-                    .build();
-
-            semesterRepository.save(newSemester);
+    private void createSemesterEntity(CreateSemesterRequestDto semesterInfo) {
+        for(String isFull: timeList){
+            String detailName = semesterInfo.getSemesterName() + isFull;
+            semesterRepository.save(SemesterEntity.from(semesterInfo, detailName, getIsFullEnum(isFull)));
         }
-
-        // 기수 채팅방 생성
-        chatRoomService.createDefaultRoom(String.valueOf(createSemesterInfo.getSemesterName()));
-
-        // 결과 전달
-
-        return CommonResponseDto.createSuccessResponse("기수 생성이 완료되었습니다.");
     }
 
     private static IsFull getIsFullEnum(String inputString) {
@@ -86,22 +86,20 @@ public class SemesterService {
         }
     }
 
-    public GetAllSemesterResponseDto getAllSemester() {
-        List<SemesterEntity> semesterList = semesterRepository.findAll();
+    /**
+     * 기능 - 모든 기수 조회
+     *
+     * @return List<SemesterEntity>
+     */
+    @Transactional(readOnly = true)
+    public List<GetSemesterDto> getAllSemester() {
+
         List<GetSemesterDto> resultList = new ArrayList<>();
 
-        if(semesterList.isEmpty()){
-            throw new CustomNoSuchElementException("기수 리스트가 비어있습니다.");
-        }
-        for(SemesterEntity semester:semesterList){
-            GetSemesterDto newSemesterDto = GetSemesterDto.builder()
-                    .semesterCid(semester.getSemesterCid())
-                    .semesterDetailName(semester.getSemesterDetailName())
-                    .build();
-
-            resultList.add(newSemesterDto);
+        for(SemesterEntity semester: semesterValidation.validateSemesterIsEmpty()){
+            resultList.add(GetSemesterDto.from(semester));
         }
 
-        return GetAllSemesterResponseDto.successResponse("기수를 성공적으로 불러왔습니다.", resultList);
+        return resultList;
     }
 }
