@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.inquiry.repository.InquiryImageRepository;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.inquiry.web.dto.*;
@@ -162,7 +163,7 @@ public class UserService {
         List<InquiryDetailDto> inquiryListDto = new ArrayList<>();
 
         if(inquiryList.isEmpty()){
-            throw new CustomNotFoundException("문의내용이 없습니다.");
+            throw new CustomNoSuchElementException("문의내용이 없습니다.");
         }
 
         for(InquiryEntity inquiry: inquiryList){

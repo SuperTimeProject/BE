@@ -27,4 +27,5 @@ public class BoardEntity {
 
     @ManyToMany(mappedBy = "boardList")
     private List<UserEntity> userList;
+
 }
