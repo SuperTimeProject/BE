@@ -60,10 +60,12 @@ public class SemesterService {
     }
 
     private void createSemesterBoard(int semesterName) {
-        boardRepository.save(BoardEntity.toSemesterBoard(semesterName));
+        BoardEntity semesterBoard = BoardEntity.toSemesterBoard(semesterName);
+        boardRepository.save(semesterBoard);
 
         for(String part: partList){
-            boardRepository.save(BoardEntity.toStudyBoard(semesterName, part));
+            BoardEntity studyBoard = BoardEntity.toStudyBoard(semesterName, part);
+            boardRepository.save(studyBoard);
         }
     }
 

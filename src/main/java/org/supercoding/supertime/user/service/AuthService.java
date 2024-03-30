@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.golbal.auth.token.repository.RefreshTokenRepository;
+import org.supercoding.supertime.golbal.web.advice.CustomDataIntegerityCiolationException;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
 import org.supercoding.supertime.user.repository.AuthStateRepository;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
@@ -233,7 +234,7 @@ public class AuthService {
     public CommonResponseDto emailDuplicateTest(String userEmail) {
         Boolean duplicateResult = userRepository.existsByUserId(userEmail);
         if (duplicateResult){
-            throw new DataIntegrityViolationException("이미 사용중인 이메일입니다.");
+            throw new CustomDataIntegerityCiolationException("이미 사용중인 이메일입니다.");
         }
 
         return CommonResponseDto.successResponse("사용 가능한 email 입니다.");
@@ -242,7 +243,7 @@ public class AuthService {
     public CommonResponseDto nicknameDuplicateTest(String nickname) {
         Boolean duplicateResult = userRepository.existsByUserNickname(nickname);
         if (duplicateResult){
-            throw new DataIntegrityViolationException("이미 사용중인 닉네임입니다.");
+            throw new CustomDataIntegerityCiolationException("이미 사용중인 닉네임입니다.");
         }
 
         return CommonResponseDto.successResponse("사용 가능한 닉네임 입니다.");

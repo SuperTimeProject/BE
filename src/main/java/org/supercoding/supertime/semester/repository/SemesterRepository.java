@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface SemesterRepository extends JpaRepository<SemesterEntity, Long> {
     Boolean existsBySemesterName(int createSemesterName);
 
-    Optional<Void> findBySemesterName(int semesterName);
+    Optional<SemesterEntity> findBySemesterName(int semesterName);
 }

@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.user.service.MyPageService;
 import org.supercoding.supertime.user.service.UserService;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.inquiry.web.dto.InquiryDetailResponseDto;
@@ -30,6 +32,7 @@ import java.util.List;
 public class MyPageController {
 
     private final UserService userService;
+    private final MyPageService myPageService;
 
     /*
     @Operation(summary = "유저 정보 조회", description = "로그인한 유저 정보를 보여주는 api입니다.")
@@ -41,6 +44,31 @@ public class MyPageController {
         return ResponseEntity.ok(getUserInfoResult);
     }
      */
+    @Operation(summary = "유저 프로필 수정", description = "유저의 프로필 이미지를 수정하는 API입니다.")
+    @PutMapping(value = "/profile-image",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> editProfileImage(
+            @AuthenticationPrincipal User user,
+            @RequestPart(name = "userProfileImage", required = false) MultipartFile newProfileImage
+    ) {
+        log.debug("[MY_PAGE] 프로필 이미지 수정 요청이 들어왔습니다.");
+        myPageService.editProfileImage(user, newProfileImage);
+        log.debug("[MY_PAGE] 프로필 이미지를 성공적으로 수정하였습니다.");
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponseDto.successResponse("유저 프로필 이미지 수정에 성공했습니다."));
+    }
+
+    @Operation(summary = "유저 닉네임 수정", description = "유저의 닉네임을 수정하는 API입니다.")
+    @PutMapping(value = "/profile-nickname",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponseDto> editNickname(
+            @AuthenticationPrincipal User user,
+            @Parameter String newNickname
+    ) {
+        log.debug("[MY_PAGE] 닉네임 수정 요청이 들어왔습니다.");
+        myPageService.editNickname(user, newNickname);
+        log.debug("[MY_PAGE] 닉네임을 성공적으로 수정하였습니다.");
+
+        return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.successResponse("유저 닉네임 수정에 성공했습니다."));
+    }
 
     @Operation(summary = "유저 정보 수정", description = "로그인한 유저 정보를 수정하는 api입니다.")
     @PutMapping(value = "/info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

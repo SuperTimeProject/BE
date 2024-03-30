@@ -18,8 +18,9 @@ public class SemesterValidation {
     private final SemesterRepository semesterRepository;
 
     public void validateSemesterExist (int semesterName) {
-        semesterRepository.findBySemesterName(semesterName)
-                .orElseThrow(() -> new CustomDataIntegerityCiolationException("이미 중복된 기수가 존재합니다."));
+        if(semesterRepository.existsBySemesterName(semesterName)) {
+            throw new CustomDataIntegerityCiolationException("이미 중복된 기수가 존재합니다.");
+        }
     }
 
     public List<SemesterEntity> validateSemesterIsEmpty () {
