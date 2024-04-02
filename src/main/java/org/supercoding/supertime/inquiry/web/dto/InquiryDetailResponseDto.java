@@ -22,4 +22,13 @@ public class InquiryDetailResponseDto {
     private String message;
 
     private InquiryDetailDto inquiryInfo;
+
+    public static InquiryDetailResponseDto from(String message, InquiryDetailDto inquiryInfo) {
+        return InquiryDetailResponseDto.builder()
+                .success(true)
+                .code(200)
+                .message(message)
+                .inquiryInfo(inquiryInfo)
+                .build();
+    }
 }

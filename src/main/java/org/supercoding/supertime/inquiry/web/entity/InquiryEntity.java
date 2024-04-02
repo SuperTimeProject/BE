@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.supercoding.supertime.golbal.web.entity.TimeEntity;
 import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
+import org.supercoding.supertime.inquiry.web.dto.InquiryRequestDto;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.List;
@@ -46,4 +47,13 @@ public class InquiryEntity extends TimeEntity {
     @Column(name = "isClosed")
     @Schema(description = "문의 닫힘 여부 (1 or 0)", example = "1")
     private InquiryClosed isClosed;
+
+    public static InquiryEntity from(InquiryRequestDto inquiryRequestDto, UserEntity userEntity) {
+        return InquiryEntity.builder()
+                .inquiryTitle(inquiryRequestDto.getInquiryTitle())
+                .inquiryContent(inquiryRequestDto.getInquiryContent())
+                .user(userEntity)
+                .isClosed(InquiryClosed.OPEN)
+                .build();
+    }
 }

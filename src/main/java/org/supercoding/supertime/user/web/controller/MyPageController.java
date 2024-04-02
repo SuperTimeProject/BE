@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.inquiry.web.dto.InquiryDetailDto;
 import org.supercoding.supertime.user.service.MyPageService;
 import org.supercoding.supertime.user.service.UserService;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
@@ -34,16 +35,6 @@ public class MyPageController {
     private final UserService userService;
     private final MyPageService myPageService;
 
-    /*
-    @Operation(summary = "유저 정보 조회", description = "로그인한 유저 정보를 보여주는 api입니다.")
-    @GetMapping("/info")
-    public ResponseEntity<GetUserPageResponseDto> userInfo(@AuthenticationPrincipal User user){
-        log.info("[USER] 유저 정보 조회 요청이 들어왔습니다.");
-        GetUserPageResponseDto getUserInfoResult = userService.GetUserInfo(user);
-        log.info("[USER] 유저 정보 조회 결과 = " + getUserInfoResult);
-        return ResponseEntity.ok(getUserInfoResult);
-    }
-     */
     @Operation(summary = "유저 프로필 수정", description = "유저의 프로필 이미지를 수정하는 API입니다.")
     @PutMapping(value = "/profile-image",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponseDto> editProfileImage(
@@ -70,54 +61,44 @@ public class MyPageController {
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.successResponse("유저 닉네임 수정에 성공했습니다."));
     }
 
-    @Operation(summary = "유저 정보 수정", description = "로그인한 유저 정보를 수정하는 api입니다.")
-    @PutMapping(value = "/info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponseDto> editUserInfo(
-            @AuthenticationPrincipal User user,
-            @RequestParam(name = "userNickname", required = false) String userNickName,
-            @RequestPart(name = "userProfileImage", required = false) MultipartFile userProfileImage
-            ){
-        log.info("[USER] 유저 정보 조회 요청이 들어왔습니다.");
-        CommonResponseDto editUserInfoResult = userService.editUserInfo(user,userNickName,userProfileImage);
-        log.info("[USER] 유저 정보 조회 결과 = " + editUserInfoResult);
-        return ResponseEntity.ok(editUserInfoResult);
-    }
-
-    @Operation(summary = "문의 조회", description = "문의한 기록을 불러오는 api입니다.")
-    @GetMapping("/inquiry")
-    public ResponseEntity<InquiryResponseDto> getInquiryHistory(
-            @AuthenticationPrincipal User user,
-            @RequestParam int page
-    ){
-        log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
-        InquiryResponseDto getInquiryHistoryResult = userService.getInquiryHistory(user,page);
-        log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryHistoryResult);
-        return ResponseEntity.ok().body(getInquiryHistoryResult);
-    }
-
-    @Operation(summary = "문의 상세 조회", description = "문의한 기록을 불러오는 api입니다.")
-    @GetMapping("/inquiry/{inquiryCid}")
+    @Operation(summary = "유저 문의 상세 조회", description = "유저의 문의 상세 내역을 불러오는 API입니다.")
+    @GetMapping("/user-inquiry/detail/{inquiryCid}")
     public ResponseEntity<InquiryDetailResponseDto> getInquiryDetail(
             @AuthenticationPrincipal User user,
             @PathVariable Long inquiryCid
-            ){
-        log.info("[USER] 유저 문의 기록 조회 요청이 들어왔습니다.");
-        InquiryDetailResponseDto getInquiryDetailResult = userService.getInquiryDetail(user,inquiryCid);
-        log.info("[USER] 유저 문의 기록 조회 결과 = " + getInquiryDetailResult);
-        return ResponseEntity.ok().body(getInquiryDetailResult);
+    ) {
+        log.debug("[MY_PAGE] 유저 문의 상세 조회 요청이 들어왔습니다.");
+        InquiryDetailDto inquiryDetail = myPageService.getInquiryDetail(user, inquiryCid);
+        log.debug(("[MY_PAGE] 유저 문의 상세 내용을 성공적으로 조회하였습니다."));
+
+        return ResponseEntity.ok(InquiryDetailResponseDto.from("유저 문의 상세 내용을 성공적으로 불러왔습니다.", inquiryDetail));
     }
 
-    @Operation(summary = "문의하기", description = "관리자에게 문의하는 api입니다.")
+    @Operation(summary = "유저 문의 조회", description = "유저가 작성한 문의를 불러오는 API입니다.")
+    @GetMapping("/user-inquiry")
+    public ResponseEntity<InquiryResponseDto> getUserInquiry(
+            @AuthenticationPrincipal User user,
+            @RequestParam int page
+    ) {
+        log.debug("[MY_PAGE] 유저 문의 목록 조회 요청이 들어왔습니다.");
+        List<InquiryDetailDto> inquiryList = myPageService.getUserInquiry(user, page);
+        log.debug(("[MY_PAGE] 유저 문의를 성공적으로 불러왔습니다."));
+
+        return ResponseEntity.ok(InquiryResponseDto.from("문의 리스트를 성공적으로 불러왔습니다.", inquiryList));
+    }
+
+    @Operation(summary = "문의 작성", description = "문의를 작성하는 API입니다.")
     @PostMapping(value = "/inquiry", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponseDto> inquiry(
+    public ResponseEntity<CommonResponseDto> createInquiry(
             @AuthenticationPrincipal User user,
             @RequestPart(name = "inquiryInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) InquiryRequestDto inquiryRequestDto,
             @RequestPart(name = "inquiryImage", required = false) List<MultipartFile> inquiryImage
-    ){
-        log.info("[USER] 유저 문의하기 요청이 들어왔습니다.");
-        CommonResponseDto inquiryResult = userService.createInquiry(user,inquiryRequestDto,inquiryImage);
-        log.info("[USER] 유저 문의하기 결과 = " + inquiryResult);
-        return ResponseEntity.ok(inquiryResult);
+    ) {
+        log.debug("[MY_PAGE] 문의하기 작성 요청이 들어왔습니다.");
+        myPageService.createInquiry(user, inquiryRequestDto, inquiryImage);
+        log.debug("[MY_PAGE] 문의하기를 성공적으로 추가하였습니다.");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponseDto.successResponse("문의를 성공적으로 추가하였습니다."));
     }
 
     @Operation(summary = "주특기 선택", description = "주특기를 선택하는 api입니다.")
