@@ -13,12 +13,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
+import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
+import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.inquiry.web.dto.InquiryDetailDto;
 import org.supercoding.supertime.inquiry.web.dto.InquiryImageDto;
 import org.supercoding.supertime.inquiry.web.dto.InquiryRequestDto;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
+import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.util.UserValidation;
@@ -26,6 +29,7 @@ import org.supercoding.supertime.user.web.entity.user.UserEntity;
 import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -39,6 +43,10 @@ public class MyPageService {
     private final InquiryRepository inquiryRepository;
 
     private final UserValidation userValidation;
+
+    final int MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+    final int SELECTABLE_START_DATE = 14;
+    final int SELECTABLE_END_DATE = 21;
 
     /**
      * 기능 - 유저 프로필 이미지 수정
@@ -106,84 +114,32 @@ public class MyPageService {
     }
 
     /**
-     * 기능 - 유저 문의 조회
+     * 기능 - 유저 파트 선택
      *
      * @param user
-     * @param page
+     * @param part
      *
-     * @return List<InquiryDetailDto>
-     */
-    @Transactional(readOnly = true)
-    public List<InquiryDetailDto> getUserInquiry(User user, int page) {
-        UserEntity userEntity = userValidation.validateExistUser(user.getUsername());
-
-        Page<InquiryEntity> inquiryList = userValidation.validateExistUserInquiry(page, userEntity);
-
-        return inquiryToDto(inquiryList, userEntity);
-    }
-
-    private List<InquiryDetailDto> inquiryToDto(Page<InquiryEntity> inquiryList, UserEntity user) {
-        List<InquiryDetailDto> inquiryDetailList = new ArrayList<>();
-        for(InquiryEntity inquiry : inquiryList) {
-            List<InquiryImageDto> imageList = inquiryImageToDto(inquiry);
-            inquiryDetailList.add(InquiryDetailDto.from(inquiry, user, imageList));
-        }
-
-        return inquiryDetailList;
-    }
-
-    private List<InquiryImageDto> inquiryImageToDto(InquiryEntity inquiry) {
-        List<InquiryImageDto> imageList = new ArrayList<>();
-        for(InquiryImageEntity image : inquiry.getInquiryImages()) {
-            imageList.add(InquiryImageDto.from(image));
-        }
-
-        return imageList;
-    }
-
-    /**
-     * 기능 - 유저 문의 내용 상세 조회
-     *
-     * @param user
-     * @param inquiryCid
-     *
-     * @return InquiryDetailDto
-     */
-    public InquiryDetailDto getInquiryDetail(User user, Long inquiryCid) {
-        UserEntity userEntity = userValidation.validateExistUser(user.getUsername());
-
-        InquiryEntity inquiry = userValidation.validateExistInquiry(inquiryCid);
-
-        List<InquiryImageDto> imageList = inquiryImageToDto(inquiry);
-
-        return InquiryDetailDto.from(inquiry, userEntity, imageList);
-    }
-
-    /**
-     * 기능 - 문의 작성
-     *
-     * @param user
-     * @param inquiryRequestDto
-     * @param inquiryImage
-     *
-     * @return void
+     * return void
      */
     @Transactional
-    public void createInquiry(User user, InquiryRequestDto inquiryRequestDto, List<MultipartFile> inquiryImage) {
+    public void selectPart(User user, String part) {
         UserEntity userEntity = userValidation.validateExistUser(user.getUsername());
 
-        InquiryEntity inquiry = InquiryEntity.from(inquiryRequestDto, userEntity);
+        SemesterEntity semester = userValidation.validateExistSemester(userEntity.getSemester());
 
-        addInquiryImage(inquiry, inquiryImage);
-
-        inquiryRepository.save(inquiry);
+        if(!isPossible(semester.getStartDate())) {
+            throw new CustomAccessDeniedException("변경 가능일이 아닙니다.");
+        }
+            userEntity.setPart(Part.valueOf(part));
+            userRepository.save(userEntity);
     }
 
-    private void addInquiryImage(InquiryEntity inquiry, List<MultipartFile> imageList) {
-        if(imageList != null) {
-            List<InquiryImageEntity> uploadImages = imageUploadService.uploadInquiryImages(imageList, "inquiry");
-            inquiry.setInquiryImages(uploadImages);
-        }
+    private Boolean isPossible(Date startDate) {
+        Date today = new Date();
+
+        Long PERIOD = (today.getTime() - startDate.getTime())/(MILLISECONDS_PER_DAY);
+
+        return PERIOD >= SELECTABLE_START_DATE && PERIOD <= SELECTABLE_END_DATE;
     }
 
 }

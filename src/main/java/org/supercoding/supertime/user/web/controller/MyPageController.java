@@ -61,56 +61,16 @@ public class MyPageController {
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.successResponse("유저 닉네임 수정에 성공했습니다."));
     }
 
-    @Operation(summary = "유저 문의 상세 조회", description = "유저의 문의 상세 내역을 불러오는 API입니다.")
-    @GetMapping("/user-inquiry/detail/{inquiryCid}")
-    public ResponseEntity<InquiryDetailResponseDto> getInquiryDetail(
-            @AuthenticationPrincipal User user,
-            @PathVariable Long inquiryCid
-    ) {
-        log.debug("[MY_PAGE] 유저 문의 상세 조회 요청이 들어왔습니다.");
-        InquiryDetailDto inquiryDetail = myPageService.getInquiryDetail(user, inquiryCid);
-        log.debug(("[MY_PAGE] 유저 문의 상세 내용을 성공적으로 조회하였습니다."));
-
-        return ResponseEntity.ok(InquiryDetailResponseDto.from("유저 문의 상세 내용을 성공적으로 불러왔습니다.", inquiryDetail));
-    }
-
-    @Operation(summary = "유저 문의 조회", description = "유저가 작성한 문의를 불러오는 API입니다.")
-    @GetMapping("/user-inquiry")
-    public ResponseEntity<InquiryResponseDto> getUserInquiry(
-            @AuthenticationPrincipal User user,
-            @RequestParam int page
-    ) {
-        log.debug("[MY_PAGE] 유저 문의 목록 조회 요청이 들어왔습니다.");
-        List<InquiryDetailDto> inquiryList = myPageService.getUserInquiry(user, page);
-        log.debug(("[MY_PAGE] 유저 문의를 성공적으로 불러왔습니다."));
-
-        return ResponseEntity.ok(InquiryResponseDto.from("문의 리스트를 성공적으로 불러왔습니다.", inquiryList));
-    }
-
-    @Operation(summary = "문의 작성", description = "문의를 작성하는 API입니다.")
-    @PostMapping(value = "/inquiry", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponseDto> createInquiry(
-            @AuthenticationPrincipal User user,
-            @RequestPart(name = "inquiryInfo") @Parameter(schema = @Schema(type = "string", format = "binary")) InquiryRequestDto inquiryRequestDto,
-            @RequestPart(name = "inquiryImage", required = false) List<MultipartFile> inquiryImage
-    ) {
-        log.debug("[MY_PAGE] 문의하기 작성 요청이 들어왔습니다.");
-        myPageService.createInquiry(user, inquiryRequestDto, inquiryImage);
-        log.debug("[MY_PAGE] 문의하기를 성공적으로 추가하였습니다.");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponseDto.successResponse("문의를 성공적으로 추가하였습니다."));
-    }
-
     @Operation(summary = "주특기 선택", description = "주특기를 선택하는 api입니다.")
     @PutMapping(value = "/part/{partName}")
     public ResponseEntity<CommonResponseDto> selectPart(
             @AuthenticationPrincipal User user,
             @PathVariable String partName
     ){
-        log.info("[USER] 주특기 선택 요청이 들어왔습니다.");
-        CommonResponseDto selectPartResult = userService.selectPart(user,partName);
-        log.info("[USER] 주특기 선택 결과 = " + selectPartResult);
-        return ResponseEntity.ok(selectPartResult);
+        log.debug("[MY_PAGE] 주특기 선택 요청이 들어왔습니다.");
+        myPageService.selectPart(user,partName);
+        log.debug("[MY_PAGE] 주특기를 성곡적으로 변경하였습니다");
+        return ResponseEntity.ok(CommonResponseDto.successResponse("성공적으로 주특기를 선택하였습니다."));
     }
 
     @Operation(summary = "주특기 확정", description = "주특기를 확정하는 api입니다.")
@@ -118,9 +78,9 @@ public class MyPageController {
     public ResponseEntity<CommonResponseDto> confirmedPart(
             @AuthenticationPrincipal User user
     ){
-        log.info("[USER] 주특기 선택 요청이 들어왔습니다.");
+        log.info("[MY_PAGE] 주특기 선택 요청이 들어왔습니다.");
         CommonResponseDto selectPartResult = userService.confirmedPart(user);
-        log.info("[USER] 주특기 선택 결과 = " + selectPartResult);
+        log.info("[MY_PAGE] 주특기 선택 결과 = " + selectPartResult);
         return ResponseEntity.ok(selectPartResult);
     }
 
