@@ -1,26 +1,18 @@
 package org.supercoding.supertime.user.service;
 
-import com.nimbusds.jose.util.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.board.web.entity.PostImageEntity;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
-import org.supercoding.supertime.inquiry.web.dto.InquiryDetailDto;
-import org.supercoding.supertime.inquiry.web.dto.InquiryImageDto;
-import org.supercoding.supertime.inquiry.web.dto.InquiryRequestDto;
-import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
-import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
@@ -28,7 +20,6 @@ import org.supercoding.supertime.user.util.UserValidation;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,7 +31,6 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final ImageUploadService imageUploadService;
-    private final InquiryRepository inquiryRepository;
 
     private final UserValidation userValidation;
 
@@ -142,4 +132,22 @@ public class MyPageService {
         return PERIOD >= SELECTABLE_START_DATE && PERIOD <= SELECTABLE_END_DATE;
     }
 
+    @Transactional
+    public void deleteProfileImage(User user) {
+        UserEntity userEntity = userValidation.validateExistUser(user.getUsername());
+
+        userValidation.validateExistProfileImage(userEntity);
+
+        String oldPath = deleteProfileImage(userEntity.getUserProfileCid());
+
+        deleteImageFromS3(oldPath);
+    }
+
+    private String deleteProfileImage(Long profileCid) {
+        UserProfileEntity userProfile = userProfileRepository.findByUserProfileCid(profileCid);
+
+        userProfileRepository.delete(userProfile);
+
+        return userProfile.getUserProfileFilePath();
+    }
 }

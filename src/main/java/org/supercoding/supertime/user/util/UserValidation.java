@@ -12,8 +12,10 @@ import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
+import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class UserValidation {
     private final UserRepository userRepository;
     private final InquiryRepository inquiryRepository;
     private final SemesterRepository semesterRepository;
+    private final UserProfileRepository userProfileRepository;
 
     public UserEntity validateExistUser(String username) {
         return userRepository.findByUserId(username)
@@ -55,5 +58,11 @@ public class UserValidation {
     public SemesterEntity validateExistSemester(Long semesterCid) {
         return semesterRepository.findById(semesterCid)
                 .orElseThrow(()-> new CustomNotFoundException("기수가 존재하지 않습니다."));
+    }
+
+    public void validateExistProfileImage(UserEntity user) {
+        if(user.getUserProfileCid() == null) {
+            throw new CustomNotFoundException("프로필 이미지가 존재하지 않습니다.");
+        }
     }
 }

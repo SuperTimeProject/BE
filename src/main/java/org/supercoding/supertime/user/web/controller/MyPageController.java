@@ -73,27 +73,16 @@ public class MyPageController {
         return ResponseEntity.ok(CommonResponseDto.successResponse("성공적으로 주특기를 선택하였습니다."));
     }
 
-    @Operation(summary = "주특기 확정", description = "주특기를 확정하는 api입니다.")
-    @PutMapping(value = "/part/confirmed")
-    public ResponseEntity<CommonResponseDto> confirmedPart(
-            @AuthenticationPrincipal User user
-    ){
-        log.info("[MY_PAGE] 주특기 선택 요청이 들어왔습니다.");
-        CommonResponseDto selectPartResult = userService.confirmedPart(user);
-        log.info("[MY_PAGE] 주특기 선택 결과 = " + selectPartResult);
-        return ResponseEntity.ok(selectPartResult);
-    }
-
     @Operation(summary = "프로필 이미지 삭제", description = "프로필 이미지를 삭제하는 api입니다.")
-    @PutMapping(value = "/info/profile-image")
+    @DeleteMapping(value = "/info/profile-image")
     public ResponseEntity<CommonResponseDto> deleteProfileImage(
             @AuthenticationPrincipal User user
-    ){
-        log.info("[USER] 프로필 이미지 삭제 요청이 들어왔습니다.");
-        CommonResponseDto deleteImgResult = userService.deleteProfileImage(user);
-        log.info("[USER] 프로필 이미지 삭제 결과 = " + deleteImgResult);
-        return ResponseEntity.ok(deleteImgResult);
-    }
+    ) {
+        log.debug("[MY_PAGE] 프로필 이미지 삭제 요청이 들어왔습니다.");
+        myPageService.deleteProfileImage(user);
+        log.debug("[MY_PAGE] 프로필 이미지를 성공적으로 삭제했습니다.");
 
+        return ResponseEntity.ok(CommonResponseDto.successResponse("이미지를 성공적으로 삭제하였습니다"));
+    }
 
 }
