@@ -130,6 +130,13 @@ public class MyPageService {
         return PERIOD >= SELECTABLE_START_DATE && PERIOD <= SELECTABLE_END_DATE;
     }
 
+    /**
+     * 기능 - 유저 프로필 이미지 삭제
+     *
+     * @param user
+     *
+     * return void
+     */
     @Transactional
     public void deleteProfileImage(User user) {
         UserEntity userEntity = userValidation.validateExistUser(user.getUsername());
