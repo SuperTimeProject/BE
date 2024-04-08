@@ -2,7 +2,6 @@ package org.supercoding.supertime.user.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.supercoding.supertime.inquiry.web.dto.InquiryDetailDto;
 import org.supercoding.supertime.user.service.MyPageService;
 import org.supercoding.supertime.user.service.UserService;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
-import org.supercoding.supertime.inquiry.web.dto.InquiryDetailResponseDto;
-import org.supercoding.supertime.inquiry.web.dto.InquiryRequestDto;
-import org.supercoding.supertime.inquiry.web.dto.InquiryResponseDto;
-
-import java.util.List;
 
 @RestController
 @Slf4j
