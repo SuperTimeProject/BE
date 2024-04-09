@@ -24,4 +24,13 @@ public class InquiryResponseDto {
 
     @Schema(description = "문의 기록 리스트")
     private List<InquiryDetailDto> inquiryList;
+
+    public static InquiryResponseDto from(String message, List<InquiryDetailDto> inquiryList) {
+        return InquiryResponseDto.builder()
+                .code(200)
+                .success(true)
+                .message(message)
+                .inquiryList(inquiryList)
+                .build();
+    }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.supercoding.supertime.golbal.web.enums.IsFull;
+import org.supercoding.supertime.schedule.web.dto.CreateSemesterRequestDto;
 
 import java.util.Date;
 
@@ -41,4 +42,12 @@ public class SemesterEntity {
     @Enumerated(EnumType.STRING)
     private IsFull isFull;
 
+    public static SemesterEntity from(CreateSemesterRequestDto semesterInfo, String detailName, IsFull time) {
+        return SemesterEntity.builder()
+                .semesterName(semesterInfo.getSemesterName())
+                .semesterDetailName(detailName)
+                .startDate(semesterInfo.getStartDate())
+                .isFull(time)
+                .build();
+    }
 }

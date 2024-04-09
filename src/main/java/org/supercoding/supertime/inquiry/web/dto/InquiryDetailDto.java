@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
+import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.List;
 
@@ -36,4 +38,15 @@ public class InquiryDetailDto {
     @Schema(description = "문의 닫힘 여부 (1 or 0)", example = "1")
     private InquiryClosed isClosed;
 
+    public static InquiryDetailDto from(InquiryEntity inquiry, UserEntity user, List<InquiryImageDto> imageList) {
+        return InquiryDetailDto.builder()
+                .inquiryCid(inquiry.getInquiryCid())
+                .userId(user.getUserId())
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryContent(inquiry.getInquiryContent())
+                .imageList(imageList)
+                .answer(inquiry.getAnswer())
+                .isClosed(inquiry.getIsClosed())
+                .build();
+    }
 }

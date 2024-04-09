@@ -226,42 +226,6 @@ public class UserService {
                 .build();
     }
 
-    @Transactional
-    public CommonResponseDto selectPart(User user,String part){
-
-        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));
-
-        SemesterEntity semester = semesterRepository.findById(userEntity.getSemester())
-                .orElseThrow(()-> new CustomNotFoundException("기수가 존재하지 않습니다."));
-
-        Date now = new Date();
-
-        Long Period = (now.getTime() - semester.getStartDate().getTime())/(1000 * 60 * 60 * 24);
-
-        //TODO 1차배포용으로 열어놓음
-        boolean isSelectPeriod =true;
-        //boolean isSelectPeriod = Period >= SELECT_START_DAY && Period <= SELECT_START_DAY + PERIOD;
-
-        if(isSelectPeriod) {
-            userEntity.setPart(Part.valueOf(part));
-
-            userRepository.save(userEntity);
-
-            return CommonResponseDto.builder()
-                    .success(true)
-                    .code(200)
-                    .message("파트 선택에 성공했습니다.")
-                    .build();
-        }
-
-        return CommonResponseDto.builder()
-                .success(false)
-                .code(400)
-                .message("파트 선택에 실패했습니다.")
-                .build();
-    }
-
     public CommonResponseDto confirmedPart(User user) {
         UserEntity userEntity = userRepository.findByUserId(user.getUsername())
                 .orElseThrow(()-> new CustomNotFoundException("유저가 존재하지 않습니다."));

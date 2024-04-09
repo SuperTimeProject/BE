@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 
 @Getter
 @Setter
@@ -19,4 +20,11 @@ public class GetSemesterDto {
 
     @Schema(description = "기수", example = "2311")
     private String semesterDetailName;
+
+    public static GetSemesterDto from(SemesterEntity semester) {
+        return GetSemesterDto.builder()
+                .semesterCid(semester.getSemesterCid())
+                .semesterDetailName(semester.getSemesterDetailName())
+                .build();
+    }
 }

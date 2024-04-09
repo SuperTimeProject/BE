@@ -28,4 +28,15 @@ public class BoardEntity {
     @ManyToMany(mappedBy = "boardList")
     private List<UserEntity> userList;
 
+    public static BoardEntity toSemesterBoard(int semesterName) {
+        return BoardEntity.builder()
+                .boardName("기수 게시판 ("+semesterName+")")
+                .build();
+    }
+
+    public static BoardEntity toStudyBoard(int semesterName, String part) {
+        return BoardEntity.builder()
+                .boardName("스터디 게시판 ("+semesterName+part+")")
+                .build();
+    }
 }
