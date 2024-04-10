@@ -127,6 +127,24 @@ public class AuthService {
         return CommonResponseDto.successResponse("로그인에 성공했습니다.");
     }
 
+    private Cookie createTokenCookie(String token) {
+        Cookie cookie = new Cookie("TOKEN", token);
+        cookie.setMaxAge(30 * 60); // 리프래시 토큰 구현 전 임시 30분
+        cookie.setPath("/");
+
+        return cookie;
+    }
+
+    private Cookie createRefreshTokenCookie(String token) {
+        Cookie cookie = new Cookie("REFRESH_TOKEN", token);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(10 * 60 * 60);
+        cookie.setPath("/");
+
+        return cookie;
+    }
+
     @Transactional
     public CommonResponseDto signup(SignupRequestDto signupInfo) {
         Boolean existUserId = userRepository.existsByUserId(signupInfo.getUserName());
