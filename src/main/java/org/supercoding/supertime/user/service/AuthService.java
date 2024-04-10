@@ -1,5 +1,6 @@
 package org.supercoding.supertime.user.service;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,7 +121,8 @@ public class AuthService {
 //                .path("/")
 //                .build();
 
-        httpServletResponse.setHeader("Authorization", tokenDto.getAccessToken());
+        httpServletResponse.addCookie(createTokenCookie(tokenDto.getAccessToken()));
+        httpServletResponse.addCookie(createRefreshTokenCookie(tokenDto.getRefreshToken()));
 
         return CommonResponseDto.successResponse("로그인에 성공했습니다.");
     }
