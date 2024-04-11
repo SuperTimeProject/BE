@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.supercoding.supertime.golbal.web.entity.TimeEntity;
 
 @Getter
@@ -28,5 +29,12 @@ public class RefreshToken extends TimeEntity {
     public RefreshToken updateValue(String token) {
         this.value = token;
         return this;
+    }
+
+    public static RefreshToken from(String name, String refreshToken) {
+        return RefreshToken.builder()
+                .key(name)
+                .value(refreshToken)
+                .build();
     }
 }

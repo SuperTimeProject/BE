@@ -9,32 +9,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseCookie;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.board.repository.PostImageRepository;
 import org.supercoding.supertime.board.repository.PostRepository;
 import org.supercoding.supertime.board.util.PostValidation;
-import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
-import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
-import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.board.web.dto.CreatePostRequestDto;
 import org.supercoding.supertime.board.web.dto.EditPostRequestDto;
 import org.supercoding.supertime.board.web.dto.getBoardPost.BoardInfoDto;
 import org.supercoding.supertime.board.web.dto.getBoardPost.GetBoardPostDetailDto;
-import org.supercoding.supertime.board.web.dto.getBoardPost.GetBoardPostResponseDto;
-import org.supercoding.supertime.board.web.dto.getPostDetail.GetPostDetailResponseDto;
 import org.supercoding.supertime.board.web.dto.getPostDetail.PostDetailDto;
 import org.supercoding.supertime.board.web.dto.getPostDetail.PostDetailImageDto;
 import org.supercoding.supertime.board.web.dto.getUserPost.GetUserPostDto;
-import org.supercoding.supertime.board.web.dto.getUserPost.GetUserPostResponseDto;
-import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.board.web.entity.PostEntity;
 import org.supercoding.supertime.board.web.entity.PostImageEntity;
@@ -210,7 +203,7 @@ public class BoardService {
      *
      * @return PostDetailDto
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public PostDetailDto getPostDetail(Long postCid, HttpServletRequest req, HttpServletResponse res) {
         PostEntity targetPost = postValidation.validatePostExistence(postCid);
 
@@ -221,20 +214,21 @@ public class BoardService {
     }
 
     private void updatePostView(PostEntity targetPost, HttpServletRequest req, HttpServletResponse res) {
-        Cookie oldCookie = findCookieByNamm("postView", req.getCookies());
+        Cookie oldCookie = findCookieByName("postView", req.getCookies());
         if (oldCookie != null && !oldCookie.getValue().contains("[" + targetPost.getPostCid() + "]")) {
             targetPost.updatePostView();
             oldCookie.setValue(oldCookie.getValue() + "_[" + targetPost.getPostCid() + "]");
             res.addCookie(updateCookie(oldCookie));
         } else if (oldCookie == null) {
             targetPost.updatePostView();
-            Cookie newCookie = createNewCookie("postView", "[" + targetPost.getPostCid() + "]");
-            res.addCookie(newCookie);
+            ResponseCookie newCookie = createNewCookie("postView", "[" + targetPost.getPostCid() + "]");
+            res.addHeader("Set-Cookie", newCookie.toString());
+//            res.addCookie(newCookie);
         }
         postRepository.save(targetPost);
     }
 
-    private Cookie findCookieByNamm(String name, Cookie[] cookies) {
+    private Cookie findCookieByName(String name, Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(name)) {
@@ -251,10 +245,16 @@ public class BoardService {
         return cookie;
     }
 
-    private Cookie createNewCookie(String name, String value) {
-        Cookie newCookie = new Cookie(name, value);
-        newCookie.setPath("/");
-        newCookie.setMaxAge(SECONDS_IN_A_DAY);
+    private ResponseCookie createNewCookie(String name, String value) {
+//        Cookie newCookie = new Cookie(name, value);
+//        newCookie.setPath("/");
+//        newCookie.setMaxAge(SECONDS_IN_A_DAY);
+//        return newCookie;
+        ResponseCookie newCookie = ResponseCookie.from(name, value)
+                .path("/")
+                .sameSite("None")
+                .maxAge(SECONDS_IN_A_DAY)
+                .build();
         return newCookie;
     }
 

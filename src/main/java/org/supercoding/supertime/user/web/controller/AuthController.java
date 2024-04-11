@@ -14,7 +14,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.user.service.AuthService;
+import org.supercoding.supertime.user.service.AuthService1;
 import org.supercoding.supertime.user.web.dto.LoginRequestDto;
+import org.supercoding.supertime.user.web.dto.LoginResponseDto;
 import org.supercoding.supertime.user.web.dto.SignupRequestDto;
 import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoResponseDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
@@ -26,22 +28,23 @@ import org.supercoding.supertime.golbal.web.enums.Roles;
 @RequiredArgsConstructor
 @Tag(name = "회원관련 API")
 public class AuthController {
+    private final AuthService1 authService1;
     private final AuthService authService;
 
     @Operation(summary = "로그인", description = "로그인을 다루는 api입니다.")
     @PostMapping("/login")
-    public ResponseEntity<CommonResponseDto> login(@RequestBody LoginRequestDto loginInfo, HttpServletResponse httpServletResponse){
-        log.info("[AUTH] 로그인 요청이 들어왔습니다.");
-        CommonResponseDto loginResult = authService.login(loginInfo,httpServletResponse);
-        log.info("[AUTH] 로그인 결과 = " + loginResult);
-        return ResponseEntity.ok().body(loginResult);
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginInfo, HttpServletResponse httpServletResponse){
+        log.debug("[AUTH] 로그인 요청이 들어왔습니다.");
+        String accessToken = authService.login(loginInfo, httpServletResponse);
+        log.debug("[AUTH] 로그인이 성공적으로 이루어졌습니다.");
+        return ResponseEntity.ok().body(LoginResponseDto.successResponse("로그인에 성공했습니다.", accessToken));
     }
 
     @Operation(summary = "회원가입", description = "회원가입을 다루는 api입니다.")
     @PostMapping("/signup")
     public ResponseEntity<CommonResponseDto> signup(@RequestBody SignupRequestDto signupInfo){
         log.info("[AUTH] 회원가입 요청이 들어왔습니다.");
-        CommonResponseDto signupResult = authService.signup(signupInfo);
+        CommonResponseDto signupResult = authService1.signup(signupInfo);
         log.info("[AUTH] 회원가입 결과 = " + signupResult);
         return ResponseEntity.status(HttpStatus.CREATED).body(signupResult);
     }
@@ -50,7 +53,7 @@ public class AuthController {
     @GetMapping("/duplicate-test/email")
     public ResponseEntity<CommonResponseDto> emailDuplicateTest(@RequestParam String userEmail){
         log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
-        CommonResponseDto duplicateTestResult = authService.emailDuplicateTest(userEmail);
+        CommonResponseDto duplicateTestResult = authService1.emailDuplicateTest(userEmail);
         log.info("[DUPLICATE] 이메일 중복확인 요청 결과 = " + duplicateTestResult);
         return ResponseEntity.ok().body(duplicateTestResult);
     }
@@ -59,7 +62,7 @@ public class AuthController {
     @GetMapping("/duplicate-test/nickname")
     public ResponseEntity<CommonResponseDto> nicknameDuplicateTest(@RequestParam String nickname){
         log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
-        CommonResponseDto duplicateTestResult = authService.nicknameDuplicateTest(nickname);
+        CommonResponseDto duplicateTestResult = authService1.nicknameDuplicateTest(nickname);
         log.info("[DUPLICATE] 이메일 중복확인 요청 결과 = " + duplicateTestResult);
         return ResponseEntity.ok().body(duplicateTestResult);
     }
@@ -68,7 +71,7 @@ public class AuthController {
     @GetMapping("/user-info")
     public ResponseEntity<GetUserInfoResponseDto> getUserInfo(@AuthenticationPrincipal User user){
         log.info("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
-        GetUserInfoResponseDto getUserInfoResult = authService.getUserInfo(user);
+        GetUserInfoResponseDto getUserInfoResult = authService1.getUserInfo(user);
         log.info("[GET_USER] 유저 정보 결과 = " + getUserInfoResult);
 
         return ResponseEntity.ok(getUserInfoResult);
@@ -78,7 +81,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<CommonResponseDto> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication, @AuthenticationPrincipal User user){
         log.info("[LOGOUT] 로그아웃 요청이 들어왔습니다.");
-        //CommonResponseDto logoutInfoResult = authService.logout(user);
+        //CommonResponseDto logoutInfoResult = authService1.logout(user);
         new SecurityContextLogoutHandler().logout(request,response,authentication);
         log.info("[LOGOUT] 로그아웃 성공");
 
@@ -98,7 +101,7 @@ public class AuthController {
             @RequestParam Roles role
     ){
         log.info("[ADMIN] 역할 변경 요청이 들어왔습니다.");
-        CommonResponseDto setRoleResult = authService.setRole(UserCid,role);
+        CommonResponseDto setRoleResult = authService1.setRole(UserCid,role);
         log.info("[ADMIN] 답변 결과 = " + setRoleResult);
         return ResponseEntity.ok().body(setRoleResult);
     }

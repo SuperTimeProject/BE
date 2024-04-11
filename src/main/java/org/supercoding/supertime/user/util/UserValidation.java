@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.golbal.web.advice.CustomDataIntegerityCiolationException;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
@@ -13,6 +16,7 @@ import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserRepository;
+import org.supercoding.supertime.user.web.dto.LoginRequestDto;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 @Component
@@ -23,9 +27,24 @@ public class UserValidation {
     private final InquiryRepository inquiryRepository;
     private final SemesterRepository semesterRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     public UserEntity validateExistUser(String username) {
         return userRepository.findByUserId(username)
                 .orElseThrow(()-> new CustomNotFoundException("로그인된 유저가 존재하지 않습니다."));
+    }
+
+    public void validateLogin(LoginRequestDto loginInfo) {
+        UserEntity userEntity = userRepository.findByUserId(loginInfo.getUserId())
+                .orElseThrow(() -> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+
+        if(userEntity.getIsDeleted() == 1) {
+            throw new CustomAccessDeniedException("탈퇴 처리된 유저입니다.");
+        }
+
+        if(!passwordEncoder.matches(loginInfo.getUserPassword(), userEntity.getUserPassword())){
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     public void validateDuplicateNickname(String newNickname) {

@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.user.service.MyPageService;
-import org.supercoding.supertime.user.service.UserService;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 
 @RestController
@@ -25,7 +24,6 @@ import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 @Tag(name = "마이페이지 API")
 public class MyPageController {
 
-    private final UserService userService;
     private final MyPageService myPageService;
 
     @Operation(summary = "유저 프로필 수정", description = "유저의 프로필 이미지를 수정하는 API입니다.")
