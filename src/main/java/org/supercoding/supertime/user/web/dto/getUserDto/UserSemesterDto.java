@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.supercoding.supertime.golbal.web.enums.IsFull;
+import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 
 @Getter
 @Setter
@@ -21,4 +22,12 @@ public class UserSemesterDto {
 
     @Schema(description = "풀 or 하프")
     private IsFull isFull;
+
+    public static UserSemesterDto from(SemesterEntity semester) {
+        return UserSemesterDto.builder()
+                .semesterCid(semester.getSemesterCid())
+                .semesterDetailName(semester.getSemesterDetailName())
+                .isFull(semester.getIsFull())
+                .build();
+    }
 }

@@ -26,4 +26,11 @@ public class ChatRoomMemberEntity {
     @ManyToOne
     @JoinColumn(name = "user_cid")
     private UserEntity user;
+
+    public static ChatRoomMemberEntity from(final UserEntity user, final ChatRoomEntity chatRoom) {
+        return ChatRoomMemberEntity.builder()
+                .user(user)
+                .chatRoom(chatRoom)
+                .build();
+    }
 }

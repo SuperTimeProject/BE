@@ -36,5 +36,13 @@ public class ChatMessageEntity extends TimeEntity {
 
     private MessageType type;
 
+    public static ChatMessageEntity enter(final UserEntity user, final ChatRoomEntity chatRoom) {
+        return ChatMessageEntity.builder()
+                .type(MessageType.ENTER)
+                .user(user)
+                .chatRoom(chatRoom)
+                .chatMessageContent(user.getUserNickname()+"유저가 들어왔습니다.")
+                .build();
+    }
 
 }

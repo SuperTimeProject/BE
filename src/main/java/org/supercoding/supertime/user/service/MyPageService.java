@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.golbal.web.enums.Part;
@@ -15,9 +16,14 @@ import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.util.UserValidation;
+import org.supercoding.supertime.user.web.dto.getUserDto.UserProfileDto;
+import org.supercoding.supertime.user.web.dto.getUserDto.UserSemesterDto;
+import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoBoardInfoDto;
+import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoDetailDto;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -154,5 +160,43 @@ public class MyPageService {
         userProfileRepository.delete(userProfile);
 
         return userProfile.getUserProfileFilePath();
+    }
+
+    /**
+     * 기능 - 로그인 유저 정보 불러오기
+     * @param user
+     * @return GetUserInfoDetailDto
+     */
+
+    public GetUserInfoDetailDto getUserInfo(User user) {
+        UserEntity loggedInUser = userValidation.validateExistUser(user.getUsername());
+
+        List<GetUserInfoBoardInfoDto> userBoard = getBoardInfo(loggedInUser.getBoardList());
+        UserSemesterDto userSemester = getSemesterInfo(loggedInUser.getSemester());
+        UserProfileDto userProfile = getUserProfile(loggedInUser);
+
+        return GetUserInfoDetailDto.from(loggedInUser, userBoard, userSemester, userProfile);
+    }
+
+    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<BoardEntity> userBoardList) {
+        List<GetUserInfoBoardInfoDto> boardList = new ArrayList<>();
+        for(BoardEntity board: userBoardList) {
+            boardList.add(GetUserInfoBoardInfoDto.from(board));
+        }
+
+        return boardList;
+    }
+
+    private UserSemesterDto getSemesterInfo(long semesterCid) {
+        SemesterEntity userSemester = userValidation.findSemester(semesterCid);
+        return UserSemesterDto.from(userSemester);
+    }
+
+    private UserProfileDto getUserProfile(UserEntity user) {
+        if(user.getUserProfileCid() == null) {
+            return null;
+        }
+        UserProfileEntity userProfile = userValidation.findUserProfile(user.getUserProfileCid());
+        return UserProfileDto.from(userProfile);
     }
 }
