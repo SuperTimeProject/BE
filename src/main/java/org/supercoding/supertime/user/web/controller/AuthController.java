@@ -52,19 +52,19 @@ public class AuthController {
     @Operation(summary = "이메일 중복확인", description = "이메일 중복을 확인하는 api입니다.")
     @GetMapping("/duplicate-test/email")
     public ResponseEntity<CommonResponseDto> emailDuplicateTest(@RequestParam String userEmail){
-        log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
-        CommonResponseDto duplicateTestResult = authService1.emailDuplicateTest(userEmail);
-        log.info("[DUPLICATE] 이메일 중복확인 요청 결과 = " + duplicateTestResult);
-        return ResponseEntity.ok().body(duplicateTestResult);
+        log.debug("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
+        authService.emailDuplicateTest(userEmail);
+        log.debug("[DUPLICATE] 이메일 중복검사가 정상적으로 이루어 졌습니다.");
+        return ResponseEntity.ok().body(CommonResponseDto.successResponse("사용가능한 이메일입니다."));
     }
 
     @Operation(summary = "닉네임 중복확인", description = "닉네임 중복을 확인하는 api입니다.")
     @GetMapping("/duplicate-test/nickname")
     public ResponseEntity<CommonResponseDto> nicknameDuplicateTest(@RequestParam String nickname){
-        log.info("[DUPLICATE] 이메일 중복확인 요청이 들어왔습니다.");
-        CommonResponseDto duplicateTestResult = authService1.nicknameDuplicateTest(nickname);
-        log.info("[DUPLICATE] 이메일 중복확인 요청 결과 = " + duplicateTestResult);
-        return ResponseEntity.ok().body(duplicateTestResult);
+        log.debug("[DUPLICATE] 닉네임 중복확인 요청이 들어왔습니다.");
+        authService.nicknameDuplicateTest(nickname);
+        log.debug("[DUPLICATE] 닉네임 중복검사가 정상적으로 이루어 졌습니다.");
+        return ResponseEntity.ok().body(CommonResponseDto.successResponse("사용가능한 닉네임입니다."));
     }
 
     @Operation(summary = "로그인 유저 불러오기", description = "로그인한 유저의 정보를 불러오는 api입니다.")

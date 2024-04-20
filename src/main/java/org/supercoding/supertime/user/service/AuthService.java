@@ -104,6 +104,10 @@ public class AuthService {
         userValidation.validateDuplicateNickname(nickname);
     }
 
+    /**
+     * 기능 - 회원가입
+     * @param signupInfo
+     */
     @Transactional
     public void signup(SignupRequestDto signupInfo) {
         emailDuplicateTest(signupInfo.getUserId());
