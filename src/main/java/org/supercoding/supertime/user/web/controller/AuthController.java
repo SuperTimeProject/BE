@@ -67,16 +67,6 @@ public class AuthController {
         return ResponseEntity.ok().body(CommonResponseDto.successResponse("사용가능한 닉네임입니다."));
     }
 
-    @Operation(summary = "로그인 유저 불러오기", description = "로그인한 유저의 정보를 불러오는 api입니다.")
-    @GetMapping("/user-info")
-    public ResponseEntity<GetUserInfoResponseDto> getUserInfo(@AuthenticationPrincipal User user){
-        log.info("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
-        GetUserInfoResponseDto getUserInfoResult = authService1.getUserInfo(user);
-        log.info("[GET_USER] 유저 정보 결과 = " + getUserInfoResult);
-
-        return ResponseEntity.ok(getUserInfoResult);
-    }
-
     @Operation(summary = "로그아웃", description = "로그아웃 api입니다.")
     @PostMapping("/logout")
     public ResponseEntity<CommonResponseDto> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication, @AuthenticationPrincipal User user){

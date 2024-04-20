@@ -162,6 +162,12 @@ public class MyPageService {
         return userProfile.getUserProfileFilePath();
     }
 
+    /**
+     * 기능 - 로그인 유저 정보 불러오기
+     * @param user
+     * @return GetUserInfoDetailDto
+     */
+
     public GetUserInfoDetailDto getUserInfo(User user) {
         UserEntity loggedInUser = userValidation.validateExistUser(user.getUsername());
 
