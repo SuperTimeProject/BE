@@ -7,6 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.supercoding.supertime.admin.util.AdminValidation;
+import org.supercoding.supertime.golbal.web.enums.Roles;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.user.repository.AuthImageRepository;
 import org.supercoding.supertime.user.repository.AuthStateRepository;
@@ -42,6 +45,24 @@ public class AdminService {
     private final AuthImageRepository authImageRepository;
     private final AuthStateRepository authStateRepository;
 
+    private final AdminValidation adminValidation;
+
+    /**
+     * 기능 - 유저의 권한을 수정합니다
+     * @param userCid
+     * @param role
+     */
+    @Transactional
+    public void changeRole(Long userCid, Roles role) {
+        UserEntity user = adminValidation.findUserEntity(userCid);
+
+        setRole(user, role);
+    }
+
+    private void setRole(UserEntity user, Roles role) {
+        user.setRoles(role);
+        userRepository.save(user);
+    }
 
 
     ///TODO
@@ -162,56 +183,6 @@ public class AdminService {
 
         return CommonResponseDto.successResponse("회원 정보 변경에 성공했습니다.");
     }
-    /* 아니면 가독성과 디비 왕창조회를 챙길것인가..? 어차피 한번에 많이 수정되는건 아닌데..
-    public void updateUserSemester(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getUserNickname() != null){
-            user.setUserNickname(updateUserInfoRequestDto.getUserNickname());
-        }
-        userRepository.save(user);
-    }
-    public void updateUserPassword(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getUserPassword() != null){
-            user.setUserPassword(updateUserInfoRequestDto.getUserPassword());
-        }
-        userRepository.save(user);
-    }
-    public void updateUserName(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getUserName() != null){
-            user.setUserName(updateUserInfoRequestDto.getUserName());
-        }
-        userRepository.save(user);
-    }
-    public void updateUserNickname(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getUserNickname() != null){
-            user.setUserNickname(updateUserInfoRequestDto.getUserNickname());
-        }
-        userRepository.save(user);
-    }
-    public void updateValified(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getValified() != null){
-            user.setValified(updateUserInfoRequestDto.getValified());
-        }
-        userRepository.save(user);
-    }
-    public void updatePart(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getPart() != null){
-            user.setPart(updateUserInfoRequestDto.getPart());
-        }
-        userRepository.save(user);
-    }
-    public void updateRoles(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getRoles() != null){
-            user.setRoles(updateUserInfoRequestDto.getRoles());
-        }
-        userRepository.save(user);
-    }
-    public void updateIsDeleted(UserEntity user,UpdateUserInfoRequestDto updateUserInfoRequestDto){
-        if(updateUserInfoRequestDto.getIsDeleted() != null){
-            user.setIsDeleted(updateUserInfoRequestDto.getIsDeleted());
-        }
-        userRepository.save(user);
-    }
-*/
 
     public CommonResponseDto varification(String userId, Valified valified) {
         log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");

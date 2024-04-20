@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.admin.service.AdminService;
+import org.supercoding.supertime.golbal.web.enums.Roles;
 import org.supercoding.supertime.schedule.service.ScheduleService;
 import org.supercoding.supertime.admin.web.dto.GetPendingUserDetailDto;
 import org.supercoding.supertime.admin.web.dto.GetPendingUserDto;
@@ -33,6 +34,20 @@ public class AdminController {
 
     private final AdminService adminService;
     private final ScheduleService scheduleService;
+
+
+    @Operation(summary = "권한 변경하기", description = "유저 역할을 변경하는 api입니다.")
+    @PutMapping("/set-role")
+    public ResponseEntity<CommonResponseDto> setRole(
+            @RequestParam Long userCid,
+            @RequestParam Roles role
+    ){
+        log.debug("[ADMIN] 역할 변경 요청이 들어왔습니다.");
+        adminService.changeRole(userCid, role);
+        log.debug("[ADMIN] 역할을 성공적으로 변경했습니다.");
+        return ResponseEntity.ok().body(CommonResponseDto.successResponse("역할 변경에 성공했습니다."));
+    }
+
 
     @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
     @GetMapping("/pending-user/{page}")

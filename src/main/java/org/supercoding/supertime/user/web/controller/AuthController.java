@@ -2,25 +2,17 @@ package org.supercoding.supertime.user.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.user.service.AuthService;
-import org.supercoding.supertime.user.service.AuthService1;
 import org.supercoding.supertime.user.web.dto.LoginRequestDto;
 import org.supercoding.supertime.user.web.dto.LoginResponseDto;
 import org.supercoding.supertime.user.web.dto.SignupRequestDto;
-import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoResponseDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
-import org.supercoding.supertime.golbal.web.enums.Roles;
 
 @RestController
 @Slf4j
@@ -28,7 +20,6 @@ import org.supercoding.supertime.golbal.web.enums.Roles;
 @RequiredArgsConstructor
 @Tag(name = "회원관련 API")
 public class AuthController {
-    private final AuthService1 authService1;
     private final AuthService authService;
 
     @Operation(summary = "로그인", description = "로그인을 다루는 api입니다.")
@@ -65,34 +56,5 @@ public class AuthController {
         authService.nicknameDuplicateTest(nickname);
         log.debug("[DUPLICATE] 닉네임 중복검사가 정상적으로 이루어 졌습니다.");
         return ResponseEntity.ok().body(CommonResponseDto.successResponse("사용가능한 닉네임입니다."));
-    }
-
-    @Operation(summary = "로그아웃", description = "로그아웃 api입니다.")
-    @PostMapping("/logout")
-    public ResponseEntity<CommonResponseDto> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication, @AuthenticationPrincipal User user){
-        log.info("[LOGOUT] 로그아웃 요청이 들어왔습니다.");
-        //CommonResponseDto logoutInfoResult = authService1.logout(user);
-        new SecurityContextLogoutHandler().logout(request,response,authentication);
-        log.info("[LOGOUT] 로그아웃 성공");
-
-        CommonResponseDto logoutInfoResult = CommonResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("로그아웃 성공")
-                .build();
-
-        return ResponseEntity.ok(logoutInfoResult);
-    }
-
-    @Operation(summary = "권한 변경하기", description = "유저 역할을 변경하는 api입니다.")
-    @PutMapping("/set-role")
-    public ResponseEntity<CommonResponseDto> setRole(
-            @RequestParam Long UserCid,
-            @RequestParam Roles role
-    ){
-        log.info("[ADMIN] 역할 변경 요청이 들어왔습니다.");
-        CommonResponseDto setRoleResult = authService1.setRole(UserCid,role);
-        log.info("[ADMIN] 답변 결과 = " + setRoleResult);
-        return ResponseEntity.ok().body(setRoleResult);
     }
 }

@@ -22,4 +22,9 @@ public class AdminValidation {
             throw new CustomAccessDeniedException("관지자 권한이 없습니다.");
         };
     }
+
+    public UserEntity findUserEntity(long userCid) {
+        return userRepository.findByUserCid(userCid)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
+    }
 }
