@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.user.service.MyPageService;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
+import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoResponseDto;
 
 @RestController
 @Slf4j
@@ -74,6 +75,17 @@ public class MyPageController {
         log.debug("[MY_PAGE] 프로필 이미지를 성공적으로 삭제했습니다.");
 
         return ResponseEntity.ok(CommonResponseDto.successResponse("이미지를 성공적으로 삭제하였습니다"));
+    }
+
+    @Operation(summary = "로그인 유저 불러오기", description = "로그인한 유저의 정보를 불러오는 api입니다.")
+    @GetMapping("/user-info")
+    public ResponseEntity<GetUserInfoResponseDto> getUserInfo(@AuthenticationPrincipal User user){
+        log.info("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
+        GetUserInfoResponseDto getUserResponse =
+                GetUserInfoResponseDto.successResponse("유저 정보를 성공적으로 불러왔습니다.", myPageService.getUserInfo(user));
+        log.info("[GET_USER] 성공적으로 유저 정보를 불러왔습니다.");
+
+        return ResponseEntity.ok(getUserResponse);
     }
 
 }

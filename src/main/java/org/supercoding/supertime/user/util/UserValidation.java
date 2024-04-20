@@ -19,9 +19,11 @@ import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
+import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.web.dto.LoginRequestDto;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
+import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
 @Component
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class UserValidation {
     private final SemesterRepository semesterRepository;
     private final BoardRepository boardRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final UserProfileRepository userProfileRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -106,6 +109,11 @@ public class UserValidation {
     public ChatRoomEntity validateExistChatRoom(String chatroomName) {
         return chatRoomRepository.findByChatRoomName(chatroomName)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 채팅방이 존재하지 않습니다."));
+    }
+
+    public UserProfileEntity findUserProfile(long userProfileCid) {
+        return userProfileRepository.findById(userProfileCid)
+                .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
     }
 
 
