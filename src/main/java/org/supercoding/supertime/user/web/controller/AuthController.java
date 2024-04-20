@@ -43,10 +43,10 @@ public class AuthController {
     @Operation(summary = "회원가입", description = "회원가입을 다루는 api입니다.")
     @PostMapping("/signup")
     public ResponseEntity<CommonResponseDto> signup(@RequestBody SignupRequestDto signupInfo){
-        log.info("[AUTH] 회원가입 요청이 들어왔습니다.");
-        CommonResponseDto signupResult = authService1.signup(signupInfo);
-        log.info("[AUTH] 회원가입 결과 = " + signupResult);
-        return ResponseEntity.status(HttpStatus.CREATED).body(signupResult);
+        log.debug("[AUTH] 회원가입 요청이 들어왔습니다.");
+        authService.signup(signupInfo);
+        log.debug("[AUTH] 회원가입이 성공적으로 이루어졌습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponseDto.createSuccessResponse("회원가입에 성공했습니다."));
     }
 
     @Operation(summary = "이메일 중복확인", description = "이메일 중복을 확인하는 api입니다.")

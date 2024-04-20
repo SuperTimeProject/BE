@@ -7,6 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.supercoding.supertime.board.repository.BoardRepository;
+import org.supercoding.supertime.board.web.entity.BoardEntity;
+import org.supercoding.supertime.chat.repository.ChatRoomRepository;
+import org.supercoding.supertime.chat.web.entity.ChatRoomEntity;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
 import org.supercoding.supertime.golbal.web.advice.CustomDataIntegerityCiolationException;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
@@ -26,6 +30,8 @@ public class UserValidation {
     private final UserRepository userRepository;
     private final InquiryRepository inquiryRepository;
     private final SemesterRepository semesterRepository;
+    private final BoardRepository boardRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -47,11 +53,6 @@ public class UserValidation {
         }
     }
 
-    public void validateDuplicateNickname(String newNickname) {
-        if(userRepository.existsByUserNickname(newNickname)) {
-            throw new CustomDataIntegerityCiolationException("이미 사용중인 닉네임입니다.");
-        }
-    }
 
     public Page<InquiryEntity> validateExistUserInquiry(int page, UserEntity user) {
         Pageable pageable = PageRequest.of(page - 1, 10);
@@ -79,4 +80,33 @@ public class UserValidation {
             throw new CustomNotFoundException("프로필 이미지가 존재하지 않습니다.");
         }
     }
+
+    public void validateDuplicateEmail(String email) {
+        if (userRepository.existsByUserId(email)) {
+            throw new CustomDataIntegerityCiolationException("이미 사용중인 이메일입니다.");
+        }
+    }
+
+    public void validateDuplicateNickname(String nickname) {
+        if (userRepository.existsByUserNickname(nickname)) {
+            throw new CustomDataIntegerityCiolationException("이미 사용중인 닉네임입니다.");
+        }
+    }
+
+    public SemesterEntity findSemester(long semesterCid) {
+        return semesterRepository.findById(semesterCid)
+                .orElseThrow(() -> new CustomNotFoundException("기수가 존재하지 않습니다."));
+    }
+
+    public BoardEntity findBoard(String boardName) {
+        return boardRepository.findByBoardName(boardName)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 게시판이 존재하지 않습니다."));
+    }
+
+    public ChatRoomEntity validateExistChatRoom(String chatroomName) {
+        return chatRoomRepository.findByChatRoomName(chatroomName)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 채팅방이 존재하지 않습니다."));
+    }
+
+
 }

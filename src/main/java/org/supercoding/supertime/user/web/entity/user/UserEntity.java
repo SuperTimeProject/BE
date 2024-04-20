@@ -10,6 +10,7 @@ import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.golbal.web.enums.Roles;
 import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.user.web.dto.SignupRequestDto;
 
 import java.util.List;
 
@@ -83,6 +84,21 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "아이디 삭제 여부", example = "0 or 1으로 삭제여부 판단")
     @Column(name = "is_deleted")
     private int isDeleted;
+
+    public static UserEntity from(final SignupRequestDto signupInfo, final String password, final List<BoardEntity> userBoard) {
+        return  UserEntity.builder()
+                .userId(signupInfo.getUserId())
+                .userName(signupInfo.getUserName())
+                .userNickname(signupInfo.getUserNickname())
+                .userPassword(password)
+                .semester(signupInfo.getSemesterCid())
+                .boardList(userBoard)
+                .roles(Roles.ROLE_USER)
+                .part(Part.PART_UNDEFINED)
+                .isDeleted(0)
+                .valified(Valified.NEEDED)
+                .build();
+    }
 
     public UserEntity update(String name){
         this.userName = name;

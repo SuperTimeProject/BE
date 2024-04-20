@@ -32,4 +32,10 @@ public class AuthStateEntity extends TimeEntity {
     @Schema(description = "인증 이미지 ID", example = "1")
     private Long authImageId;
 
+    public static AuthStateEntity from(String userId) {
+        return AuthStateEntity.builder()
+                .userId(userId)
+                .valified(Valified.NEEDED)
+                .build();
+    }
 }

@@ -141,10 +141,10 @@ public class AuthService1 {
         SemesterEntity userSemester = semesterRepository.findById(signupInfo.getSemesterCid()).orElseThrow(()->new CustomNotFoundException("기수가 존재하지 않습니다."));
         String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+userSemester.getSemesterName().toString()+")"};
 
-        for(String boardName : boardList){
-            BoardEntity board = boardRepository.findByBoardName(boardName);
-            userBoard.add(board);
-        }
+//        for(String boardName : boardList){
+//            BoardEntity board = boardRepository.findByBoardName(boardName);
+//            userBoard.add(board);
+//        }
 
         // 패스워드 인코딩
         String password = passwordEncoder.encode(signupInfo.getUserPassword());
