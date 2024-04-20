@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @ToString
 @Slf4j
-public class GetPendingUserDto {
+public class GetVerifiedUserDto {
     @Schema(description = "요청의 성공 상태", example = "true")
     private Boolean success;
 
@@ -24,5 +24,14 @@ public class GetPendingUserDto {
     private String message;
 
     @Schema(description = "승인 대기중인 유저 리스트")
-    private List<GetPendingUserDetailDto> userList;
+    private List<GetVerifiedUserDetailDto> userList;
+
+    public static GetVerifiedUserDto successResponse(final String message, List<GetVerifiedUserDetailDto> userList) {
+        return GetVerifiedUserDto.builder()
+                .success(true)
+                .code(200)
+                .message(message)
+                .userList(userList)
+                .build();
+    }
 }

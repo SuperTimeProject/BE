@@ -12,16 +12,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.admin.service.AdminService;
+import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDetailResponseDto;
 import org.supercoding.supertime.golbal.web.enums.Roles;
 import org.supercoding.supertime.schedule.service.ScheduleService;
-import org.supercoding.supertime.admin.web.dto.GetPendingUserDetailDto;
-import org.supercoding.supertime.admin.web.dto.GetPendingUserDto;
+import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDetailDto;
+import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDto;
 import org.supercoding.supertime.admin.web.dto.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.golbal.web.enums.IsFull;
 import org.supercoding.supertime.golbal.web.enums.Part;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 
 import java.util.List;
 
@@ -51,35 +52,35 @@ public class AdminController {
 
     @Operation(summary = "회원 인증상태 별 조회", description = "회원인증 인증상태에 따른 대기내역을 조회하는 api입니다.")
     @GetMapping("/pending-user/{page}")
-    public ResponseEntity<GetPendingUserDto> getUserByValified(
-            @RequestParam Valified valified,
+    public ResponseEntity<GetVerifiedUserDto> getUserByValified(
+            @RequestParam Verified verified,
             @PathVariable int page
     ){
-        log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
-        GetPendingUserDto getPendingResult = adminService.getUserByValified(valified,page);
-        log.info("[ADMIN] 조회 결과 = " + getPendingResult);
-        return ResponseEntity.ok().body(getPendingResult);
+        log.debug("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
+        List<GetVerifiedUserDetailDto> userDetailDtoList = adminService.findUserByVerified(verified,page);
+        log.debug("[ADMIN] 인증상태 별 유저를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok().body(GetVerifiedUserDto.successResponse("인증상태별 유저를 조회하였습니다.", userDetailDtoList));
     }
 
     @Operation(summary = "회원 인증요청 상세 조회", description = "회원 인증요청 상세내용을 조회하는 api입니다.")
     @GetMapping("/pending-user/detail/{userId}")
-    public ResponseEntity<GetPendingUserDetailDto> getValifiedDetail(
+    public ResponseEntity<GetVerifiedUserDetailResponseDto> getValifiedDetail(
             @PathVariable String userId
     ){
-        log.info("[ADMIN] 회원인증 인증상태 별 조회 요청이 들어왔습니다.");
-        GetPendingUserDetailDto getValifiedDetailResult = adminService.getValifiedDetail(userId);
-        log.info("[ADMIN] 조회 결과 = " + getValifiedDetailResult);
-        return ResponseEntity.ok().body(getValifiedDetailResult);
+        log.debug("[ADMIN] 회원의 인증 상세내용 조회 요청이 들어왔습니다.");
+        GetVerifiedUserDetailDto userDetail = adminService.getVerifiedUserDetail(userId);
+        log.debug("[ADMIN] 회원의 인증 상세내용을 조회하였습니다.");
+        return ResponseEntity.ok().body(GetVerifiedUserDetailResponseDto.successResponse("회원 인증 상세 내용을 조회했습니다.", userDetail));
     }
 
     @Operation(summary = "회원 인증 관리", description = "회원 인증상태를 변경하는 api입니다.")
     @PutMapping("/verification")
     public ResponseEntity<CommonResponseDto> verification(
             @RequestParam String userId,
-            @RequestParam Valified valified
+            @RequestParam Verified verified
     ){
         log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
-        CommonResponseDto verifiResult = adminService.varification(userId, valified);
+        CommonResponseDto verifiResult = adminService.varification(userId, verified);
         log.info("[ADMIN] 인증 결과 = " + verifiResult);
         return ResponseEntity.ok().body(verifiResult);
     }

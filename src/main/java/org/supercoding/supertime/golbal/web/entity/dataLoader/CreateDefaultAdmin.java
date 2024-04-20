@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
@@ -42,7 +42,7 @@ public class CreateDefaultAdmin implements CommandLineRunner {
                     .roles(Roles.ROLE_ADMIN)
                     .part(Part.PART_UNDEFINED)
                     .isDeleted(0)
-                    .valified(Valified.COMPLETED)
+                    .verified(Verified.COMPLETED)
                     .build();
 
             log.info("[CREATE_DEFAULT_ADMIN] 관리자 계정이 생성되었습니다.");

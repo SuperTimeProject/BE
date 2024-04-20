@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.supercoding.supertime.golbal.web.entity.TimeEntity;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 
 @Entity
 @Getter
@@ -24,9 +24,9 @@ public class AuthStateEntity extends TimeEntity {
     @Schema(description = "인증한 유저", example = "qwer1234@naver.com")
     private String userId;
 
-    @Column(name = "valified")
+    @Column(name = "verified")
     @Schema(description = "인증상태", example = "NEEDED")
-    private Valified valified;
+    private Verified verified;
 
     @Column(name = "authImageId")
     @Schema(description = "인증 이미지 ID", example = "1")
@@ -35,7 +35,7 @@ public class AuthStateEntity extends TimeEntity {
     public static AuthStateEntity from(String userId) {
         return AuthStateEntity.builder()
                 .userId(userId)
-                .valified(Valified.NEEDED)
+                .verified(Verified.NEEDED)
                 .build();
     }
 }

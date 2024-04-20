@@ -10,16 +10,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.admin.util.AdminValidation;
 import org.supercoding.supertime.golbal.web.enums.Roles;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.user.repository.AuthImageRepository;
 import org.supercoding.supertime.user.repository.AuthStateRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
-import org.supercoding.supertime.admin.web.dto.GetPendingUserDetailDto;
-import org.supercoding.supertime.admin.web.dto.GetPendingUserDto;
+import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDetailDto;
+import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDto;
 import org.supercoding.supertime.admin.web.dto.UpdateUserInfoRequestDto;
-import org.supercoding.supertime.admin.web.dto.PendingImgaeDto;
+import org.supercoding.supertime.admin.web.dto.PendingImageDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
 import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryDetailDto;
@@ -29,7 +30,6 @@ import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
 import org.supercoding.supertime.user.web.entity.AuthImageEntity;
 import org.supercoding.supertime.user.web.entity.AuthStateEntity;
 import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
-import org.supercoding.supertime.golbal.web.enums.Valified;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class AdminService {
      */
     @Transactional
     public void changeRole(Long userCid, Roles role) {
-        UserEntity user = adminValidation.findUserEntity(userCid);
+        UserEntity user = adminValidation.findUserEntityByUserCid(userCid);
 
         setRole(user, role);
     }
@@ -64,90 +64,61 @@ public class AdminService {
         userRepository.save(user);
     }
 
+    /**
+     * 기능 - 인증 상태별 유저 조회
+     * @param verified
+     * @param page
+     * @return List<GetVerifiedUserDetailDto>
+     */
+    @Transactional(readOnly = true)
+    public List<GetVerifiedUserDetailDto> findUserByVerified(Verified verified, int page) {
+        Page<UserEntity> verifiedUserList = getUserList(verified, page);
 
-    ///TODO
-    public GetPendingUserDto getUserByValified(Valified valified, int page){
-        log.info("[ADMIN SERVICE] 사용자 인증 대기 조회 요청이 들어왔습니다.");
-        List<GetPendingUserDetailDto> userList = new ArrayList<>();
-
-        Pageable pageable = PageRequest.of(page-1, 10);
-        Page<UserEntity> userEntities = userRepository.findAllByValified(valified,pageable);
-
-        if(userEntities.isEmpty()){
-            throw new CustomNoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");
-        }
-
-        for(UserEntity user : userEntities) {
-            AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
-                    .orElseThrow(()-> new CustomNoSuchElementException("[GET_USER_VALIFIED]일치하는 인증요청이 존재하지 않습니다."));
-
-            // 이미지 없는 경우
-            AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthCid()).orElse(null);
-            PendingImgaeDto image = null;
-
-            if(authImageEntity!=null){
-                image = PendingImgaeDto.builder()
-                        .authImageCid(authImageEntity.getAuthImageCid())
-                        .authImageFileName(authImageEntity.getAuthImageFileName())
-                        .authImageFilePath(authImageEntity.getAuthImageFilePath())
-                        .build();
-            }
-
-            GetPendingUserDetailDto dto = GetPendingUserDetailDto.builder()
-                    .userId(user.getUserId())
-                    .userNickname(user.getUserNickname())
-                    .semester(user.getSemester())
-                    .userName(user.getUserName())
-                    .image(image)
-                    .valified(valified)
-                    .build();
-
-
-            userList.add(dto);
-        }
-
-        return GetPendingUserDto.builder()
-                .code(200)
-                .success(true)
-                .message("인증 대기 조회 요청에 성공했습니다.")
-                .userList(userList)
-                .build();
+        return toVerifiedUserDto(verifiedUserList, verified);
     }
 
-        public GetPendingUserDetailDto getValifiedDetail(String userId){
-            log.info("[ADMIN SERVICE] 사용자 인증대기 상세 조회 요청이 들어왔습니다.");
-            UserEntity user = userRepository.findByUserId(userId)
-                    .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
+    private Page<UserEntity> getUserList(Verified verified, int page) {
+        Pageable pageable = PageRequest.of(page - 1, 10);
+        return adminValidation.validateVerifiedUser(verified, pageable);
+    }
 
-            AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
-                    .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증요청이 존재하지 않습니다."));
+    private List<GetVerifiedUserDetailDto> toVerifiedUserDto(Page<UserEntity> verifiedUserList, Verified verified) {
+        List<GetVerifiedUserDetailDto> userList = new ArrayList<>();
 
+        for(UserEntity user : verifiedUserList) {
+            AuthStateEntity authState = adminValidation.validateGetAuthState(user.getUserId());
 
-            PendingImgaeDto image = null;
+            AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthCid()).orElse(null);
 
-            if(authState.getAuthImageId()!=null){
-                AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthImageId())
-                        .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 이미지 값이 존재하지 않습니다."));
-
-                image = PendingImgaeDto.builder()
-                        .authImageCid(authImageEntity.getAuthImageCid())
-                        .authImageFileName(authImageEntity.getAuthImageFileName())
-                        .authImageFilePath(authImageEntity.getAuthImageFilePath())
-                        .build();
+            if(authImageEntity == null) {
+                userList.add(GetVerifiedUserDetailDto.from(user, null, verified));
+                continue;
             }
 
-            return GetPendingUserDetailDto.builder()
-                    .userCid(user.getUserCid())
-                    .userId(user.getUserId())
-                    .userName(user.getUserName())
-                    .userNickname(user.getUserNickname())
-                    .image(image)
-                    .semester(user.getSemester())
-                    .valified(user.getValified())
-                    .build();
+            PendingImageDto image = PendingImageDto.from(authImageEntity);
+            userList.add(GetVerifiedUserDetailDto.from(user, image, verified));
         }
 
+        return userList;
+    }
 
+    public GetVerifiedUserDetailDto getVerifiedUserDetail(String userId) {
+        UserEntity user = adminValidation.findUserEntityByUserId(userId);
+        AuthStateEntity authState = adminValidation.validateGetAuthState(user.getUserId());
+        PendingImageDto pendingImage = getPendingImage(authState);
+
+        return GetVerifiedUserDetailDto.getVerifiedDetail(user, pendingImage);
+    }
+
+    private PendingImageDto getPendingImage(AuthStateEntity authState) {
+        if(authState.getAuthImageId() == null) {
+            return null;
+        }
+
+        AuthImageEntity authImageEntity = adminValidation.validateExistAuthImage(authState.getAuthImageId());
+
+        return PendingImageDto.from(authImageEntity);
+    }
     public CommonResponseDto updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto){
 
         UserEntity userEntity = userRepository.findByUserId(updateUserInfoRequestDto.getUserName())
@@ -166,8 +137,8 @@ public class AdminService {
         if(updateUserInfoRequestDto.getUserNickname()!=null){
             userEntity.setUserNickname(updateUserInfoRequestDto.getUserNickname());
         }
-        if(updateUserInfoRequestDto.getValified()!=null){
-            userEntity.setValified(updateUserInfoRequestDto.getValified());
+        if(updateUserInfoRequestDto.getVerified()!=null){
+            userEntity.setVerified(updateUserInfoRequestDto.getVerified());
         }
         if(updateUserInfoRequestDto.getPart()!=null){
             userEntity.setPart(updateUserInfoRequestDto.getPart());
@@ -184,7 +155,7 @@ public class AdminService {
         return CommonResponseDto.successResponse("회원 정보 변경에 성공했습니다.");
     }
 
-    public CommonResponseDto varification(String userId, Valified valified) {
+    public CommonResponseDto varification(String userId, Verified verified) {
         log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");
         UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
@@ -192,11 +163,11 @@ public class AdminService {
         AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
                 .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증내역이 존재하지 않습니다."));
 
-        //if(user.getValified()==Valified.COMPLETED)
+        //if(user.getVerified()==Verified.COMPLETED)
         //    throw new DataIntegrityViolationException("이미 인증된 사용자 입니다.");
 
-        user.setValified(valified);
-        authState.setValified(valified);
+        user.setVerified(verified);
+        authState.setVerified(verified);
 
         userRepository.save(user);
         authStateRepository.save(authState);
