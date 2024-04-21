@@ -79,10 +79,10 @@ public class AdminController {
             @RequestParam String userId,
             @RequestParam Verified verified
     ){
-        log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
-        CommonResponseDto verifiResult = adminService.varification(userId, verified);
-        log.info("[ADMIN] 인증 결과 = " + verifiResult);
-        return ResponseEntity.ok().body(verifiResult);
+        log.debug("[ADMIN] 회원인증 요청이 들어왔습니다.");
+        adminService.changeVerification(userId, verified);
+        log.debug("[ADMIN] 인증상태를 성공적으로 수정했습니다.");
+        return ResponseEntity.ok().body(CommonResponseDto.successResponse("성공적으로 인증상태를 수정하였습니다."));
     }
 
     @Operation(summary = "회원 정보 수정", description = "회원의 모든 정보를 수정 할 수 있는 api입니다.")

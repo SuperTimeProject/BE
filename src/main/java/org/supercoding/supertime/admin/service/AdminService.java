@@ -102,6 +102,11 @@ public class AdminService {
         return userList;
     }
 
+    /**
+     * 기능 - 유저의 인증상태관리에 대한 조회
+     * @param userId
+     * @return GetVerifiedUserDetailDto
+     */
     public GetVerifiedUserDetailDto getVerifiedUserDetail(String userId) {
         UserEntity user = adminValidation.findUserEntityByUserId(userId);
         AuthStateEntity authState = adminValidation.validateGetAuthState(user.getUserId());
@@ -119,6 +124,29 @@ public class AdminService {
 
         return PendingImageDto.from(authImageEntity);
     }
+
+    /**
+     * 기능 - 유저의 인증상태 수정
+     * @param userId
+     * @param verified
+     */
+    @Transactional
+    public void changeVerification(String userId, Verified verified) {
+        UserEntity user = adminValidation.findUserEntityByUserId(userId);
+        AuthStateEntity authState = adminValidation.validateGetAuthState(userId);
+
+        setVerifiedState(user, authState, verified);
+    }
+
+    private void setVerifiedState(UserEntity user, AuthStateEntity authState, Verified verified) {
+        user.setVerified(verified);
+        authState.setVerified(verified);
+
+        userRepository.save(user);
+        authStateRepository.save(authState);
+    }
+
+
     public CommonResponseDto updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto){
 
         UserEntity userEntity = userRepository.findByUserId(updateUserInfoRequestDto.getUserName())
