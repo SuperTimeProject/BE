@@ -31,6 +31,7 @@ public class PostValidation {
                 .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
 
         if (author.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
                 .noneMatch(cid -> cid.equals(boardCid))) {
             throw new CustomAccessDeniedException("게시판 작성 권한이 없습니다.");
         }
@@ -44,6 +45,7 @@ public class PostValidation {
                 .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
 
         if(user.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
                 .noneMatch(cid -> cid.equals(boardEntity.getBoardCid()))
         ) {
             throw new CustomAccessDeniedException("게시물 조회 권한이 없습니다.");
@@ -72,6 +74,7 @@ public class PostValidation {
     // 게시판 조회 권한을 검증하는 메서드
     public void validateGetBoardPermission(UserEntity user, Long boardCid) {
         if(user.getBoardList().stream()
+                .map(BoardEntity::getBoardCid)
                 .noneMatch(cid -> cid.equals(boardCid))
         ) {
             throw new CustomAccessDeniedException("게시판 조회 권한이 없습니다.");

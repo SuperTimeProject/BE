@@ -181,18 +181,13 @@ public class MyPageService {
         return GetUserInfoDetailDto.from(loggedInUser, userBoard, userSemester, userProfile);
     }
 
-    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<Long> userBoardList) {
+    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<BoardEntity> userBoardList) {
         List<GetUserInfoBoardInfoDto> boardList = new ArrayList<>();
-        for(Long boardCid: userBoardList) {
-            boardList.add(GetUserInfoBoardInfoDto.from(findBoardEntityByCid(boardCid)));
+        for(BoardEntity board: userBoardList) {
+            boardList.add(GetUserInfoBoardInfoDto.from(board));
         }
 
         return boardList;
-    }
-
-    private BoardEntity findBoardEntityByCid(Long boardCid) {
-        return boardRepository.findById(boardCid)
-                .orElseThrow(() -> new CustomNotFoundException("일치하는 게시판이 존재하지 않습니다."));
     }
 
     private UserSemesterDto getSemesterInfo(long semesterCid) {
