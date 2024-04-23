@@ -25,9 +25,6 @@ public class BoardEntity {
     @Schema(description = "게시판 이름", example = "자유게시판")
     private String boardName;
 
-    @ManyToMany(mappedBy = "boardList")
-    private List<UserEntity> userList;
-
     public static BoardEntity toSemesterBoard(int semesterName) {
         return BoardEntity.builder()
                 .boardName("기수 게시판 ("+semesterName+")")

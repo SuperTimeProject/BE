@@ -57,15 +57,10 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_board", // 중간 테이블 이름
-            joinColumns = @JoinColumn(name = "user_cid"), // UserEntity를 참조하는 외래 키
-            inverseJoinColumns = @JoinColumn(name = "board_cid") // BoardEntity를 참조하는 외래 키
-    )
+    @ElementCollection
     @Column(name = "board_cid_list")
     @Schema(name = "게시판 리스트")
-    private List<BoardEntity> boardList;
+    private List<Long> boardList;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     @Column(name = "chat_room_list")
@@ -85,7 +80,7 @@ public class UserEntity extends TimeEntity {
     @Column(name = "is_deleted")
     private int isDeleted;
 
-    public static UserEntity from(final SignupRequestDto signupInfo, final String password, final List<BoardEntity> userBoard) {
+    public static UserEntity from(final SignupRequestDto signupInfo, final String password, final List<Long> userBoard) {
         return  UserEntity.builder()
                 .userId(signupInfo.getUserId())
                 .userName(signupInfo.getUserName())

@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
+import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
@@ -35,6 +37,7 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final ImageUploadService imageUploadService;
+    private final BoardRepository boardRepository;
 
     private final UserValidation userValidation;
 
@@ -178,13 +181,18 @@ public class MyPageService {
         return GetUserInfoDetailDto.from(loggedInUser, userBoard, userSemester, userProfile);
     }
 
-    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<BoardEntity> userBoardList) {
+    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<Long> userBoardList) {
         List<GetUserInfoBoardInfoDto> boardList = new ArrayList<>();
-        for(BoardEntity board: userBoardList) {
-            boardList.add(GetUserInfoBoardInfoDto.from(board));
+        for(Long boardCid: userBoardList) {
+            boardList.add(GetUserInfoBoardInfoDto.from(findBoardEntityByCid(boardCid)));
         }
 
         return boardList;
+    }
+
+    private BoardEntity findBoardEntityByCid(Long boardCid) {
+        return boardRepository.findById(boardCid)
+                .orElseThrow(() -> new CustomNotFoundException("일치하는 게시판이 존재하지 않습니다."));
     }
 
     private UserSemesterDto getSemesterInfo(long semesterCid) {
