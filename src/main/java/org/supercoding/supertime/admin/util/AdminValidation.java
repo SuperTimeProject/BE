@@ -44,7 +44,7 @@ public class AdminValidation {
     }
 
     public Page<UserEntity> validateVerifiedUser(Verified verified, Pageable pageable) {
-        Page<UserEntity> userEntities = userRepository.findAllByValified(verified, pageable);
+        Page<UserEntity> userEntities = userRepository.findAllByVerified(verified, pageable);
 
         if(userEntities.isEmpty()) {
             throw new CustomNoSuchElementException("인증 대기중인 유저가 없습니다.");

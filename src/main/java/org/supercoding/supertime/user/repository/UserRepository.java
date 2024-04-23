@@ -19,5 +19,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByUserNickname(String userNickname);
 
-    Page<UserEntity> findAllByValified(Verified verified, Pageable pageable);
+    Page<UserEntity> findAllByVerified(Verified verified, Pageable pageable);
 }
