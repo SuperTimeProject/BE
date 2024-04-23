@@ -10,8 +10,11 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.supercoding.supertime.comment.service.CommentService;
 import org.supercoding.supertime.comment.web.dto.request.CreateCommentReqDto;
+import org.supercoding.supertime.comment.web.dto.response.GetCommentDetailDto;
 import org.supercoding.supertime.comment.web.dto.response.GetCommentResDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -27,10 +30,12 @@ public class CommentController {
             @AuthenticationPrincipal User user,
             @RequestBody CreateCommentReqDto commentInfo
             ){
-        log.info("[COMMENT] 댓글 작성 요청이 들어왔습니다.");
+        log.debug("[COMMENT] 댓글 작성 요청이 들어왔습니다.");
+        commentService.createComment(user, commentInfo);
+        log.debug("[COMMENT] 댓글을 성공적으로 추가했습니다.");
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(commentService.createComment(user, commentInfo));
+                .body(CommonResponseDto.successResponse("댓글을 성공적으로 추가했습니다."));
     }
 
     @Operation(tags = {"게시판 조회 API"}, summary = "댓글 조회", description = "댓글을 조회하는 api입니다.")
@@ -39,8 +44,11 @@ public class CommentController {
             @PathVariable Long postCid,
             @PathVariable int page
     ){
-        log.info("[COMMENT] 댓글 조회 요청이 들어왔습니다.");
+        log.debug("[COMMENT] 댓글 조회 요청이 들어왔습니다.");
+        List<GetCommentDetailDto> commentList = commentService.getPostComment(postCid, page);
+        log.debug("[COMMENT] 성공적으로 댓글을 조회했습니다.");
 
-        return ResponseEntity.ok(commentService.getComment(postCid, page));
+        return ResponseEntity.ok(GetCommentResDto.success(commentList));
     }
+
 }

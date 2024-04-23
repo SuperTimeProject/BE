@@ -7,7 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.comment.repository.CommentRepository;
+import org.supercoding.supertime.comment.util.CommentValidation;
 import org.supercoding.supertime.comment.web.dto.request.CreateCommentReqDto;
 import org.supercoding.supertime.comment.web.dto.response.GetCommentDetailDto;
 import org.supercoding.supertime.comment.web.dto.response.GetCommentResDto;
@@ -28,46 +30,59 @@ import java.util.List;
 @Slf4j
 public class CommentService {
 
-    private final UserRepository userRepository;
-    private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
-    public CommonResponseDto createComment(User user, CreateCommentReqDto commentInfo) {
-        UserEntity userEntity = userRepository.findByUserId(user.getUsername())
-                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 없습니다."));
+    private final CommentValidation commentValidation;
 
-        PostEntity postEntity = postRepository.findById(commentInfo.getPostCid())
-                .orElseThrow(() -> new CustomNotFoundException("일치하는 게시글이 없습니다."));
+    /**
+     * 기능 - 댓글 추가
+     * @param user
+     * @param commentInfo
+     */
+    @Transactional
+    public void createComment(User user, CreateCommentReqDto commentInfo) {
+        UserEntity userEntity = commentValidation.validateExistUser(user.getUsername());
 
-        PostCommentEntity comment = PostCommentEntity.builder()
-                .user(userEntity)
-                .postEntity(postEntity)
-                .comment(commentInfo.getContent())
-                .build();
-
-        commentRepository.save(comment);
-
-        return CommonResponseDto.successResponse("댓글이 성공적으로 추가되었습니다.");
+        createCommentEntity(userEntity.getUserCid(), commentInfo);
     }
 
-    public GetCommentResDto getComment(Long postCid, int page) {
-        PostEntity postEntity = postRepository.findById(postCid)
-                .orElseThrow(() -> new CustomNotFoundException("일치하는 게시글이 없습니다."));
+    private void createCommentEntity(Long userCid, CreateCommentReqDto commentInfo) {
+        PostCommentEntity comment = PostCommentEntity.from(userCid, commentInfo);
 
+        commentRepository.save(comment);
+    }
+
+    /**
+     * 기능 - 게시물 댓글 조회
+     * @param postCid
+     * @param page
+     * @return List<GetCommentDetailDto>
+     */
+    @Transactional(readOnly = true)
+    public List<GetCommentDetailDto> getPostComment(Long postCid, int page) {
+        PostEntity postEntity = commentValidation.validateExistPost(postCid);
+
+        Page<PostCommentEntity> commentList = getCommentList(postEntity, page);
+
+        return commentListToDto(commentList);
+
+    }
+
+    private Page<PostCommentEntity> getCommentList(PostEntity postEntity, int page) {
         Pageable pageable = PageRequest.of(page-1, 10);
-        Page<PostCommentEntity> commentList = commentRepository.findAllByPostEntity(postEntity, pageable);
+
+        return commentValidation.validateExistComment(postEntity, pageable);
+    }
+
+    private List<GetCommentDetailDto> commentListToDto(Page<PostCommentEntity> commentList) {
+
         List<GetCommentDetailDto> commentDtoList = new ArrayList<>();
-
-        if(commentList.isEmpty()){
-            throw new CustomNoSuchElementException("댓글이 비어있습니다.");
-        }
-
 
         for(PostCommentEntity comment: commentList){
             GetCommentDetailDto postComment = GetCommentDetailDto.from(comment);
             commentDtoList.add(postComment);
         }
 
-        return GetCommentResDto.success(commentDtoList);
+        return commentDtoList;
     }
 }
