@@ -7,21 +7,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.chat.repository.ChatRoomRepository;
 import org.supercoding.supertime.chat.web.entity.ChatRoomEntity;
-import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
-import org.supercoding.supertime.golbal.web.advice.CustomDataIntegerityCiolationException;
-import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
-import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
+import org.supercoding.supertime.golbal.web.advice.*;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.semester.repository.SemesterRepository;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
+import org.supercoding.supertime.user.repository.AuthStateRepository;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.web.dto.LoginRequestDto;
+import org.supercoding.supertime.user.web.entity.AuthStateEntity;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 import org.supercoding.supertime.user.web.entity.user.UserProfileEntity;
 
@@ -35,6 +35,7 @@ public class UserValidation {
     private final BoardRepository boardRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserProfileRepository userProfileRepository;
+    private final AuthStateRepository authStateRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -114,6 +115,20 @@ public class UserValidation {
     public UserProfileEntity findUserProfile(long userProfileCid) {
         return userProfileRepository.findById(userProfileCid)
                 .orElseThrow(()->new CustomNotFoundException("찾는 프로필이 존재하지 않습니다."));
+    }
+
+    public UserEntity validateCertificationRequest(String username, MultipartFile image) {
+        if(image == null) {
+            throw new CustomMissingFileException("인증 요청 이미지가 없습니다");
+        }
+
+        return userRepository.findByUserId(username)
+                .orElseThrow(()-> new CustomNotFoundException("인증 신청하는 유저가 존재하지 않습니다."));
+    }
+
+    public AuthStateEntity validateAuthState(String userId) {
+        return authStateRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomNotFoundException("일치하는 인증상태 정보가 존재하지 않습니다."));
     }
 
 
