@@ -41,7 +41,7 @@ public class CommentService {
      */
     @Transactional
     public void createComment(User user, CreateCommentReqDto commentInfo) {
-        UserEntity userEntity = commentValidation.validateExistUser(user.getUsername());
+        UserEntity userEntity = commentValidation.validateExistUserByUsername(user.getUsername());
 
         createCommentEntity(userEntity.getUserCid(), commentInfo);
     }
@@ -78,8 +78,10 @@ public class CommentService {
 
         List<GetCommentDetailDto> commentDtoList = new ArrayList<>();
 
-        for(PostCommentEntity comment: commentList){
-            GetCommentDetailDto postComment = GetCommentDetailDto.from(comment);
+        for (PostCommentEntity comment : commentList) {
+            UserEntity user = commentValidation.validateExistUser(comment.getUserCid());
+
+            GetCommentDetailDto postComment = GetCommentDetailDto.from(comment, user);
             commentDtoList.add(postComment);
         }
 

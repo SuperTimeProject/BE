@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.supercoding.supertime.comment.web.entity.PostCommentEntity;
+import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.time.LocalDateTime;
 
@@ -25,9 +26,9 @@ public class GetCommentDetailDto {
     @Schema(description = "작성 시간")
     private LocalDateTime createdAt;
 
-    public static GetCommentDetailDto from(final PostCommentEntity comment){
+    public static GetCommentDetailDto from(final PostCommentEntity comment, final UserEntity user){
         return GetCommentDetailDto.builder()
-                .author(comment.getUser().getUserNickname())
+                .author(user.getUserNickname())
                 .content(comment.getComment())
                 .createdAt(comment.getCreatedAt())
                 .build();

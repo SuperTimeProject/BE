@@ -21,8 +21,13 @@ public class CommentValidation {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
-    public UserEntity validateExistUser(String username) {
+    public UserEntity validateExistUserByUsername(String username) {
         return userRepository.findByUserId(username)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 없습니다."));
+    }
+
+    public UserEntity validateExistUser(Long userCid) {
+        return userRepository.findById(userCid)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 없습니다."));
     }
 
