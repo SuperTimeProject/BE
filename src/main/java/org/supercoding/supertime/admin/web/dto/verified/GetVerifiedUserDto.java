@@ -1,4 +1,4 @@
-package org.supercoding.supertime.admin.web.dto;
+package org.supercoding.supertime.admin.web.dto.verified;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

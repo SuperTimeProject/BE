@@ -6,23 +6,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.admin.service.AdminService;
-import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDetailResponseDto;
-import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.schedule.service.ScheduleService;
-import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDetailDto;
-import org.supercoding.supertime.admin.web.dto.GetVerifiedUserDto;
+import org.supercoding.supertime.admin.web.dto.inquiry.GetInquiryDetail;
+import org.supercoding.supertime.admin.web.dto.inquiry.GetInquiryRes;
+import org.supercoding.supertime.admin.web.dto.verified.GetVerifiedUserDetailResponseDto;
+import org.supercoding.supertime.golbal.web.enums.*;
+import org.supercoding.supertime.admin.web.dto.verified.GetVerifiedUserDetailDto;
+import org.supercoding.supertime.admin.web.dto.verified.GetVerifiedUserDto;
 import org.supercoding.supertime.admin.web.dto.UpdateUserInfoRequestDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
-import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryResponseDto;
-import org.supercoding.supertime.golbal.web.enums.IsFull;
-import org.supercoding.supertime.golbal.web.enums.Part;
-import org.supercoding.supertime.golbal.web.enums.Verified;
 
 import java.util.List;
 
@@ -34,7 +28,6 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-    private final ScheduleService scheduleService;
 
 
     @Operation(summary = "권한 변경하기", description = "유저 역할을 변경하는 api입니다.")
@@ -92,22 +85,33 @@ public class AdminController {
             @Parameter(schema = @Schema(type = "string", format = "binary"))
             UpdateUserInfoRequestDto updateUserInfoRequestDto
             ){
-        log.info("[ADMIN] 회원인증 요청이 들어왔습니다.");
+        log.debug("[ADMIN] 회원인증 요청이 들어왔습니다.");
         CommonResponseDto updateUserInfoResult = adminService.updateUserInfo(updateUserInfoRequestDto);
-        log.info("[ADMIN] 인증 결과 = " + updateUserInfoResult);
+        log.debug("[ADMIN] 인증 결과 = " + updateUserInfoResult);
         return ResponseEntity.ok().body(updateUserInfoResult);
     }
 
 
-    @Operation(summary = "문의 조회하기", description = "문의기록을 조회하는 api입니다.")
-    @GetMapping("/inquiry/{page}")
-    public ResponseEntity<GetUnclosedInquiryResponseDto> getUnclosedInquiry(
+    @Operation(summary = "열린 문의 조회하기", description = "문의기록을 조회하는 api입니다.")
+    @GetMapping("/open-inquiry/{page}")
+    public ResponseEntity<GetInquiryRes> getOpenInquiry(
             @PathVariable int page
     ){
-        log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
-        GetUnclosedInquiryResponseDto getInquiryResult = adminService.getUnclosedInquiry(page);
-        log.info("[ADMIN] 문의 조회 결과 = " + getInquiryResult);
-        return ResponseEntity.ok().body(getInquiryResult);
+        log.debug("[ADMIN] 열린 문의 조회 요청이 들어왔습니다.");
+        List<GetInquiryDetail> inquiryList = adminService.getInquiryByIsClosed(page, InquiryClosed.OPEN);
+        log.debug("[ADMIN] 열린 문의를 성공적으로 불러왔습니다." );
+        return ResponseEntity.ok().body(GetInquiryRes.from("열려있는 문의를 조회했습니다.", inquiryList));
+    }
+
+    @Operation(summary = "닫힌 문의 조회하기", description = "문의기록을 조회하는 api입니다.")
+    @GetMapping("/closed-inquiry/{page}")
+    public ResponseEntity<GetInquiryRes> getClosedInquiry(
+            @PathVariable int page
+    ){
+        log.debug("[ADMIN] 닫힌 문의 조회 요청이 들어왔습니다.");
+        List<GetInquiryDetail> inquiryList = adminService.getInquiryByIsClosed(page, InquiryClosed.CLOSED);
+        log.debug("[ADMIN] 닫힌 문의를 성공적으로 불러왔습니다." );
+        return ResponseEntity.ok().body(GetInquiryRes.from("닫힌 문의를 조회했습니다.", inquiryList));
     }
 
     @Operation(summary = "문의 답변하기", description = "문의에 대한 답변을 하는 api입니다.")
@@ -116,10 +120,10 @@ public class AdminController {
            @PathVariable Long inquiryCid,
            @RequestParam String inquiryContent
     ){
-        log.info("[ADMIN] 문의 답변 요청이 들어왔습니다.");
-        CommonResponseDto answerResult = adminService.answerInquiry(inquiryCid,inquiryContent);
-        log.info("[ADMIN] 답변 결과 = " + answerResult);
-        return ResponseEntity.ok().body(answerResult);
+        log.debug("[ADMIN] 문의 답변 요청이 들어왔습니다.");
+        adminService.answerInquiry(inquiryCid,inquiryContent);
+        log.debug("[ADMIN] 문의 답변을 성공적으로 추가했습니다.");
+        return ResponseEntity.ok().body(CommonResponseDto.successResponse("문의 답변에 성공했습니다."));
     }
 
     @Operation(summary = "문의 삭제하기", description = "문의를 삭제하는 api입니다.")
@@ -127,41 +131,9 @@ public class AdminController {
     public ResponseEntity<CommonResponseDto> deleteInquiry(
             @PathVariable Long inquiryCid
     ){
-        log.info("[ADMIN] 문의 삭제 요청이 들어왔습니다.");
-        CommonResponseDto deleteResult = adminService.deleteInquiry(inquiryCid);
-        log.info("[ADMIN] 답변 결과 = " + deleteResult);
-        return ResponseEntity.ok().body(deleteResult);
+        log.debug("[ADMIN] 문의 삭제 요청이 들어왔습니다.");
+        adminService.deleteInquiry(inquiryCid);
+        log.debug("[ADMIN] 답변를 성공적으로 삭제했습니다.");
+        return ResponseEntity.ok().body(CommonResponseDto.successResponse("문의 삭제에 성공했습니다."));
     }
-
-
-    @Operation(summary = "시간표 생성", description = "시간표를 생성하는 api입니다.")
-    @PostMapping(value = "/timetable",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponseDto> createSchedule(
-            //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
-            @RequestParam Part part,
-            @RequestParam IsFull isFull,
-            @RequestPart(name = "scheduleImage") List<MultipartFile> scheduleImage
-    ){
-        log.info("[SCHEDULE] 시간표 생성 요청이 들어왔습니다.");
-        CommonResponseDto createSchedulerResult = scheduleService.createSchedule(part,isFull,scheduleImage);
-        log.info("[SCHEDULE] 시간표 생성 결과 = " + createSchedulerResult);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createSchedulerResult);
-    }
-
-    @Operation(summary = "시간표 수정", description = "시간표를 수정하는 api입니다.")
-    @PutMapping(value = "/timetable", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponseDto> editSchedule(
-            //TODO DTO로 바꿔야 하는걸 알지만.. 프론트에서 구현 시간 모자랄까바 일단 넣기
-            @RequestParam Part part,
-            @RequestParam IsFull isFull,
-            @RequestPart(name = "scheduleImage") List<MultipartFile> scheduleImage
-    ){
-        log.info("[SCHEDULE] 시간표 수정 요청이 들어왔습니다.");
-        CommonResponseDto editSchedulerResult = scheduleService.editSchedule(part,isFull,scheduleImage);
-        log.info("[SCHEDULE] 시간표 수정 결과 = " + editSchedulerResult);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(editSchedulerResult);
-    }
-
 }

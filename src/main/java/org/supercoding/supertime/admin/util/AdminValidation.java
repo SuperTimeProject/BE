@@ -6,10 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
+import org.supercoding.supertime.golbal.web.advice.CustomDataIntegerityCiolationException;
 import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
+import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
 import org.supercoding.supertime.golbal.web.enums.Roles;
 import org.supercoding.supertime.golbal.web.enums.Verified;
+import org.supercoding.supertime.inquiry.repository.InquiryRepository;
+import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.user.repository.AuthImageRepository;
 import org.supercoding.supertime.user.repository.AuthStateRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
@@ -23,6 +27,7 @@ public class AdminValidation {
     private final UserRepository userRepository;
     private final AuthStateRepository authStateRepository;
     private final AuthImageRepository authImageRepository;
+    private final InquiryRepository inquiryRepository;
 
     public void validateAdminRole(User user) {
         UserEntity targetUser = userRepository.findByUserId(user.getUsername())
@@ -61,5 +66,35 @@ public class AdminValidation {
     public AuthImageEntity validateExistAuthImage(long authImageId) {
         return authImageRepository.findById(authImageId)
                 .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 이미지 값이 존재하지 않습니다."));
+    }
+
+    public Page<InquiryEntity> validateGetInquiry(Pageable pageable, InquiryClosed isclosed) {
+        Page<InquiryEntity> inquiryList = inquiryRepository.findAllByIsClosed(isclosed, pageable);
+
+        if(inquiryList.isEmpty()) {
+            switch (isclosed){
+                case OPEN -> throw new CustomNoSuchElementException("열려있는 문의가 없습니다.");
+                case CLOSED -> throw new CustomNoSuchElementException("답변완료된 문의가 없습니다.");
+            }
+        }
+
+        return inquiryList;
+    }
+
+    public InquiryEntity validateAnsweredInquiry(Long inquiryCid) {
+        InquiryEntity inquiry = inquiryRepository.findById(inquiryCid)
+                .orElseThrow(() -> new CustomNotFoundException("일치하는 문의가 존재하지 않습니다."));
+
+        if(inquiry.getAnswer() != null) {
+            throw new CustomDataIntegerityCiolationException("이미 답변 완료된 문의 입니다.");
+        }
+
+        return inquiry;
+    }
+
+    public InquiryEntity validateExistInquiry(Long inquiryCid) {
+        return inquiryRepository.findById(inquiryCid)
+                .orElseThrow(() -> new CustomNotFoundException("일치하는 문의가 존재하지 않습니다."));
+
     }
 }
