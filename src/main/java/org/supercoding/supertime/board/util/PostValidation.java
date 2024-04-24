@@ -32,7 +32,7 @@ public class PostValidation {
 
         if (author.getBoardList().stream()
                 .map(BoardEntity::getBoardCid)
-                .noneMatch(cid -> cid.equals(targetBoard.getBoardCid()))) {
+                .noneMatch(cid -> cid.equals(boardCid))) {
             throw new CustomAccessDeniedException("게시판 작성 권한이 없습니다.");
         }
 
