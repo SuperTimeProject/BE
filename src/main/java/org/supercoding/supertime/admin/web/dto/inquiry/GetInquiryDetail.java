@@ -1,10 +1,9 @@
-package org.supercoding.supertime.inquiry.web.dto;
+package org.supercoding.supertime.admin.web.dto.inquiry;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
+import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 
 @Getter
 @Setter
@@ -13,7 +12,7 @@ import java.util.List;
 @Builder
 @ToString
 @Slf4j
-public class GetUnclosedInquiryDetailDto {
+public class GetInquiryDetail {
     @Schema(description = "문의 cid")
     private Long inquiryCid;
 
@@ -32,4 +31,14 @@ public class GetUnclosedInquiryDetailDto {
     @Schema(description = "작성일", example = "23-11-10")
     private String createdAt;
 
+    public static GetInquiryDetail from(InquiryEntity inquiryEntity) {
+        return GetInquiryDetail.builder()
+                .inquiryCid(inquiryEntity.getInquiryCid())
+                .author(inquiryEntity.getUser().getUserId())
+                .inquiryTitle(inquiryEntity.getInquiryTitle())
+                .inquiryContent(inquiryEntity.getInquiryContent())
+                .createdAt(inquiryEntity.getCreatedAt().toString())
+                .answer(inquiryEntity.getAnswer())
+                .build();
+    }
 }

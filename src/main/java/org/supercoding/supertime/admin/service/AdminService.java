@@ -2,34 +2,33 @@ package org.supercoding.supertime.admin.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.supercoding.supertime.admin.util.AdminValidation;
+import org.supercoding.supertime.admin.web.dto.*;
+import org.supercoding.supertime.admin.web.dto.inquiry.GetInquiryDetail;
+import org.supercoding.supertime.admin.web.dto.verified.GetVerifiedUserDetailDto;
+import org.supercoding.supertime.admin.web.dto.verified.PendingImageDto;
 import org.supercoding.supertime.golbal.web.enums.Roles;
+import org.supercoding.supertime.golbal.web.enums.Verified;
+import org.supercoding.supertime.inquiry.repository.InquiryImageRepository;
 import org.supercoding.supertime.inquiry.repository.InquiryRepository;
 import org.supercoding.supertime.user.repository.AuthImageRepository;
 import org.supercoding.supertime.user.repository.AuthStateRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
-import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
 import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
-import org.supercoding.supertime.admin.web.dto.GetPendingUserDetailDto;
-import org.supercoding.supertime.admin.web.dto.GetPendingUserDto;
-import org.supercoding.supertime.admin.web.dto.UpdateUserInfoRequestDto;
-import org.supercoding.supertime.admin.web.dto.PendingImgaeDto;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
-import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryDetailDto;
-import org.supercoding.supertime.inquiry.web.dto.GetUnclosedInquiryResponseDto;
 import org.supercoding.supertime.inquiry.web.entity.InquiryEntity;
 import org.supercoding.supertime.inquiry.web.entity.InquiryImageEntity;
 import org.supercoding.supertime.user.web.entity.AuthImageEntity;
 import org.supercoding.supertime.user.web.entity.AuthStateEntity;
 import org.supercoding.supertime.golbal.web.enums.InquiryClosed;
-import org.supercoding.supertime.golbal.web.enums.Valified;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ import java.util.List;
 public class AdminService {
     private final UserRepository userRepository;
     private final InquiryRepository inquiryRepository;
+    private final InquiryImageRepository inquiryImageRepository;
     private final ImageUploadService imageUploadService;
     private final AuthImageRepository authImageRepository;
     private final AuthStateRepository authStateRepository;
@@ -54,7 +54,7 @@ public class AdminService {
      */
     @Transactional
     public void changeRole(Long userCid, Roles role) {
-        UserEntity user = adminValidation.findUserEntity(userCid);
+        UserEntity user = adminValidation.findUserEntityByUserCid(userCid);
 
         setRole(user, role);
     }
@@ -64,88 +64,156 @@ public class AdminService {
         userRepository.save(user);
     }
 
+    /**
+     * 기능 - 인증 상태별 유저 조회
+     * @param verified
+     * @param page
+     * @return List<GetVerifiedUserDetailDto>
+     */
+    @Transactional(readOnly = true)
+    public List<GetVerifiedUserDetailDto> findUserByVerified(Verified verified, int page) {
+        Page<UserEntity> verifiedUserList = getUserList(verified, page);
 
-    ///TODO
-    public GetPendingUserDto getUserByValified(Valified valified, int page){
-        log.info("[ADMIN SERVICE] 사용자 인증 대기 조회 요청이 들어왔습니다.");
-        List<GetPendingUserDetailDto> userList = new ArrayList<>();
-
-        Pageable pageable = PageRequest.of(page-1, 10);
-        Page<UserEntity> userEntities = userRepository.findAllByValified(valified,pageable);
-
-        if(userEntities.isEmpty()){
-            throw new CustomNoSuchElementException("[ADMIN] 인증 대기중인 유저가 없습니다.");
-        }
-
-        for(UserEntity user : userEntities) {
-            AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
-                    .orElseThrow(()-> new CustomNoSuchElementException("[GET_USER_VALIFIED]일치하는 인증요청이 존재하지 않습니다."));
-
-            // 이미지 없는 경우
-            AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthCid()).orElse(null);
-            PendingImgaeDto image = null;
-
-            if(authImageEntity!=null){
-                image = PendingImgaeDto.builder()
-                        .authImageCid(authImageEntity.getAuthImageCid())
-                        .authImageFileName(authImageEntity.getAuthImageFileName())
-                        .authImageFilePath(authImageEntity.getAuthImageFilePath())
-                        .build();
-            }
-
-            GetPendingUserDetailDto dto = GetPendingUserDetailDto.builder()
-                    .userId(user.getUserId())
-                    .userNickname(user.getUserNickname())
-                    .semester(user.getSemester())
-                    .userName(user.getUserName())
-                    .image(image)
-                    .valified(valified)
-                    .build();
-
-
-            userList.add(dto);
-        }
-
-        return GetPendingUserDto.builder()
-                .code(200)
-                .success(true)
-                .message("인증 대기 조회 요청에 성공했습니다.")
-                .userList(userList)
-                .build();
+        return toVerifiedUserDto(verifiedUserList, verified);
     }
 
-        public GetPendingUserDetailDto getValifiedDetail(String userId){
-            log.info("[ADMIN SERVICE] 사용자 인증대기 상세 조회 요청이 들어왔습니다.");
-            UserEntity user = userRepository.findByUserId(userId)
-                    .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 유저값이 존재하지 않습니다."));
+    private Page<UserEntity> getUserList(Verified verified, int page) {
+        Pageable pageable = PageRequest.of(page - 1, 10);
+        return adminValidation.validateVerifiedUser(verified, pageable);
+    }
 
-            AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
-                    .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증요청이 존재하지 않습니다."));
+    private List<GetVerifiedUserDetailDto> toVerifiedUserDto(Page<UserEntity> verifiedUserList, Verified verified) {
+        List<GetVerifiedUserDetailDto> userList = new ArrayList<>();
 
+        for(UserEntity user : verifiedUserList) {
+            AuthStateEntity authState = adminValidation.validateGetAuthState(user.getUserId());
 
-            PendingImgaeDto image = null;
+            AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthCid()).orElse(null);
 
-            if(authState.getAuthImageId()!=null){
-                AuthImageEntity authImageEntity = authImageRepository.findById(authState.getAuthImageId())
-                        .orElseThrow(()-> new CustomNoSuchElementException("인증요청의 이미지 값이 존재하지 않습니다."));
-
-                image = PendingImgaeDto.builder()
-                        .authImageCid(authImageEntity.getAuthImageCid())
-                        .authImageFileName(authImageEntity.getAuthImageFileName())
-                        .authImageFilePath(authImageEntity.getAuthImageFilePath())
-                        .build();
+            if(authImageEntity == null) {
+                userList.add(GetVerifiedUserDetailDto.from(user, null, verified));
+                continue;
             }
 
-            return GetPendingUserDetailDto.builder()
-                    .userCid(user.getUserCid())
-                    .userId(user.getUserId())
-                    .userName(user.getUserName())
-                    .userNickname(user.getUserNickname())
-                    .image(image)
-                    .semester(user.getSemester())
-                    .valified(user.getValified())
-                    .build();
+            PendingImageDto image = PendingImageDto.from(authImageEntity);
+            userList.add(GetVerifiedUserDetailDto.from(user, image, verified));
         }
+
+        return userList;
+    }
+
+    /**
+     * 기능 - 유저의 인증상태관리에 대한 조회
+     * @param userId
+     * @return GetVerifiedUserDetailDto
+     */
+    public GetVerifiedUserDetailDto getVerifiedUserDetail(String userId) {
+        UserEntity user = adminValidation.findUserEntityByUserId(userId);
+        AuthStateEntity authState = adminValidation.validateGetAuthState(user.getUserId());
+        PendingImageDto pendingImage = getPendingImage(authState);
+
+        return GetVerifiedUserDetailDto.getVerifiedDetail(user, pendingImage);
+    }
+
+    private PendingImageDto getPendingImage(AuthStateEntity authState) {
+        if(authState.getAuthImageId() == null) {
+            return null;
+        }
+
+        AuthImageEntity authImageEntity = adminValidation.validateExistAuthImage(authState.getAuthImageId());
+
+        return PendingImageDto.from(authImageEntity);
+    }
+
+    /**
+     * 기능 - 유저의 인증상태 수정
+     * @param userId
+     * @param verified
+     */
+    @Transactional
+    public void changeVerification(String userId, Verified verified) {
+        UserEntity user = adminValidation.findUserEntityByUserId(userId);
+        AuthStateEntity authState = adminValidation.validateGetAuthState(userId);
+
+        setVerifiedState(user, authState, verified);
+    }
+
+    private void setVerifiedState(UserEntity user, AuthStateEntity authState, Verified verified) {
+        user.setVerified(verified);
+        authState.setVerified(verified);
+
+        userRepository.save(user);
+        authStateRepository.save(authState);
+    }
+
+    /**
+     * 기능 - 문의하기 불러오기
+     * @param page
+     * @return List<GetInquiryDetail>
+     */
+    @Transactional(readOnly = true)
+    public List<GetInquiryDetail> getInquiryByIsClosed(int page, InquiryClosed isClosed) {
+        Page<InquiryEntity> inquiryList = getPageableInquiry(page, isClosed);
+
+        return inquiryToDto(inquiryList);
+    }
+
+    private Page<InquiryEntity> getPageableInquiry(int page, InquiryClosed isClosed) {
+        Pageable pageable = PageRequest.of(page - 1, 10);
+        return adminValidation.validateGetInquiry(pageable, isClosed);
+    }
+
+    private List<GetInquiryDetail> inquiryToDto(Page<InquiryEntity> inquiryList) {
+        List<GetInquiryDetail> inquiryDtoList =  new ArrayList<>();
+
+        for(InquiryEntity inquiry : inquiryList) {
+            inquiryDtoList.add(GetInquiryDetail.from(inquiry));
+        }
+
+        return inquiryDtoList;
+    }
+
+    /**
+     * 기능 - 문의 답변
+     * @param inquiryCid
+     * @param answer
+     */
+    @Transactional
+    public void answerInquiry(Long inquiryCid, String answer) {
+        InquiryEntity inquiry = adminValidation.validateAnsweredInquiry(inquiryCid);
+
+        inquiry.setAnswer(answer);
+        inquiry.setIsClosed(InquiryClosed.CLOSED);
+        inquiryRepository.save(inquiry);
+    }
+
+    public void deleteInquiry(Long inquiryCid) {
+        InquiryEntity inquiry = adminValidation.validateExistInquiry(inquiryCid);
+
+        List<String> oldPathList = deleteInquiryImage(inquiry.getInquiryImages());
+        inquiryRepository.delete(inquiry);
+
+        deleteImagesFromS3(oldPathList);
+    }
+
+    private List<String> deleteInquiryImage(List<InquiryImageEntity> inquiryImages) {
+        List<String> oldPathList = new ArrayList<>();
+
+        for(InquiryImageEntity image : inquiryImages) {
+            inquiryImageRepository.delete(image);
+            oldPathList.add(image.getInquiryImageFilePath());
+        }
+
+        return oldPathList;
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteImagesFromS3(List<String> oldPathList) {
+        for (String path : oldPathList) {
+            imageUploadService.deleteImage(path);
+        }
+    }
 
 
     public CommonResponseDto updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto){
@@ -166,8 +234,8 @@ public class AdminService {
         if(updateUserInfoRequestDto.getUserNickname()!=null){
             userEntity.setUserNickname(updateUserInfoRequestDto.getUserNickname());
         }
-        if(updateUserInfoRequestDto.getValified()!=null){
-            userEntity.setValified(updateUserInfoRequestDto.getValified());
+        if(updateUserInfoRequestDto.getVerified()!=null){
+            userEntity.setVerified(updateUserInfoRequestDto.getVerified());
         }
         if(updateUserInfoRequestDto.getPart()!=null){
             userEntity.setPart(updateUserInfoRequestDto.getPart());
@@ -184,91 +252,4 @@ public class AdminService {
         return CommonResponseDto.successResponse("회원 정보 변경에 성공했습니다.");
     }
 
-    public CommonResponseDto varification(String userId, Valified valified) {
-        log.info("[ADMIN] 사용자 인증상태 변경 요청이 들어왔습니다.");
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(()-> new CustomNotFoundException("일치하는 유저가 존재하지 않습니다."));
-
-        AuthStateEntity authState = authStateRepository.findByUserId(user.getUserId())
-                .orElseThrow(()-> new CustomNoSuchElementException("일치하는 인증내역이 존재하지 않습니다."));
-
-        //if(user.getValified()==Valified.COMPLETED)
-        //    throw new DataIntegrityViolationException("이미 인증된 사용자 입니다.");
-
-        user.setValified(valified);
-        authState.setValified(valified);
-
-        userRepository.save(user);
-        authStateRepository.save(authState);
-
-        return CommonResponseDto.successResponse("회원 인증 정보 변경에 성공했습니다.");
-    }
-
-    public GetUnclosedInquiryResponseDto getUnclosedInquiry(int page) {
-        log.info("[ADMIN] 문의 조회 요청이 들어왔습니다.");
-
-        Pageable pageable = PageRequest.of(page-1, 10);
-        Page<InquiryEntity> inquiryList = inquiryRepository.findAll(pageable);
-
-        List<GetUnclosedInquiryDetailDto> inquiryDtoList =  new ArrayList<>();
-
-        if(inquiryList.isEmpty()){
-            throw new CustomNoSuchElementException("문의내용이 없습니다.");
-        }
-
-        for(InquiryEntity inquiryEntity:inquiryList){
-            GetUnclosedInquiryDetailDto dto = GetUnclosedInquiryDetailDto.builder()
-                    .inquiryCid(inquiryEntity.getInquiryCid())
-                    .author(inquiryEntity.getUser().getUserId())
-                    .inquiryTitle(inquiryEntity.getInquiryTitle())
-                    .inquiryContent(inquiryEntity.getInquiryContent())
-                    .createdAt(inquiryEntity.getCreatedAt().toString())
-                    .answer(inquiryEntity.getAnswer())
-                    .build();
-
-            inquiryDtoList.add(dto);
-        }
-
-
-        return GetUnclosedInquiryResponseDto.builder()
-                .code(200)
-                .success(true)
-                .message("문의 기록 조회에 성공했습니다.")
-                .inquiryList(inquiryDtoList)
-                .build();
-    }
-
-    public CommonResponseDto answerInquiry(Long inquiryCid, String inquiryContent) {
-        log.info("[ADMIN] 문의 답변 요청이 들어왔습니다.");
-        InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
-                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
-
-        if(inquiryEntity.getAnswer()!=null)
-            throw new DataIntegrityViolationException("이미 답변한 문의입니다.");
-
-        inquiryEntity.setAnswer(inquiryContent);
-        inquiryEntity.setIsClosed(InquiryClosed.CLOSED);
-
-        inquiryRepository.save(inquiryEntity);
-
-        return CommonResponseDto.successResponse("문의 답변에 성공했습니다.");
-    }
-
-    public CommonResponseDto deleteInquiry(Long inquiryCid){
-        log.info("[ADMIN] 문의 삭제 요청이 들어왔습니다.");
-        InquiryEntity inquiryEntity = inquiryRepository.findById(inquiryCid)
-                .orElseThrow(()-> new CustomNotFoundException("해당 문의가 존재하지 않습니다."));
-
-        List<InquiryImageEntity> inquiryImageEntity = inquiryEntity.getInquiryImages();
-
-        if(!inquiryEntity.getInquiryImages().isEmpty()) {
-            for(InquiryImageEntity image : inquiryImageEntity) {
-                imageUploadService.deleteImage(image.getInquiryImageFilePath());
-            }
-        }
-        inquiryRepository.delete(inquiryEntity);
-
-
-        return CommonResponseDto.successResponse("문의 삭제에 성공했습니다.");
-    }
 }

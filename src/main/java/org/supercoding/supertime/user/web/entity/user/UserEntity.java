@@ -10,7 +10,7 @@ import org.supercoding.supertime.golbal.web.entity.TimeEntity;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.user.web.dto.SignupRequestDto;
 
 import java.util.List;
@@ -68,7 +68,7 @@ public class UserEntity extends TimeEntity {
     private List<ChatRoomMemberEntity> chatRoomMemberList;
 
     @Enumerated(EnumType.STRING)
-    private Valified valified;
+    private Verified verified;
 
     @Enumerated(EnumType.STRING)
     private Part part;
@@ -92,7 +92,7 @@ public class UserEntity extends TimeEntity {
                 .roles(Roles.ROLE_USER)
                 .part(Part.PART_UNDEFINED)
                 .isDeleted(0)
-                .valified(Valified.NEEDED)
+                .verified(Verified.NEEDED)
                 .build();
     }
 

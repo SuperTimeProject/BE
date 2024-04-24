@@ -1,6 +1,6 @@
 package org.supercoding.supertime.golbal.web.enums;
 
-public enum Valified {
+public enum Verified {
     PENDING("PENDING"),
     DENIED("DENIED"),
     COMPLETED("COMPLETED"),
@@ -8,7 +8,7 @@ public enum Valified {
 
     private final String type;
 
-    Valified(String type) {this.type = type;}
+    Verified(String type) {this.type = type;}
 
     public String getType() {return type;}
 }

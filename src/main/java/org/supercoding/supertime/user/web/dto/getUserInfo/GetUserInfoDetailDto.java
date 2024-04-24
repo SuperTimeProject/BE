@@ -3,12 +3,11 @@ package org.supercoding.supertime.user.web.dto.getUserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.user.web.dto.getUserDto.UserProfileDto;
 import org.supercoding.supertime.user.web.dto.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.List;
@@ -49,7 +48,7 @@ public class GetUserInfoDetailDto {
     private UserProfileDto userProfile;
 
     @Schema(description = "인증 상태")
-    private Valified valified;
+    private Verified verified;
 
     public static GetUserInfoDetailDto from(
             final UserEntity loggedInUser,
@@ -67,7 +66,7 @@ public class GetUserInfoDetailDto {
                 .boardList(boardList)
                 .semester(semester)
                 .userProfile(userProfile)
-                .valified(loggedInUser.getValified())
+                .verified(loggedInUser.getVerified())
                 .build();
     }
 }
