@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 
 @Getter
 @Setter
@@ -29,7 +29,7 @@ public class UpdateUserInfoRequestDto {
     private String userNickname;
 
     @Enumerated(EnumType.STRING)
-    private Valified valified;
+    private Verified verified;
 
     @Enumerated(EnumType.STRING)
     private Part part;
