@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercoding.supertime.board.repository.BoardRepository;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
 import org.supercoding.supertime.golbal.web.advice.CustomAccessDeniedException;
+import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
@@ -35,6 +37,7 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final ImageUploadService imageUploadService;
+    private final BoardRepository boardRepository;
 
     private final UserValidation userValidation;
 

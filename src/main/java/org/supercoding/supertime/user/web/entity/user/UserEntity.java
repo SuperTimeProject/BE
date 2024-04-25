@@ -4,12 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
 import org.supercoding.supertime.chat.web.entity.ChatRoomMemberEntity;
 import org.supercoding.supertime.golbal.web.entity.TimeEntity;
 import org.supercoding.supertime.board.web.entity.BoardEntity;
 import org.supercoding.supertime.golbal.web.enums.Part;
 import org.supercoding.supertime.golbal.web.enums.Roles;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.user.web.dto.SignupRequestDto;
 
 import java.util.List;
@@ -57,13 +58,8 @@ public class UserEntity extends TimeEntity {
     @Schema(description = "유저 닉네임", example = "피카츄")
     private String userNickname;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_board", // 중간 테이블 이름
-            joinColumns = @JoinColumn(name = "user_cid"), // UserEntity를 참조하는 외래 키
-            inverseJoinColumns = @JoinColumn(name = "board_cid") // BoardEntity를 참조하는 외래 키
-    )
-    @Column(name = "board_cid_list")
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "board_cid")
     @Schema(name = "게시판 리스트")
     private List<BoardEntity> boardList;
 
@@ -72,7 +68,7 @@ public class UserEntity extends TimeEntity {
     private List<ChatRoomMemberEntity> chatRoomMemberList;
 
     @Enumerated(EnumType.STRING)
-    private Valified valified;
+    private Verified verified;
 
     @Enumerated(EnumType.STRING)
     private Part part;
@@ -96,7 +92,7 @@ public class UserEntity extends TimeEntity {
                 .roles(Roles.ROLE_USER)
                 .part(Part.PART_UNDEFINED)
                 .isDeleted(0)
-                .valified(Valified.NEEDED)
+                .verified(Verified.NEEDED)
                 .build();
     }
 

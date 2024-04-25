@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.golbal.aws.service.ImageUploadService;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.user.repository.AuthImageRepository;
 import org.supercoding.supertime.user.repository.AuthStateRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
@@ -16,7 +17,6 @@ import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.user.web.entity.AuthImageEntity;
 import org.supercoding.supertime.user.web.entity.AuthStateEntity;
-import org.supercoding.supertime.golbal.web.enums.Valified;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 @Service
@@ -35,8 +35,8 @@ public class VerificationService {
 
         AuthStateEntity authStateEntity = authStateRepository.findByUserId(loggedInUser.getUserId()).orElse(null);
 
-        if(authStateEntity!=null || loggedInUser.getValified()!=Valified.COMPLETED) {
-            switch (loggedInUser.getValified()){
+        if(authStateEntity!=null || loggedInUser.getVerified()!= Verified.COMPLETED) {
+            switch (loggedInUser.getVerified()){
                 case PENDING:
                     throw new DataIntegrityViolationException("인증이 대기중입니다.");
                 case COMPLETED:
@@ -52,8 +52,8 @@ public class VerificationService {
             authStateEntity.setAuthImageId(img.getAuthImageCid());
         }
 
-        loggedInUser.setValified(Valified.PENDING);
-        authStateEntity.setValified(Valified.PENDING);
+        loggedInUser.setVerified(Verified.PENDING);
+        authStateEntity.setVerified(Verified.PENDING);
 
         userRepository.save(loggedInUser);
         authStateRepository.save(authStateEntity);
@@ -73,7 +73,7 @@ public class VerificationService {
         }
 
         if(authStateEntity!=null) {
-            switch (loggedInUser.getValified()){
+            switch (loggedInUser.getVerified()){
                 case NEEDED:
                     throw new DataIntegrityViolationException("아직 인증요청을 보낸적 없는 유저입니다.");
                 case PENDING:
@@ -89,8 +89,8 @@ public class VerificationService {
             authStateEntity.setAuthImageId(img.getAuthImageCid());
         }
 
-        loggedInUser.setValified(Valified.PENDING);
-        authStateEntity.setValified(Valified.PENDING);
+        loggedInUser.setVerified(Verified.PENDING);
+        authStateEntity.setVerified(Verified.PENDING);
 
         userRepository.save(loggedInUser);
         authStateRepository.save(authStateEntity);
