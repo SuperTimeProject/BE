@@ -4,7 +4,8 @@ public enum Verified {
     PENDING("PENDING"),
     DENIED("DENIED"),
     COMPLETED("COMPLETED"),
-    NEEDED("NEEDED");
+    NEEDED("NEEDED"),
+    ADMIN("ADMIN");
 
     private final String type;
 

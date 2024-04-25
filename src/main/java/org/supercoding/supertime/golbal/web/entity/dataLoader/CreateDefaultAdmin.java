@@ -42,7 +42,7 @@ public class CreateDefaultAdmin implements CommandLineRunner {
                     .roles(Roles.ROLE_ADMIN)
                     .part(Part.PART_UNDEFINED)
                     .isDeleted(0)
-                    .verified(Verified.COMPLETED)
+                    .verified(Verified.ADMIN)
                     .build();
 
             log.info("[CREATE_DEFAULT_ADMIN] 관리자 계정이 생성되었습니다.");
