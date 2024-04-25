@@ -15,6 +15,8 @@ import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 @Component
 public class PostValidation {
@@ -30,8 +32,11 @@ public class PostValidation {
         BoardEntity targetBoard = boardRepository.findById(boardCid)
                 .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
 
-        if (author.getBoardList().stream()
-                .noneMatch(cid -> cid.equals(boardCid))) {
+        long[] userBoardList = author.getBoardList();
+
+        if (Arrays.stream(userBoardList)
+                .noneMatch(cid -> Long.valueOf(cid).equals(targetBoard.getBoardCid()))
+        ) {
             throw new CustomAccessDeniedException("게시판 작성 권한이 없습니다.");
         }
 
@@ -43,8 +48,10 @@ public class PostValidation {
         BoardEntity boardEntity = boardRepository.findById(boardCid)
                 .orElseThrow(() -> new CustomNotFoundException("게시판이 존재하지 않습니다."));
 
-        if(user.getBoardList().stream()
-                .noneMatch(cid -> cid.equals(boardEntity.getBoardCid()))
+        long[] userBoardList = user.getBoardList();
+
+        if(Arrays.stream(userBoardList)
+                .noneMatch(cid -> Long.valueOf(cid).equals(boardEntity.getBoardCid()))
         ) {
             throw new CustomAccessDeniedException("게시물 조회 권한이 없습니다.");
         }
@@ -71,8 +78,10 @@ public class PostValidation {
 
     // 게시판 조회 권한을 검증하는 메서드
     public void validateGetBoardPermission(UserEntity user, Long boardCid) {
-        if(user.getBoardList().stream()
-                .noneMatch(cid -> cid.equals(boardCid))
+        long[] userBoardList = user.getBoardList();
+
+        if (Arrays.stream(userBoardList)
+                .noneMatch(cid -> Long.valueOf(cid).equals(boardCid))
         ) {
             throw new CustomAccessDeniedException("게시판 조회 권한이 없습니다.");
         }

@@ -115,7 +115,7 @@ public class AuthService {
         nicknameDuplicateTest(signupInfo.getUserNickname());
 
         SemesterEntity userSemester = userValidation.findSemester(signupInfo.getSemesterCid());
-        List<Long> userBoard = createUserBoardList(userSemester.getSemesterName());
+        long[] userBoard = createUserBoardList(userSemester.getSemesterName());
 
         String password = passwordEncoder.encode(signupInfo.getUserPassword());
 
@@ -127,12 +127,12 @@ public class AuthService {
         enterChatRoom(signupUser.getUserId(), userSemester.getSemesterName().toString());
     }
 
-    private List<Long> createUserBoardList(int semesterName) {
-        List<Long> userBoard = new ArrayList<>();
-        String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 ("+semesterName+")"};
+    private long[] createUserBoardList(int semesterName) {
+        long[] userBoard = new long[3];
+        String[] boardList = {"전체 게시판", "커뮤니티 게시판", "기수 게시판 (" + semesterName + ")"};
 
-        for(String boardName : boardList) {
-            userBoard.add(userValidation.findBoard(boardName).getBoardCid());
+        for (int i = 0; i < boardList.length; i++) {
+            userBoard[i] = userValidation.findBoard(boardList[i]).getBoardCid();
         }
 
         return userBoard;
