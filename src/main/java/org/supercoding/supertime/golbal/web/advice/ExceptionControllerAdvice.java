@@ -62,4 +62,17 @@ public class ExceptionControllerAdvice {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(responseDto);
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CustomMissingFileException.class)
+    public ResponseEntity<CommonResponseDto> handleMissingFileException(CustomMissingFileException e) {
+        log.error("[BAD REQUEST] 파일이 누락되었습니다: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                CommonResponseDto.builder()
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage())
+                        .success(false)
+                        .build()
+        );
+    }
 }
