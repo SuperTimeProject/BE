@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.supercoding.supertime.golbal.web.enums.Valified;
+import org.supercoding.supertime.golbal.web.enums.Verified;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 
 import java.util.Optional;
@@ -19,5 +19,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByUserNickname(String userNickname);
 
-    Page<UserEntity> findAllByValified(Valified valified, Pageable pageable);
+    Page<UserEntity> findAllByVerified(Verified verified, Pageable pageable);
 }
