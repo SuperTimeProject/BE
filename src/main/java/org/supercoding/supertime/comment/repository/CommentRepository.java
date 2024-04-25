@@ -10,5 +10,5 @@ import org.supercoding.supertime.board.web.entity.PostEntity;
 @Repository
 public interface CommentRepository extends JpaRepository<PostCommentEntity, Long> {
 
-    Page<PostCommentEntity> findAllByPostEntity(PostEntity postEntity, Pageable pageable);
+    Page<PostCommentEntity> findAllByPostCid(Long postCid, Pageable pageable);
 }

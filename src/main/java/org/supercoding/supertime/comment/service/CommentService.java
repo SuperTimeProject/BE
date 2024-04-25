@@ -12,13 +12,7 @@ import org.supercoding.supertime.comment.repository.CommentRepository;
 import org.supercoding.supertime.comment.util.CommentValidation;
 import org.supercoding.supertime.comment.web.dto.request.CreateCommentReqDto;
 import org.supercoding.supertime.comment.web.dto.response.GetCommentDetailDto;
-import org.supercoding.supertime.comment.web.dto.response.GetCommentResDto;
 import org.supercoding.supertime.comment.web.entity.PostCommentEntity;
-import org.supercoding.supertime.board.repository.PostRepository;
-import org.supercoding.supertime.user.repository.UserRepository;
-import org.supercoding.supertime.golbal.web.advice.CustomNoSuchElementException;
-import org.supercoding.supertime.golbal.web.advice.CustomNotFoundException;
-import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
 import org.supercoding.supertime.board.web.entity.PostEntity;
 import org.supercoding.supertime.user.web.entity.user.UserEntity;
 

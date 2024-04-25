@@ -181,9 +181,11 @@ public class MyPageService {
         return GetUserInfoDetailDto.from(loggedInUser, userBoard, userSemester, userProfile);
     }
 
-    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<BoardEntity> userBoardList) {
+    private List<GetUserInfoBoardInfoDto> getBoardInfo(List<Long> userBoardList) {
         List<GetUserInfoBoardInfoDto> boardList = new ArrayList<>();
-        for(BoardEntity board: userBoardList) {
+        for(Long boardCid: userBoardList) {
+            BoardEntity board = userValidation.validateExistBoard(boardCid);
+
             boardList.add(GetUserInfoBoardInfoDto.from(board));
         }
 

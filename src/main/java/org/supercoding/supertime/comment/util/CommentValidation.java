@@ -37,7 +37,7 @@ public class CommentValidation {
     }
 
     public Page<PostCommentEntity> validateExistComment(PostEntity postEntity, Pageable pageable) {
-        Page<PostCommentEntity> commentList = commentRepository.findAllByPostEntity(postEntity, pageable);
+        Page<PostCommentEntity> commentList = commentRepository.findAllByPostCid(postEntity.getPostCid(), pageable);
 
         if(commentList.isEmpty()) {
             throw new CustomNoSuchElementException("댓글이 비어있습니다.");

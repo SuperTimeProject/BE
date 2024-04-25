@@ -107,6 +107,11 @@ public class UserValidation {
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 게시판이 존재하지 않습니다."));
     }
 
+    public BoardEntity validateExistBoard(Long boardCid) {
+        return boardRepository.findById(boardCid)
+                .orElseThrow(()-> new CustomNotFoundException("일치하는 게시판이 존재하지 않습니다."));
+    }
+
     public ChatRoomEntity validateExistChatRoom(String chatroomName) {
         return chatRoomRepository.findByChatRoomName(chatroomName)
                 .orElseThrow(()-> new CustomNotFoundException("일치하는 채팅방이 존재하지 않습니다."));
