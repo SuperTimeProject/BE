@@ -18,6 +18,7 @@ import org.supercoding.supertime.semester.web.entity.SemesterEntity;
 import org.supercoding.supertime.user.repository.UserProfileRepository;
 import org.supercoding.supertime.user.repository.UserRepository;
 import org.supercoding.supertime.user.util.UserValidation;
+import org.supercoding.supertime.user.web.dto.getUserDto.GetUserVerificationInfoDto;
 import org.supercoding.supertime.user.web.dto.getUserDto.UserProfileDto;
 import org.supercoding.supertime.user.web.dto.getUserDto.UserSemesterDto;
 import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoBoardInfoDto;
@@ -203,5 +204,11 @@ public class MyPageService {
         }
         UserProfileEntity userProfile = userValidation.findUserProfile(user.getUserProfileCid());
         return UserProfileDto.from(userProfile);
+    }
+
+    public GetUserVerificationInfoDto getUserVerificationInfo(User user) {
+        UserEntity userEntity = userValidation.validateExistUser(user.getUsername());
+
+        return GetUserVerificationInfoDto.from(userEntity);
     }
 }

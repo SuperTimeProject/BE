@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercoding.supertime.user.service.MyPageService;
 import org.supercoding.supertime.golbal.web.dto.CommonResponseDto;
+import org.supercoding.supertime.user.web.dto.getUserDto.GetUserVerificationInfoDto;
 import org.supercoding.supertime.user.web.dto.getUserInfo.GetUserInfoResponseDto;
 
 @RestController
@@ -80,12 +81,22 @@ public class MyPageController {
     @Operation(summary = "로그인 유저 불러오기", description = "로그인한 유저의 정보를 불러오는 api입니다.")
     @GetMapping("/user-info")
     public ResponseEntity<GetUserInfoResponseDto> getUserInfo(@AuthenticationPrincipal User user){
-        log.info("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
+        log.debug("[GET_USER] 유저 정보를 불러오는 요청이 들어왔습니다.");
         GetUserInfoResponseDto getUserResponse =
                 GetUserInfoResponseDto.successResponse("유저 정보를 성공적으로 불러왔습니다.", myPageService.getUserInfo(user));
-        log.info("[GET_USER] 성공적으로 유저 정보를 불러왔습니다.");
+        log.debug("[GET_USER] 성공적으로 유저 정보를 불러왔습니다.");
 
         return ResponseEntity.ok(getUserResponse);
+    }
+
+    @Operation(summary = "로그인 유저 인증상태 불러오기", description = "로그인한 유저의 인증 정보를 불러오는 api입니다.")
+    @GetMapping("/user-info/verification")
+    public ResponseEntity<GetUserVerificationInfoDto> getUserVerificationInfo(@AuthenticationPrincipal User user){
+        log.debug("[GET_USER] 유저 인증 정보를 불러오는 요청이 들어왔습니다.");
+        GetUserVerificationInfoDto userVerificationInfoDto = myPageService.getUserVerificationInfo(user);
+        log.debug("[GET_USER] 성공적으로 유저 인증 정보를 불러왔습니다.");
+
+        return ResponseEntity.ok(userVerificationInfoDto);
     }
 
 }
